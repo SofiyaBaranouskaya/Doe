@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Review</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+    body{
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        padding: 0px;
+        width: 100%;
+        margin: 0px;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+    }
+
+    .main{
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        margin: 0px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-top: 50px;
+        padding-bottom: 80px;
+    }
+
+    .quiz_title{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 10px;
+        margin-right: 20px;
+    }
+
+    h1{
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        font-style: normal;
+        margin: 10px 0px 0px -50px;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    h3{
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 120%;
+        margin: 0px;
+    }
+
+    h4{
+        margin: 0px;
+    }
+
+    p{
+        margin: 0px;
+    }
+
+    .back_pannel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: -webkit-fill-available;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        height: 24px;
+        padding-top: 30px;
+        padding-left: 20px;
+        padding-right: 20px;
+        background-color: white;
+    }
+
+    .progress {
+        text-align: center;
+    }
+
+    .review-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .answer-section {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    .user-answer {
+        background-color: #FFEBEE;
+        border-left: 4px solid #FD7981;
+    }
+    .correct-answer {
+        background-color: #E8F5E9;
+        border-left: 4px solid #66B498;
+    }
+    .navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+    .arrow {
+      color: #161414;
+      transition: color 0.3s ease;
+    }
+
+    .arrow:hover {
+      color: #66B498;
+    }
+
+
+</style>
+
+</head>
+<body>
+    <div class="back_pannel">
+
+            <div class="icon" onclick="window.location.href = '{% url 'quiz_results' pk=quiz_id %}';">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 5L5 12L12 19" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div class="icon" onclick="window.location.href = '{% url 'reach_girl_page' %}';">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_2001_14695)">
+                    <path d="M12.9401 12L18.4667 6.47329C18.5759 6.34576 18.633 6.18171 18.6265 6.01393C18.6201 5.84614 18.5505 5.68698 18.4318 5.56825C18.313 5.44952 18.1539 5.37997 17.9861 5.37349C17.8183 5.36701 17.6543 5.42408 17.5267 5.53329L12.0001 11.06L6.4734 5.52663C6.34786 5.40109 6.1776 5.33057 6.00006 5.33057C5.82253 5.33057 5.65227 5.40109 5.52673 5.52663C5.40119 5.65216 5.33067 5.82243 5.33067 5.99996C5.33067 6.1775 5.40119 6.34776 5.52673 6.47329L11.0601 12L5.52673 17.5266C5.45694 17.5864 5.40026 17.6599 5.36025 17.7426C5.32023 17.8254 5.29774 17.9154 5.2942 18.0073C5.29065 18.0991 5.30612 18.1906 5.33964 18.2762C5.37315 18.3617 5.42399 18.4394 5.48896 18.5044C5.55393 18.5694 5.63163 18.6202 5.71718 18.6537C5.80273 18.6872 5.89429 18.7027 5.9861 18.6992C6.07791 18.6956 6.168 18.6731 6.25071 18.6331C6.33342 18.5931 6.40697 18.5364 6.46673 18.4666L12.0001 12.94L17.5267 18.4666C17.6543 18.5758 17.8183 18.6329 17.9861 18.6264C18.1539 18.62 18.313 18.5504 18.4318 18.4317C18.5505 18.3129 18.6201 18.1538 18.6265 17.986C18.633 17.8182 18.5759 17.6542 18.4667 17.5266L12.9401 12Z" fill="black"/>
+                    </g>
+                    <defs>
+                    <clipPath id="clip0_2001_14695">
+                    <rect width="24" height="24" fill="white"/>
+                    </clipPath>
+                    </defs>
+                </svg>
+            </div>
+
+        </div>
+
+
+    <div class="main">
+        <div class="review-container">
+            <div class="progress">
+                Question {{ current_index|add:1 }} of {{ total_incorrect }}
+            </div>
+
+            <h2>{{ question.text }}</h2>
+
+            {% if question.image %}
+            <img src="{{ question.image.url }}" alt="Question image" style="max-width: 100%;">
+            {% endif %}
+
+            <div class="answer-section user-answer">
+                <h4>Your answer:</h4>
+                <p>{{ user_answer }}</p>
+            </div>
+
+            <div class="answer-section correct-answer">
+                <h4>Correct answer:</h4>
+                <p>{{ correct_answer }}</p>
+            </div>
+
+            <div class="navigation">
+                {% if prev_question_id %}
+                <a href="{% url 'quiz_question_review' question_id=prev_question_id index=current_index|add:-1 %}" class="nav-btn">
+                    <svg class="arrow" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="11" stroke="#161414" stroke-width="1.2" fill="none"/>
+                      <g transform="scale(0.7) translate(5,5)">
+                        <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 5L5 12L12 19" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </g>
+                    </svg>
+                </a>
+                {% endif %}
+
+                {% if next_question_id %}
+                <a href="{% url 'quiz_question_review' question_id=next_question_id index=current_index|add:1 %}" class="nav-btn">
+                    <svg class="arrow" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="11" stroke="#161414" stroke-width="1.2" fill="none"/>
+                      <g transform="scale(0.7) translate(5,5) rotate(-180 12 12)">
+                        <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 5L5 12L12 19" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </g>
+                    </svg>
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

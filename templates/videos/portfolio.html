@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Portfolio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body{
+            font-family: "Lato", sans-serif;
+            padding: 0px;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0px;
+        }
+
+        .main{
+            width: 100%;
+            height: 100vh;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0px;
+            overflow: hidden;
+        }
+
+        .all_header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        h1{
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            font-style: normal;
+            padding: 0px 10px;
+            margin: 20px 0px 0px;
+        }
+
+        .back_pannel{
+            height: 24px;
+            width: 95%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: -20px;
+            padding: 0px 20px 0px 10px;
+        }
+
+        .icon{
+            height:100%;
+            width:auto;
+        }
+
+        .all_content{
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            padding:auto;
+            overflow-y: auto;
+        }
+
+        .content-element{
+            height: fit-content;
+            width: 103px;
+            padding: 10px;
+        }
+
+        .content-box {
+            width: 103px;
+            height: 107px;
+            border-radius: 14px;
+            display: inline-block;
+            text-align: center;
+            line-height: 107px;
+            font-weight: bold;
+            color: #000;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .content-info {
+            padding: 0px 5px;
+            background: white;
+            align-items: center;
+        }
+
+        .meta-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 3px 0px;
+
+        }
+
+        .points {
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            font-size: 11px;
+            color: #A9A9A9;
+        }
+
+        .duration {
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            font-size: 11px;
+            color: #A9A9A9;
+        }
+
+        .play_icon{
+            height: 100%;
+            display: flex;
+            margin: auto;
+        }
+
+        .element-content-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            line-height: 120%;
+            font-weight: 500;
+            color: #1E293B;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .video {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .fun-fact {
+            background-color: #FFE37F;
+        }
+
+        .challenge {
+            background-color: #FFECE8;
+        }
+
+        .chit-chat {
+            background-color: #FFC6D4;
+        }
+
+        .quiz {
+            background-color: #FD7981;
+            color: white;
+        }
+
+        .nav_pannel{
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px 30px 20px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="all_header">
+            <div style="margin-left: auto">
+                <svg width="260" height="63" viewBox="0 0 260 63" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="125.347" cy="123.959" rx="125.347" ry="123.959" transform="matrix(1 0 0 -1 0 50.02)" fill="#FD7981"/>
+                    <path d="M259.25 -61.8576C259.25 -129.896 203.474 -185.067 134.653 -185.067C65.8317 -185.067 10.0555 -129.896 10.0555 -61.8576C10.0555 6.18108 65.8317 61.3516 134.653 61.3516C203.474 61.3516 259.25 6.18108 259.25 -61.8576Z" stroke="#2C2C2C" stroke-width="1.5"/>
+                </svg>
+            </div>
+            <div class="back_pannel">
+                <div class="icon" onclick="history.back();">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 5L5 12L12 19" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="icon" onclick="history.back();">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.9399 12L18.4666 6.47329C18.5758 6.34576 18.6329 6.18171 18.6264 6.01393C18.6199 5.84614 18.5504 5.68698 18.4317 5.56825C18.3129 5.44952 18.1538 5.37997 17.986 5.37349C17.8182 5.36701 17.6541 5.42408 17.5266 5.53329L11.9999 11.06L6.47327 5.52663C6.34774 5.40109 6.17748 5.33057 5.99994 5.33057C5.82241 5.33057 5.65214 5.40109 5.52661 5.52663C5.40107 5.65216 5.33055 5.82243 5.33055 5.99996C5.33055 6.1775 5.40107 6.34776 5.52661 6.47329L11.0599 12L5.52661 17.5266C5.45682 17.5864 5.40014 17.6599 5.36012 17.7426C5.32011 17.8254 5.29762 17.9154 5.29408 18.0073C5.29053 18.0991 5.306 18.1906 5.33952 18.2762C5.37303 18.3617 5.42387 18.4394 5.48884 18.5044C5.55381 18.5694 5.63151 18.6202 5.71706 18.6537C5.80261 18.6872 5.89416 18.7027 5.98598 18.6992C6.07779 18.6956 6.16788 18.6731 6.25059 18.6331C6.3333 18.5931 6.40684 18.5364 6.46661 18.4666L11.9999 12.94L17.5266 18.4666C17.6541 18.5758 17.8182 18.6329 17.986 18.6264C18.1538 18.62 18.3129 18.5504 18.4317 18.4317C18.5504 18.3129 18.6199 18.1538 18.6264 17.986C18.6329 17.8182 18.5758 17.6542 18.4666 17.5266L12.9399 12Z" fill="black"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <h1>The Levers</h1>
+        <div class="all_content">
+        {% for content in contents %}
+            <div class="content-element">
+                <div class="content-box
+                    {% if content.content_type.model == 'video' %}video
+                    {% elif content.content_type.model == 'funfact' %}fun-fact
+                    {% elif content.content_type.model == 'challenge' %}challenge
+                    {% elif content.content_type.model == 'chitchat' %}chit-chat
+                    {% elif content.content_type.model == 'quiz' %}quiz{% endif %}"
+                    {% if content.content_type.model == 'video' and content.poster_base64 %}
+                        style="background-image: url('data:image/jpeg;base64,{{ content.poster_base64 }}')"
+                    {% endif %}
+                    onclick="location.href='{% if content.content_type.model == 'video' %}{% url 'video_detail' content.object_id %}{% elif content.content_type.model == 'funfact' %}{% url 'fun_fact_detail' content.object_id %}{% elif content.content_type.model == 'challenge' %}{% url 'challenge_detail' content.object_id %}{% elif content.content_type.model == 'chitchat' %}{% url 'chitchat_detail' content.object_id %}{% elif content.content_type.model == 'quiz' %}{% url 'quiz_detail_welcome' content.object_id %}{% endif %}'">
+
+                    {% if content.content_type.model == 'video' %}
+                        <svg class="play_icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.69897 0.383455C2.61707 -0.697825 0 0.636152 0 2.77862V21.2214C0 23.3638 2.61712 24.6978 4.69897 23.6165L22.4532 14.3952C24.5156 13.324 24.5156 10.676 22.4532 9.60484L4.69897 0.383455Z" fill="white"/>
+                        </svg>
+                    {% elif content.content_type.model == 'funfact' %}
+                        Fun Fact
+                    {% elif content.content_type.model == 'challenge' %}
+                        Challenge
+                    {% elif content.content_type.model == 'chitchat' %}
+                        Chit Chat
+                    {% elif content.content_type.model == 'quiz' %}
+                        Quiz
+                    {% endif %}
+
+                </div>
+
+                <div class="content-info">
+                    <div class="meta-line">
+                        {% if content.content_type.model == 'video' %}
+                            <span class="duration">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8.5 5.6665C8.5 5.5339 8.44732 5.40672 8.35355 5.31295C8.25979 5.21918 8.13261 5.1665 8 5.1665C7.86739 5.1665 7.74022 5.21918 7.64645 5.31295C7.55268 5.40672 7.5 5.5339 7.5 5.6665V8.99984C7.49996 9.08461 7.52148 9.168 7.56253 9.24217C7.60358 9.31634 7.66282 9.37885 7.73467 9.42384L9.73467 10.6738C9.84712 10.7442 9.98292 10.767 10.1122 10.7373C10.1762 10.7225 10.2367 10.6953 10.2902 10.6572C10.3437 10.6191 10.3892 10.5709 10.424 10.5152C10.4588 10.4595 10.4824 10.3975 10.4933 10.3327C10.5041 10.2679 10.5022 10.2017 10.4874 10.1376C10.4727 10.0736 10.4455 10.0132 10.4074 9.95965C10.3693 9.90615 10.321 9.86068 10.2653 9.82584L8.5 8.7225V5.6665Z" fill="#A9A9A9"/>
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.1665 1.1665C6.30999 1.1665 4.52951 1.904 3.21676 3.21676C1.904 4.52951 1.1665 6.30999 1.1665 8.1665C1.1665 10.023 1.904 11.8035 3.21676 13.1163C4.52951 14.429 6.30999 15.1665 8.1665 15.1665C10.023 15.1665 11.8035 14.429 13.1163 13.1163C14.429 11.8035 15.1665 10.023 15.1665 8.1665C15.1665 6.30999 14.429 4.52951 13.1163 3.21676C11.8035 1.904 10.023 1.1665 8.1665 1.1665ZM2.3665 8.1665C2.3665 7.40484 2.51653 6.65063 2.808 5.94694C3.09948 5.24325 3.52671 4.60386 4.06528 4.06528C4.60386 3.5267 5.24325 3.09948 5.94694 2.808C6.65063 2.51653 7.40484 2.3665 8.1665 2.3665C8.92817 2.3665 9.68238 2.51653 10.3861 2.808C11.0898 3.09948 11.7291 3.5267 12.2677 4.06528C12.8063 4.60386 13.2335 5.24325 13.525 5.94694C13.8165 6.65063 13.9665 7.40484 13.9665 8.1665C13.9665 9.70476 13.3554 11.18 12.2677 12.2677C11.18 13.3554 9.70476 13.9665 8.1665 13.9665C6.62825 13.9665 5.153 13.3554 4.06528 12.2677C2.97757 11.18 2.3665 9.70476 2.3665 8.1665Z" fill="#A9A9A9"/>
+                                </svg>
+                                <span style="margin-left: 3px">{{ content.value.duration }}</span>
+                            </span>
+                        {% endif %}
+                        <span class="points">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8.57915 1.44732C8.57915 1.13275 8.31144 0.864746 7.99658 0.864746C7.68201 0.864746 7.41401 1.13275 7.41401 1.4476V3.50989C7.41401 3.83132 7.68201 4.09932 7.99687 4.09932C8.31115 4.09932 8.57915 3.83132 8.57915 3.50989V1.44732ZM10.7354 4.43417C10.5146 4.65503 10.5146 5.02989 10.7354 5.2576C10.9632 5.47875 11.3449 5.47875 11.566 5.2576L13.0257 3.7976C13.135 3.68714 13.1964 3.53801 13.1964 3.3826C13.1964 3.2272 13.135 3.07807 13.0257 2.9676C12.8046 2.74646 12.4297 2.74646 12.202 2.9676L10.7354 4.43417ZM4.42744 5.2576C4.64858 5.47875 5.02344 5.47875 5.24458 5.2576C5.47201 5.02989 5.47201 4.65475 5.24458 4.43389L3.79801 2.97417C3.57715 2.75332 3.20201 2.74646 2.9743 2.9676C2.75344 3.18846 2.75344 3.5636 2.9743 3.79132L4.42744 5.2576ZM13.4143 14.5056C13.6957 14.7933 14.1777 14.7933 14.4457 14.5056C14.5795 14.3672 14.6542 14.1823 14.6542 13.9899C14.6542 13.7974 14.5795 13.6125 14.4457 13.4742L8.08373 7.0856C7.80258 6.80446 7.31373 6.80446 7.0523 7.0856C6.77115 7.38046 6.77801 7.84275 7.0523 8.12389L13.4143 14.5056ZM1.44744 7.41418C1.13287 7.41418 0.864868 7.68189 0.864868 7.99646C0.864868 8.31132 1.13287 8.57932 1.44773 8.57932H3.51687C3.8383 8.57932 4.10601 8.31132 4.10601 7.99646C4.10601 7.68189 3.8383 7.41389 3.51687 7.41389L1.44744 7.41418ZM14.5457 8.57903C14.8606 8.57903 15.1352 8.31132 15.1352 7.99646C15.1352 7.68189 14.8606 7.41389 14.5457 7.41389H12.4832C12.1617 7.41389 11.894 7.68189 11.894 7.99675C11.894 8.31103 12.1617 8.57903 12.4832 8.57903H14.5457ZM9.52344 9.90503L7.55487 7.93646C7.4343 7.81589 7.40744 7.68846 7.51458 7.56789C7.63515 7.46075 7.7623 7.4876 7.88944 7.61475L9.85173 9.58332L9.52344 9.90503ZM2.96773 12.1953C2.74658 12.4162 2.74001 12.7979 2.96087 13.0187C3.18201 13.2399 3.56373 13.2465 3.79144 13.0256L5.2443 11.5656C5.29833 11.5122 5.34123 11.4486 5.37051 11.3785C5.39979 11.3084 5.41486 11.2332 5.41486 11.1572C5.41486 11.0812 5.39979 11.006 5.37051 10.9359C5.34123 10.8658 5.29833 10.8022 5.2443 10.7487C5.03001 10.521 4.64858 10.521 4.42744 10.7487L2.96773 12.1953ZM8.57915 12.4896C8.57915 12.1685 8.31144 11.9005 7.99658 11.9005C7.68201 11.9005 7.41401 12.1685 7.41401 12.4899V14.5525C7.41401 14.867 7.68201 15.135 7.99687 15.135C8.31115 15.135 8.57915 14.867 8.57915 14.5522V12.4896Z" fill="#A9A9A9"/>
+                            </svg>
+                            <span style="margin-left: 3px">
+                                {% if content.content_type.model == 'quiz' %}
+                                    {{ content.quiz.total_points }}
+                                {% else %}
+                                    {{ content.value.points }}
+                                {% endif %}
+                            </span>
+                        </span>
+                    </div>
+                    <p class="element-content-title">
+                        {{ content.value.title }}
+                    </p>
+                </div>
+            </div>
+        {% empty %}
+            <p style="margin: auto;">No content available.</p>
+        {% endfor %}
+    </div>
+
+    <div class="nav_pannel">
+        {% include 'videos/nav.html' %}
+    </div>
+
+</body>
+</html>

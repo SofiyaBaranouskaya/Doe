@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .logo-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+    }
+
+    .heading {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .form-label, .forgot-password, .alternative-signup, .login-prompt {
+        text-align: center; /* Центрируем текст */
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 30px;
+        margin-bottom: 1.5rem;
+    }
+
+    .forgot-password {
+        color: #007BFF;
+        text-decoration: none;
+        margin-bottom: 1rem;
+    }
+
+    .forgot-password:hover {
+        text-decoration: underline;
+    }
+
+    .submit-button {
+        background-color: #007BFF;
+        color: #ffffff;
+        padding: 10px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .submit-button:hover {
+        background-color: #0056b3;
+    }
+
+    .social-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin: 1rem 0;
+        width: 100%;
+    }
+
+    .social-button {
+        background-color: #f0f0f0;
+        color: #333;
+        padding: 10px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        flex: 1;
+        margin: 0 5px;
+    }
+
+    .social-button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .login-link {
+        color: #007BFF;
+        text-decoration: none;
+    }
+
+    .login-link:hover {
+        text-decoration: underline;
+    }
+
+</style>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="templates/users/images/signup.png" alt="crown-icon" class="logo-icon">
+        </div>
+        <h2 class="heading">Sign Up</h2>
+        <form>
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" id="email" placeholder="Enter your email" class="form-input" required />
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" class="form-input" required />
+            <label for="confirm-password" class="form-label">Confirm Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm your password" class="form-input" required />
+            <a href="#" class="forgot-password">Forgot Password?</a>
+            <button type="submit" class="submit-button">Sign Up</button>
+        </form>
+        <div class="alternative-signup">Or Sign Up with</div>
+        <div class="social-buttons">
+            <button class="social-button">Google</button>
+            <button class="social-button">Facebook</button>
+            <button class="social-button">Apple</button>
+        </div>
+        <div class="login-prompt">Joined us before? <a href="{% url 'login' %}">Log In</a></div>
+    </div>
+</body>
+</html>

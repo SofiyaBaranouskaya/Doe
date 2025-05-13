@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ fun_fact.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .container {
+            border-radius: 20px; /* Скругление углов */
+            padding: 20px;
+            max-width: 400px; /* Максимальная ширина контейнера */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Тень */
+            text-align: center;
+        }
+        h1 {
+            font-size: 2em;
+            margin: 0 0 15px;
+            position: relative;
+        }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px; /* Скругление углов изображения */
+            margin-top: 15px;
+        }
+        .points {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="javascript:history.back()" class="flex items-center mb-4 text-blue-500 hover:underline">
+        <span class="material-icons"><-</span>
+    </a>
+    <div class="container">
+        <h1>{{ fun_fact.title }}</h1>
+        <p>{{ fun_fact.fact_description }}</p>
+        {% if fun_fact.photo %}
+            <img src="{{ fun_fact.photo.url }}" alt="{{ fun_fact.title }}">
+        {% endif %}
+        <div class="points">💰 {{ fun_fact.points }} Points</div>
+    </div>
+</body>
+</html>

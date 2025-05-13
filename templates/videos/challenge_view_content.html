@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <title>View {{ challenge.name }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body{
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            padding: 0px;
+            width: 100%;
+            margin: 0px;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .main{
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 0px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-top: 50px;
+            padding-bottom: 80px;
+        }
+
+        .challenge_title{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-left: 10px;
+            margin-right: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            margin-bottom: 5px
+        }
+
+        h1{
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            font-style: normal;
+            margin: 10px 0px 0px -50px;
+        }
+
+        h3{
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 120%;
+            margin: 0px;
+        }
+
+        h4{
+            margin: 0px;
+        }
+
+        p{
+            margin: 0px;
+        }
+
+        .back_pannel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: -webkit-fill-available;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            height: 24px;
+            padding-top: 30px;
+            padding-left: 20px;
+            padding-right: 20px;
+            background-color: white;
+        }
+
+        .header{
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-content: center;
+            margin-left: 23px;
+            margin-top: -15px;
+        }
+
+        .activity_name{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .points{
+            height: fit-content;
+            display: flex;
+            align-content: center;
+        }
+
+        .cards{
+            width: 100%;
+            height: 243px;
+            margin: 20px 0px 0px 0px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card1{
+            background-color: #FFC6D4;
+            height: 172px;
+            width: 13%;
+            border-radius: 0 30px 30px 0;
+        }
+        .card2{
+            width: 63%;
+            height: 100%;
+            background-color: #FFF1EE;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0px 15px;
+            border-radius: 30px;
+        }
+        .card2_content{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .card3{
+            background-color: #FD7981;
+            height: 172px;
+            width: 13%;
+            border-radius: 30px 0 0 30px;
+        }
+
+        .main-content {
+            margin: 25px 12px;
+        }
+
+        .goal-card {
+          margin-bottom: 20px;
+          border: 3px solid;
+          border-radius: 25px;
+          position: relative;
+          background-color: white;
+          padding: 20px 20px 0px 20px;
+        }
+
+        .goal-text{
+            margin-bottom: 50px;
+        }
+
+        .goal-text p {
+            line-height: 120%;
+            margin-bottom: 15px;
+        }
+
+        .goal-label {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          background-color: #eee;
+          padding: 6px 12px;
+          border-radius: 25px;
+          font-weight: bold;
+          color: white;
+        }
+
+        .card-actions {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          display: flex;
+          flex-direction: row;
+        }
+
+        .card-actions button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 18px;
+        }
+
+        .truncate-text {
+          display: inline-block;
+          max-height: 3.6em;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .goal-card {
+            border-color: #FD7981;
+        }
+
+        .goal-card.done {
+          opacity: 0.6;
+          pointer-events: none;
+        }
+
+        .goal-card.done .card-actions button[data-action="undone"] {
+          pointer-events: auto;
+          opacity: 1;
+        }
+
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Затемнённый фон */
+            display: none; /* По умолчанию скрыто */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .confirmation-content {
+            background: white;
+            padding: 30px 30px 20px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .delete_ok{
+            font-size: 18px !important;
+            background-color: #50B69E !important;
+            color: white !important;
+            padding: 10px 20px !important;
+            margin: 10px !important;
+            border: none !important;
+            cursor: pointer !important;
+            border-radius: 20px !important;
+        }
+
+        .delete_cancel{
+            font-size: 18px !important;
+            background-color: lightgrey !important;
+            color: black !important;
+            padding: 10px 20px !important;
+            margin: 10px !important;
+            border: none !important;
+            cursor: pointer !important;
+            border-radius: 20px !important;
+        }
+
+
+        .save{
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 300px;
+            height: 50px;
+            border: none;
+            border-radius: 92px;
+            background-color: #66B498;
+            color: white;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .submit.submit-active {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 300px;
+            height: 50px;
+            border: none;
+            border-radius: 92px;
+            background-color: #66B498;
+            color: white;
+            margin: 20px auto 0px auto;
+        }
+
+        .submit.submit-inactive {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 300px;
+            height: 50px;
+            background-color: white;
+            border-radius: 92px;
+            border: 2px solid #66B498;
+            color: #66B498;
+            font-weight: 600;
+            margin: 20px auto 0px auto;
+            cursor: not-allowed;
+        }
+
+        .static-card {
+            background-color: #FFFFFF;
+            border: 2px solid #66B498;
+            border-radius: 25px;
+            padding: 20px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        .static-card-text1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            color: black;
+        }
+
+        .static-card-text2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 11px;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            outline: none;
+        }
+
+        a:focus, a:active {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .static-card-add_button {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 237px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #66B498;
+            border-radius: 92px;
+            color: #66B498;
+            background-color: white;
+            margin: 20px auto 0px auto;
+        }
+
+        .table-action-buttons {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+        }
+
+        .table-confirm-btn {
+            display: flex;
+            flex-direction: column;
+            margin: 0px;
+            align-self: center;
+        }
+
+        .table-delete-edit-btn {
+            display: flex;
+            flex-direction: column;
+            margin: 0px;
+            align-items: center;
+         }
+
+        .table-action-button {
+          background-color: transparent;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.3s ease; /* Плавный переход для фона */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .input-field{
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+          max-width: 343px;
+          margin: 0 auto;
+        }
+
+        .input-container label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 14px;
+          color: #333;
+        }
+
+        input {
+          font-family: 'Poppins', sans-serif;
+          height: 50px;
+          width: 100%;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+        }
+
+        textarea {
+          font-family: 'Poppins', sans-serif;
+          width: 100%;
+          height: 120px;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+          outline: none;
+          border-color: #FFC6D4;
+        }
+
+        .radio-time_group {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .radio_button {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .radio-custom {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #66B498;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .radio-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: #66B498;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.2s;
+        }
+
+        .radio_button:checked + .radio-custom::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .radio-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            color: #333;
+            margin-left: 5px;
+        }
+
+        .add_button{
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 237px;
+            height: 50px;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #66B498;
+            border-radius: 92px;
+            color: white;
+            background-color: #66B498;
+            margin: 20px auto 20px auto;
+        }
+
+        .input-fields-container {
+            margin-top: 20px;
+        }
+
+        .add_button_link{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav_pannel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 90%;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px 30px 20px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="back_pannel">
+
+            <div class="icon" onclick="window.location.href = '{% url 'challenge_detail' challenge.id %}';">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 5L5 12L12 19" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div class="icon" onclick="window.location.href = '{% url 'reach_girl_page' %}';">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_2001_14695)">
+                    <path d="M12.9401 12L18.4667 6.47329C18.5759 6.34576 18.633 6.18171 18.6265 6.01393C18.6201 5.84614 18.5505 5.68698 18.4318 5.56825C18.313 5.44952 18.1539 5.37997 17.9861 5.37349C17.8183 5.36701 17.6543 5.42408 17.5267 5.53329L12.0001 11.06L6.4734 5.52663C6.34786 5.40109 6.1776 5.33057 6.00006 5.33057C5.82253 5.33057 5.65227 5.40109 5.52673 5.52663C5.40119 5.65216 5.33067 5.82243 5.33067 5.99996C5.33067 6.1775 5.40119 6.34776 5.52673 6.47329L11.0601 12L5.52673 17.5266C5.45694 17.5864 5.40026 17.6599 5.36025 17.7426C5.32023 17.8254 5.29774 17.9154 5.2942 18.0073C5.29065 18.0991 5.30612 18.1906 5.33964 18.2762C5.37315 18.3617 5.42399 18.4394 5.48896 18.5044C5.55393 18.5694 5.63163 18.6202 5.71718 18.6537C5.80273 18.6872 5.89429 18.7027 5.9861 18.6992C6.07791 18.6956 6.168 18.6731 6.25071 18.6331C6.33342 18.5931 6.40697 18.5364 6.46673 18.4666L12.0001 12.94L17.5267 18.4666C17.6543 18.5758 17.8183 18.6329 17.9861 18.6264C18.1539 18.62 18.313 18.5504 18.4318 18.4317C18.5505 18.3129 18.6201 18.1538 18.6265 17.986C18.633 17.8182 18.5759 17.6542 18.4667 17.5266L12.9401 12Z" fill="black"/>
+                    </g>
+                    <defs>
+                    <clipPath id="clip0_2001_14695">
+                    <rect width="24" height="24" fill="white"/>
+                    </clipPath>
+                    </defs>
+                </svg>
+            </div>
+
+        </div>
+
+    <div class="main">
+
+        <div class="challenge_title">
+            <div class="activity_name">
+                <svg width="73" height="80" viewBox="0 0 73 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M37.7215 1.23245C37.4614 2.78853 37.624 10.1985 37.9491 10.5319C38.0792 10.6801 38.3068 10.6801 38.5019 10.5319C38.892 10.2726 39.0221 1.60294 38.6644 0.565554C38.3393 -0.397738 37.9166 -0.101341 37.7215 1.23245Z" fill="#FD7981"/>
+                    <path d="M56.0599 7.64219C54.7268 9.23533 52.1907 13.7924 52.1907 14.4964C52.1907 16.1266 53.5238 14.4964 55.9624 9.86517C57.328 7.34579 57.3605 6.012 56.0599 7.64219Z" fill="#FD7981"/>
+                    <path d="M19.3508 13.7551C19.3508 14.5702 25.7237 21.4614 26.4716 21.4614C27.512 21.4614 27.0243 20.6834 23.4802 16.7191C20.6514 13.5698 19.3508 12.6436 19.3508 13.7551Z" fill="#FD7981"/>
+                    <path d="M60.9687 25.2036C56.3191 28.1675 55.7013 28.7233 56.5142 29.0938C57.2946 29.4272 66.1711 23.7586 66.1711 22.9435C66.1711 22.1284 64.8705 22.7212 60.9687 25.2036Z" fill="#FD7981"/>
+                    <path d="M0.0370532 24.9072C0.232142 25.537 6.54 28.501 7.58047 28.501C9.14118 28.501 8.03568 27.5377 4.68666 26.0186C1.17507 24.3885 -0.255579 24.055 0.0370532 24.9072Z" fill="#FD7981"/>
+                    <path d="M9.92125 44.5808C6.34463 46.1369 5.27164 46.7297 5.10907 47.2854C5.04404 47.5818 5.23913 47.7671 5.59679 47.7671C6.53972 47.73 13.5954 44.2844 13.758 43.7657C13.9531 43.0618 12.8801 43.247 9.92125 44.5808Z" fill="#FD7981"/>
+                    <path d="M63.8311 44.3212C63.506 44.3953 63.2458 44.6176 63.2458 44.8029C63.2458 45.3957 65.3918 45.8773 69.196 46.1366C72.48 46.3589 73.0003 46.3219 73.0003 45.8032C73.0003 45.2104 72.1549 44.9511 68.6108 44.6176C67.3752 44.5065 65.9121 44.3583 65.3593 44.2842C64.8391 44.2101 64.1237 44.2101 63.8311 44.3212Z" fill="#FD7981"/>
+                    <path d="M57.3931 57.7332C57.3931 58.4742 64.4162 65.1802 65.1641 65.1802C65.3592 65.1802 65.5217 65.032 65.5217 64.8838C65.5217 64.4392 63.0506 61.8087 60.482 59.4745C58.336 57.5109 57.3931 56.9922 57.3931 57.7332Z" fill="#FD7981"/>
+                    <path d="M12.5223 63.5869C11.4818 64.3649 7.87267 67.8476 7.58004 68.3292C7.25489 68.8109 7.25489 69.626 7.58004 69.626C8.10028 69.626 13.8229 64.0315 13.8229 63.5128C13.8229 62.8088 13.4977 62.8088 12.5223 63.5869Z" fill="#FD7981"/>
+                    <path d="M32.6168 70.9973C32.5193 76.6659 32.8119 78.8889 33.5597 78.0368C34.3076 77.1476 33.9499 67.774 33.137 67.774C32.7794 67.774 32.6818 68.515 32.6168 70.9973Z" fill="#FD7981"/>
+                    <path d="M50.4349 69.589C50.3049 69.8113 51.0202 71.9232 52.0282 74.3314C53.784 78.518 54.5968 80 55.1821 80C55.7674 80 55.3772 78.6662 53.6214 74.7019C51.7355 70.3671 50.7926 68.8851 50.4349 69.589Z" fill="#FD7981"/>
+                </svg>
+                <h1>Challenge</h1>
+            </div>
+            <div class="header">
+                <h3>{{ challenge.title }}</h3>
+
+                <span class="points">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.8688 2.17122C12.8688 1.69936 12.4672 1.29736 11.9949 1.29736C11.5231 1.29736 11.1211 1.69936 11.1211 2.17165V5.26508C11.1211 5.74722 11.5231 6.14922 11.9954 6.14922C12.4668 6.14922 12.8688 5.74722 12.8688 5.26508V2.17122ZM16.1032 6.65151C15.7719 6.98279 15.7719 7.54508 16.1032 7.88665C16.4448 8.21836 17.0174 8.21836 17.3491 7.88665L19.5386 5.69665C19.7026 5.53095 19.7946 5.30726 19.7946 5.07415C19.7946 4.84104 19.7026 4.61734 19.5386 4.45165C19.2069 4.11993 18.6446 4.11993 18.3031 4.45165L16.1032 6.65151ZM6.64122 7.88665C6.97293 8.21836 7.53522 8.21836 7.86693 7.88665C8.20808 7.54508 8.20808 6.98236 7.86693 6.65108L5.69708 4.46151C5.36579 4.13022 4.80308 4.11993 4.46151 4.45165C4.13022 4.78293 4.13022 5.34565 4.46151 5.68722L6.64122 7.88665ZM20.1215 21.7586C20.5436 22.1902 21.2666 22.1902 21.6686 21.7586C21.8693 21.5511 21.9814 21.2737 21.9814 20.9851C21.9814 20.6964 21.8693 20.419 21.6686 20.2115L12.1256 10.6286C11.7039 10.2069 10.9706 10.2069 10.5785 10.6286C10.1568 11.0709 10.1671 11.7644 10.5785 12.1861L20.1215 21.7586ZM2.17122 11.1215C1.69936 11.1215 1.29736 11.5231 1.29736 11.9949C1.29736 12.4672 1.69936 12.8692 2.17165 12.8692H5.27536C5.75751 12.8692 6.15908 12.4672 6.15908 11.9949C6.15908 11.5231 5.75751 11.1211 5.27536 11.1211L2.17122 11.1215ZM21.8186 12.8688C22.2909 12.8688 22.7028 12.4672 22.7028 11.9949C22.7028 11.5231 22.2909 11.1211 21.8186 11.1211H18.7248C18.2426 11.1211 17.8411 11.5231 17.8411 11.9954C17.8411 12.4668 18.2426 12.8688 18.7248 12.8688H21.8186ZM14.2852 14.8578L11.3324 11.9049C11.1515 11.7241 11.1112 11.5329 11.2719 11.3521C11.4528 11.1914 11.6435 11.2316 11.8342 11.4224L14.7776 14.3752L14.2852 14.8578ZM4.45165 18.2932C4.11993 18.6245 4.11008 19.1971 4.44136 19.5284C4.77308 19.8601 5.34565 19.8699 5.68722 19.5386L7.86651 17.3486C7.94756 17.2685 8.01191 17.1731 8.05582 17.068C8.09974 16.9628 8.12235 16.85 8.12235 16.736C8.12235 16.622 8.09974 16.5092 8.05582 16.404C8.01191 16.2989 7.94756 16.2035 7.86651 16.1234C7.54508 15.7818 6.97293 15.7818 6.64122 16.1234L4.45165 18.2932ZM12.8688 18.7346C12.8688 18.2529 12.4672 17.8509 11.9949 17.8509C11.5231 17.8509 11.1211 18.2529 11.1211 18.7351V21.8289C11.1211 22.3008 11.5231 22.7028 11.9954 22.7028C12.4668 22.7028 12.8688 22.3008 12.8688 21.8285V18.7346Z" fill="#2C2C2C"/>
+                    </svg>
+                    <span style="margin-left: 3px; margin-top: auto; margin-bottom: auto;">{{ challenge.points }}</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card1"></div>
+            <div class="card2">
+                <div class="card2_content">
+                    <div class="photo-container">
+                        {% if challenge.picture_base64 %}
+                            <img src="data:image/jpeg;base64,{{ challenge.picture_base64 }}" alt="{{ challenge.title }}" />
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card3"></div>
+        </div>
+
+        <div class="main-content">
+          {% if display_type == 'text' %}
+            {% for choice in user_choices %}
+              {% for attempt in choice.attempts.all %}
+                <div class="goal-card {% if attempt.is_done %}done{% endif %}" style="border-color: {{ attempt.block_color }};">
+                  <div class="card-content">
+
+                    <div class="goal-text">
+                      {% for item in attempt.text_display %}
+                        <p><strong>{{ item.label }}:</strong> {{ item.value }}</p>
+                      {% endfor %}
+                    </div>
+
+                    {% if attempt.text_display.0.color %}
+                      <div class="goal-label" style="background-color: {{ attempt.text_display.0.color }}">
+                        {{ attempt.text_display.0.value }}
+                      </div>
+                    {% endif %}
+
+                    <div class="card-actions">
+
+                      <button onclick="editAttempt({{ attempt.id }})">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 20H21" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16.5 3.50023C16.8978 3.1024 17.4374 2.87891 18 2.87891C18.2786 2.87891 18.5544 2.93378 18.8118 3.04038C19.0692 3.14699 19.303 3.30324 19.5 3.50023C19.697 3.69721 19.8532 3.93106 19.9598 4.18843C20.0665 4.4458 20.1213 4.72165 20.1213 5.00023C20.1213 5.2788 20.0665 5.55465 19.9598 5.81202C19.8532 6.06939 19.697 6.30324 19.5 6.50023L7 19.0002L3 20.0002L4 16.0002L16.5 3.50023Z" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                      </button>
+
+                      <button onclick="toggleDone({{ attempt.id }}, {{ attempt.is_done|yesno:'true,false' }})"
+                          {% if attempt.is_done %}data-action="undone"{% endif %}>
+                          {% if attempt.is_done %}
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" clip-rule="evenodd"
+                                      d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z"
+                                      fill="#00AA00" />
+                                  <path fill-rule="evenodd" clip-rule="evenodd"
+                                      d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z"
+                                      fill="#00AA00" />
+                              </svg>
+
+                          {% else %}
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#21272A"/>
+                                  <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z" fill="#21272A"/>
+                              </svg>
+                          {% endif %}
+                      </button>
+
+                      <button onclick="deleteAttempt1({{ attempt.id }})">
+                          <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M16 5L15.1327 17.1425C15.0579 18.1891 14.187 19 13.1378 19H4.86224C3.81296 19 2.94208 18.1891 2.86732 17.1425L2 5M7 9V15M11 9V15M12 5V2C12 1.44772 11.5523 1 11 1H7C6.44772 1 6 1.44772 6 2V5M1 5H17" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                      </button>
+
+                      <div id="delete-confirmation1" class="confirmation-modal">
+                          <div class="confirmation-content">
+                              <p><b>Delete the challenge?</b></p>
+                              <button class="delete_ok" id="confirm-delete1">Ok</button>
+                              <button class="delete_cancel" id="cancel-delete1">Cancel</button>
+                          </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+              {% endfor %}
+
+              <a href="{% url 'challenge_add_content' challenge.id %}" class="add_button_link">
+                <button type="button" class="add_button" id="add_button_outof_static">
+                    {{ challenge.button_add_name }}
+                    <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <mask id="mask0_2001_12607" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                            <rect x="0.804688" width="24" height="24" fill="white"/>
+                        </mask>
+                        <g mask="url(#mask0_2001_12607)">
+                            <path d="M10.9475 12.8571H5.80469V11.1429H10.9475V6H12.6618V11.1429H17.8047V12.8571H12.6618V18H10.9475V12.8571Z" fill="white"/>
+                        </g>
+                    </svg>
+                </button>
+              </a>
+
+                {% if user_choices %}
+                    {% with first_choice=user_choices|first %}
+                        {% with user_attempts=first_choice.attempts.all %}
+                            {% if user_attempts.count >= min_answers_required %}
+                                <div class="static-card">
+                                    <p class="static-card-text1">Great job! You've completed the task.</p>
+                                    <p class="static-card-text2">You can still edit them or add new ones if needed.</p>
+                                    <a href="{% url 'challenge_add_content' challenge.id %}">
+                                        <button class="static-card-add_button">
+                                            {{ challenge.button_add_name }}
+                                            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <mask id="mask0_2001_12607" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                                                    <rect x="0.804688" width="24" height="24" fill="#66B498"/>
+                                                </mask>
+                                                <g mask="url(#mask0_2001_12607)">
+                                                    <path d="M10.9475 12.8571H5.80469V11.1429H10.9475V6H12.6618V11.1429H17.8047V12.8571H12.6618V18H10.9475V12.8571Z" fill="#66B498"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endif %}
+
+
+                {% if user_choices %}
+                    {% with first_choice=user_choices|first %}
+                        {% with user_attempts=first_choice.attempts.all %}
+                            {% if user_attempts.count >= min_answers_required %}
+                                <button class="submit submit-active">Submit</button>
+                            {% else %}
+                                <button class="submit submit-inactive">Submit</button>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endif %}
+
+            {% endfor %}
+
+
+            {% elif display_type == 'table' %}
+            <form method="post" action="{% url 'submit_challenge' challenge.id %}" id="challenge-form">
+              {% csrf_token %}
+              <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                <thead>
+                  <tr>
+                    {% for column in display_settings.table_columns.all %}
+                      <th>{{ column.title }}</th>
+                    {% endfor %}
+
+                    {% if display_settings.cancel_edit_delete %}
+                      <th>To Cancel</th>
+                    {% endif %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for choice in user_choices %}
+                    {% for attempt in choice.attempts_filtered %}
+                      <tr style="background-color: {{ attempt.block_color }};">
+                        {% for cell in attempt.table_cells %}
+                          <td>{{ cell.value }}</td>
+                        {% endfor %}
+
+                        {% if display_settings.cancel_edit_delete %}
+                          <td class="table-action-buttons">
+
+                              <div class="table-confirm-btn">
+                                  <button type="button" class="table-action-button" onclick="toggleIcon({{ attempt.id }})">
+                                      <svg id="done-icon-{{ attempt.id }}" width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: {% if attempt.is_done|yesno:'True,False' == 'False' %}block{% else %}none{% endif %}">
+                                          <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#21272A"/>
+                                          <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z"/>
+                                      </svg>
+
+                                      <svg id="undone-icon-{{ attempt.id }}" width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: {% if attempt.is_done|yesno:'True,False' == 'True' %}block{% else %}none{% endif %}">
+                                          <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#21272A" />
+                                          <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z" fill="#21272A" />
+                                      </svg>
+                                  </button>
+                              </div>
+
+                              <div class="table-delete-edit-btn">
+                                  <button type="button" class="table-action-button" onclick="editAttempt({{ attempt.id }})">
+                                    <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7 10H12.25" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.625 1.75011C9.85706 1.5512 10.1718 1.43945 10.5 1.43945C10.6625 1.43945 10.8234 1.46689 10.9735 1.52019C11.1237 1.57349 11.2601 1.65162 11.375 1.75011C11.4899 1.8486 11.5811 1.96553 11.6432 2.09422C11.7054 2.2229 11.7374 2.36083 11.7374 2.50011C11.7374 2.6394 11.7054 2.77733 11.6432 2.90601C11.5811 3.0347 11.4899 3.15162 11.375 3.25011L4.08333 9.50011L1.75 10.0001L2.33333 8.00011L9.625 1.75011Z" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                  </button>
+
+                                  <button type="button" class="table-action-button" onclick="deleteAttempt2({{ attempt.id }})">
+                                      <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                          <path d="M2.25 3.25H3.75H15.75" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M14.25 3.25016V10.8335C14.25 11.1208 14.092 11.3964 13.8107 11.5995C13.5294 11.8027 13.1478 11.9168 12.75 11.9168H5.25C4.85218 11.9168 4.47064 11.8027 4.18934 11.5995C3.90804 11.3964 3.75 11.1208 3.75 10.8335V3.25016M6 3.25016V2.16683C6 1.87951 6.15804 1.60396 6.43934 1.4008C6.72064 1.19763 7.10218 1.0835 7.5 1.0835H10.5C10.8978 1.0835 11.2794 1.19763 11.5607 1.4008C11.842 1.60396 12 1.87951 12 2.16683V3.25016" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M7.5 5.9585V9.2085" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M10.5 5.9585V9.2085" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                      </svg>
+                                  </button>
+
+                                  <div id="delete-confirmation2" class="confirmation-modal">
+                                      <div class="confirmation-content">
+                                          <p><b>Delete the challenge?</b></p>
+                                          <button type="button" class="delete_ok" id="confirm-delete2">Ok</button>
+                                          <button type="button" class="delete_cancel" id="cancel-delete2">Cancel</button>
+                                      </div>
+                                  </div>
+                              </div>
+                          </td>
+                        {% endif %}
+                      </tr>
+                    {% endfor %}
+                  {% endfor %}
+                </tbody>
+              </table>
+
+            <a href="{% url 'challenge_add_content' challenge.id %}">
+                <button type="button" class="add_button">
+                    {{ challenge.button_add_name }}
+                    <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <mask id="mask0_2001_12607" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                            <rect x="0.804688" width="24" height="24" fill="white"/>
+                        </mask>
+                        <g mask="url(#mask0_2001_12607)">
+                            <path d="M10.9475 12.8571H5.80469V11.1429H10.9475V6H12.6618V11.1429H17.8047V12.8571H12.6618V18H10.9475V12.8571Z" fill="white"/>
+                        </g>
+                    </svg>
+                </button>
+            </a>
+
+
+            <div class="input-fields-container">
+                {% for element in elements_to_show_after_confirm %}
+                  <div class="input-field">
+                    <label>{{ element.name }}</label>
+
+                    {% if element.element == 'input' %}
+                        <input
+                            type="text"
+                            placeholder="{{ element.value }}"
+                            name="field_{{ element.id }}"
+                            value="{{ item.value|default:'' }}"
+                        >
+                    {% elif element.element == 'textarea' %}
+                        <textarea
+                            placeholder="{{ element.value }}"
+                            name="field_{{ element.id }}"
+                        >{{ item.value|default:'' }}</textarea>
+                    {% elif element.element == "radio" %}
+                        <div class="radio-time_group">
+                            {% for option in element.options %}
+                                <div class="radio-container">
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="field_{{ element.id }}"
+                                            value="{{ option }}"
+                                            {% if element.value == option %}checked{% endif %}
+                                            class="radio_button"
+                                        >
+                                        <span class="radio-custom"></span>
+                                        <span class="radio-text">{{ option }}</span>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                  </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="submit submit-inactive" id="table-submit">Submit</button>
+
+            {% endif %}
+            </form>
+
+            <div id="message-box" style="margin-top: 20px;"></div>
+
+
+        </div>
+
+    </div>
+
+    <div class="nav_pannel">
+        {% include 'videos/nav.html' %}
+    </div>
+
+    <script>
+        // Получение CSRF-токена из куки
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Получаем контейнер .static-card и кнопку add_button_outof_static
+            const staticCard = document.querySelector('.static-card');
+            const addButton = document.getElementById('add_button_outof_static');
+
+            // Проверяем, если .static-card не существует или скрыт, показываем кнопку
+            if (!staticCard || staticCard.style.display === 'none') {
+                addButton.style.display = 'inline-block'; // Кнопка будет видна
+            } else {
+                addButton.style.display = 'none'; // Кнопка будет скрыта
+            }
+
+            const form = document.getElementById('challenge-form');
+            const messageBox = document.getElementById('message-box');
+            const tableSubmitButton = document.getElementById('table-submit');
+
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+                    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const formAction = form.getAttribute('action');
+
+                    fetch(formAction, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                   .then(async response => {
+                        const contentType = response.headers.get("content-type") || "";
+
+                        if (!response.ok) {
+                            throw new Error("Server return the error");
+                        }
+
+                        if (contentType.includes("application/json")) {
+                            return await response.json();
+                        } else {
+                            throw new Error("Answer is not in JSON format");
+                        }
+                    })
+                    .then(data => {
+                        console.log(data);
+                        if (data.success) {
+                            messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                        } else {
+                            messageBox.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        messageBox.innerHTML = `<div class="alert alert-danger">Something went wrong</div>`;
+                    });
+                });
+            }
+
+            // Обработка переключения текста
+            document.querySelectorAll('.toggle-text').forEach(button => {
+                button.addEventListener('click', e => {
+                    e.preventDefault();
+                    const textBlock = button.previousElementSibling;
+                    textBlock.classList.toggle('truncate-text');
+                    button.textContent = textBlock.classList.contains('truncate-text') ? '...' : '⬆️';
+                });
+            });
+
+
+            // Проверка заполнения полей для активации кнопки отправки
+            const inputFields = document.querySelectorAll('.input-fields-container input, .input-fields-container textarea, .input-fields-container input[type="radio"]');
+            function checkFields() {
+                let filled = false;
+                inputFields.forEach(field => {
+                    if ((field.type === 'radio' && field.checked) ||
+                        (field.type !== 'radio' && field.value.trim() !== '')) {
+                        filled = true;
+                    }
+                });
+                if (tableSubmitButton) {
+                    if (filled) {
+                        tableSubmitButton.classList.add('submit-active');
+                        tableSubmitButton.classList.remove('submit-inactive');
+                        tableSubmitButton.disabled = false;
+                    } else {
+                        tableSubmitButton.classList.add('submit-inactive');
+                        tableSubmitButton.classList.remove('submit-active');
+                        tableSubmitButton.disabled = true;
+                    }
+                }
+            }
+            inputFields.forEach(field => {
+                field.addEventListener('input', checkFields);
+                field.addEventListener('change', checkFields);
+            });
+            checkFields();
+
+            // Кнопка сохранения статусов
+            if (tableSubmitButton) {
+                tableSubmitButton.addEventListener('click', function () {
+                    const updatedStatuses = [];
+
+                    document.querySelectorAll('.table-confirm-btn button').forEach(button => {
+                        const doneIcon = button.querySelector('svg[id^="done-icon"]');
+                        const attemptId = doneIcon.id.replace('done-icon-', '');
+                        const isDone = doneIcon.style.display === 'none';
+
+                        updatedStatuses.push({ id: attemptId, is_done: isDone });
+                    });
+
+                    fetch('/save_attempts_status/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ attempts: updatedStatuses })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'ok') {
+                            const message = document.getElementById('save-message');
+                            message.style.display = 'block';
+                            setTimeout(() => {
+                                message.style.display = 'none';
+                            }, 3000);
+                        }
+                    });
+                });
+            }
+        });
+
+        function editAttempt(id) {
+            window.location.href = `/attempt/edit/${id}/`;
+        }
+
+        function toggleDone(attemptId, currentStatus) {
+            const url = currentStatus ? `/mark_undone/${attemptId}/` : `/mark_done/${attemptId}/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'done' || data.status === 'undone') {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при смене статуса:', error);
+            });
+        }
+
+        function checkSubmitButton() {
+            let isDoneSelected = false;
+            document.querySelectorAll('.table-confirm-btn button').forEach(function (button) {
+                const doneIcon = button.querySelector('svg[id^="done-icon"]');
+                if (doneIcon && doneIcon.style.display === 'none') {
+                    isDoneSelected = true;
+                }
+            });
+
+            const tableSubmitButton = document.getElementById('table-submit');
+            if (tableSubmitButton) {
+                if (isDoneSelected) {
+                    tableSubmitButton.classList.remove('submit-inactive');
+                    tableSubmitButton.classList.add('submit-active');
+                    tableSubmitButton.disabled = false;
+                } else {
+                    tableSubmitButton.classList.remove('submit-active');
+                    tableSubmitButton.classList.add('submit-inactive');
+                    tableSubmitButton.disabled = true;
+                }
+            }
+        }
+
+        function toggleIcon(attemptId) {
+            const doneIcon = document.getElementById('done-icon-' + attemptId);
+            const undoneIcon = document.getElementById('undone-icon-' + attemptId);
+
+            if (doneIcon.style.display === 'none') {
+                doneIcon.style.display = 'block';
+                undoneIcon.style.display = 'none';
+            } else {
+                doneIcon.style.display = 'none';
+                undoneIcon.style.display = 'block';
+            }
+
+            checkSubmitButton();
+        }
+
+        function deleteAttempt(id, modalId, confirmId, cancelId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = "flex";
+
+            const confirmButton = document.getElementById(confirmId);
+            const cancelButton = document.getElementById(cancelId);
+
+            confirmButton.onclick = function () {
+                fetch(`/delete_attempt/${id}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'deleted') {
+                        location.reload();
+                    }
+                });
+
+                modal.style.display = "none";
+            };
+
+            cancelButton.onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        function deleteAttempt1(id) {
+            deleteAttempt(id, "delete-confirmation1", "confirm-delete1", "cancel-delete1");
+        }
+
+        function deleteAttempt2(id) {
+            deleteAttempt(id, "delete-confirmation2", "confirm-delete2", "cancel-delete2");
+        }
+    </script>
+
+</body>
+</html>
