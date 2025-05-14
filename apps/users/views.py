@@ -103,6 +103,9 @@ def user_profile_change(request):
     rewards = Regards.objects.all()
     interests_list = []
     hobbies_list = []
+    schools = Schools.objects.all().order_by('name')
+
+    user_schools = user.user_schools.select_related('school')
 
     if user.interests:
         interests_list = [i.strip() for i in user.interests.split(',') if i.strip()]
@@ -115,10 +118,13 @@ def user_profile_change(request):
     return render(request, 'videos/user_profile_change.html', {
         'user': user,
         'interests_list': interests_list,
-        'hobbies_list': hobbies_list,
+        'hobbies_json': json.dumps(hobbies_list),
         'completed_count': completed_count,
         'rewards': rewards,
+        'schools': schools,
+        'user_schools': user_schools,
     })
+
 
 
 def get_user_points(request):
@@ -367,6 +373,7 @@ def save_profile_steps(request):
         user.interests = ', '.join(interests_list)
         user.hobbies = ', '.join(hobbies_list)
         user.languages = request.POST.get('languages', '')
+        user.motivation = request.POST.get('motivation', '')
         user.cities = request.POST.get('cities', '')
         user.current_focus = request.POST.get('current_focus', '')
         user.favorite_media = request.POST.get('fav_media', '')

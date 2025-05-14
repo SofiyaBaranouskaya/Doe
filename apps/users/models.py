@@ -20,6 +20,7 @@ class User(AbstractUser):
     interests = models.CharField(max_length=255, blank=True, null=True)
     hobbies = models.CharField(max_length=255, blank=True, null=True)
     languages = models.CharField(max_length=70, blank=True, null=True)
+    motivation = models.CharField(max_length=255, blank=True, null=True)
     cities = models.CharField(max_length=150, blank=True, null=True)
     current_focus = models.TextField(blank=True, null=True)
     favorite_media = models.TextField(blank=True, null=True)
@@ -78,11 +79,11 @@ class UserSchool(models.Model):
 
 class Content(models.Model):
     PAGE_CHOICES = [
-        ('its_time', "It’s time we talk money"),
-        ('rich_girl', "Rich girl moves"),
-        ('you_do_you', "You do YOU"),
-        ('levers', "The Levers"),
-        ('portfolio', "The Power Portfolio"),
+        ('its_time', "First Moves"),
+        ('rich_girl', "The Levers"),
+        ('you_do_you', "Power Portfolio"),
+        ('levers', "The Playbook (IRL How-To's)"),
+        ('portfolio', "Capital Beyond Cash"),
     ]
 
     page = models.CharField(

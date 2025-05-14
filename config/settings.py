@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # 3-rd part
     'nested_admin',
     'social_django',
+    'import_export',
 
     #local
     'apps.videos.apps.VideosConfig',

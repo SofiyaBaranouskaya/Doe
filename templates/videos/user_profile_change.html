@@ -33,7 +33,7 @@
             justify-content: space-between;
             height: 24px;
             width: 95%;
-            padding-top: 30px;
+            padding-bottom: 30px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -411,7 +411,35 @@
                 <!-- Шаг 2 -->
                 <div class="step" style="margin-top: 20px;">
                     <div id="schoolsContainer">
-                        <!-- Первый блок школы -->
+                        {% for uschool in user_schools %}
+                        <div class="school-block">
+                            <div class="input_block">
+                                <label>Current school / Alma mater *</label>
+                                <select name="schools[{{ forloop.counter0 }}][school_id]" class="school-select">
+                                    <option value="" disabled {% if not uschool.school and not uschool.other_school_name %}selected{% endif %}>Select school...</option>
+                                    {% for school in schools %}
+                                        <option value="{{ school.id }}"
+                                            {% if uschool.school and uschool.school.id == school.id %}selected{% endif %}>
+                                            {{ school.name }}
+                                        </option>
+                                    {% endfor %}
+                                    <option value="0" {% if not uschool.school and uschool.other_school_name %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+
+                            <div class="input_block other-school" style="{% if uschool.other_school_name %}display: block;{% else %}display: none;{% endif %}">
+                                <label>If "Other"*</label>
+                                <input type="text" placeholder="Enter school name" name="schools[{{ forloop.counter0 }}][other_name]" value="{{ uschool.other_school_name }}">
+                            </div>
+
+                            <div class="input_block">
+                                <label>(Expected) Graduation Year*</label>
+                                <input type="text" placeholder="YYYY" maxlength="4" name="schools[{{ forloop.counter0 }}][grad_year]" value="{{ uschool.graduation_year }}">
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if not user_schools %}
                         <div class="school-block">
                             <div class="input_block">
                                 <label>Current school / Alma mater *</label>
@@ -434,6 +462,8 @@
                                 <input type="text" placeholder="YYYY" name="schools[0][grad_year]" maxlength="4">
                             </div>
                         </div>
+                        {% endif %}
+
                     </div>
 
                     <button type="button" id="addSchoolBtn">Add another school</button>
@@ -487,6 +517,7 @@
                             <option value="Not Sure Yet">Not Sure Yet</option>
                         </select>
                         <input type="hidden" id="hideChosenIndustries" name="industries" value='{{ interests_list|json_script:"interests-json" }}'>
+                        {{ interests_list|json_script:"interests-json" }}
                     </div>
 
                     <div class="input_block" id="otherInterestBlock" style="display: none;">
@@ -577,14 +608,14 @@
             </div>
 
             <input type="hidden" name="chosenIndustries" id="chosenIndustries" value="">
-            <input type="hidden" name="chosenHobbies" id="chosenHobbies" value="">
+<input type="hidden" name="chosenHobbies" id="chosenHobbies" value='{{ hobbies_json|safe }}'>
 
         </form>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // ==== 1. INDUSTRY SELECT ====
+        // ==== 1. INDUSTRY SELECT (final logic) ====
 
         const industrySelect = document.getElementById('industrySelect');
         const otherInterestBlock = document.getElementById('otherInterestBlock');
@@ -595,67 +626,57 @@
 
         let chosenInterests = [];
 
-        // Инициализация скрытого поля, если оно существует
-        if (hiddenIndustryInput) {
-            try {
-                chosenInterests = JSON.parse(hiddenIndustryInput.value) || [];
-                updateChosenInterestsDisplay();
-            } catch (e) {
-                chosenInterests = [];
+        // Инициализация выбранных интересов (с бэкенда или из скрытого input)
+        try {
+            const fromBackend = JSON.parse(document.getElementById('interests-json')?.textContent || '[]');
+            chosenInterests = Array.isArray(fromBackend) ? fromBackend.slice(0, 5) : [];
+            updateChosenInterestsDisplay();
+            hiddenIndustryInput.value = JSON.stringify(chosenInterests);
+        } catch {
+            chosenInterests = [];
+        }
+
+        // При выборе из select
+        industrySelect?.addEventListener('change', function () {
+            if (this.value === 'Other') {
+                otherInterestBlock.style.display = 'block';
+            } else {
+                otherInterestBlock.style.display = 'none';
+                if (this.value) {
+                    addInterest(this.value);
+                }
             }
-        }
+        });
 
-        if (industrySelect) {
-            industrySelect.addEventListener('change', function() {
-                if (this.value === 'Other') {
-                    otherInterestBlock.style.display = 'block';
-                } else {
-                    otherInterestBlock.style.display = 'none';
-                    if (this.value) {
-                        addInterest(this.value);
-                    }
-                }
-            });
-        }
+        // При добавлении вручную
+        addOtherInterestsBtn?.addEventListener('click', function () {
+            const interests = otherInterestInput.value
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
 
-        if (addOtherInterestsBtn) {
-            addOtherInterestsBtn.addEventListener('click', function() {
-                const interests = otherInterestInput.value
-                    .split(',')
-                    .map(item => item.trim())
-                    .filter(item => item.length > 0);
+            interests.forEach(addInterest);
+            otherInterestInput.value = '';
+            otherInterestBlock.style.display = 'none';
+        });
 
-                if (interests.length > 0) {
-                    interests.forEach(interest => {
-                        addInterest(interest);
-                    });
-                    otherInterestInput.value = '';
-                    otherInterestBlock.style.display = 'none';
-                }
-            });
-        }
+        otherInterestInput?.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addOtherInterestsBtn.click();
+            }
+        });
 
-        if (otherInterestInput) {
-            otherInterestInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addOtherInterestsBtn.click();
-                }
-            });
-        }
-
+        // Добавление карточки
         function addInterest(interest) {
-            if (!interest || chosenInterests.includes(interest)) return;
-
-            if (chosenInterests.length >= 5) {
-                return;
-            }
+            if (!interest || chosenInterests.includes(interest) || chosenInterests.length >= 5) return;
 
             chosenInterests.push(interest);
             updateChosenInterestsDisplay();
             industrySelect.value = '';
         }
 
+        // Удаление карточки
         function removeInterest(index) {
             if (index >= 0 && index < chosenInterests.length) {
                 chosenInterests.splice(index, 1);
@@ -663,6 +684,7 @@
             }
         }
 
+        // Отображение карточек
         function updateChosenInterestsDisplay() {
             if (!seeChosenInterests) return;
 
@@ -676,33 +698,18 @@
             });
 
             document.querySelectorAll('.remove-interest').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     removeInterest(parseInt(this.dataset.index));
                 });
             });
 
-            if (hiddenIndustryInput) {
-                hiddenIndustryInput.value = JSON.stringify(chosenInterests);
-            }
+            hiddenIndustryInput.value = JSON.stringify(chosenInterests);
 
-            if (chosenInterests.length >= 5) {
-                industrySelect.disabled = true;
-                otherInterestInput.disabled = true;
-                addOtherInterestsBtn.disabled = true;
-            } else {
-                industrySelect.disabled = false;
-                otherInterestInput.disabled = false;
-                addOtherInterestsBtn.disabled = false;
-            }
-
-            const interestsFromBackend = JSON.parse(document.getElementById('interests-json').textContent);
-            const hiddenInput = document.getElementById('hideChosenIndustries');
-            if (hiddenInput && interestsFromBackend) {
-                hiddenInput.value = JSON.stringify(interestsFromBackend);
-            }
+            const disable = chosenInterests.length >= 5;
+            industrySelect.disabled = disable;
+            otherInterestInput.disabled = disable;
+            addOtherInterestsBtn.disabled = disable;
         }
-
-
 
 
         // ==== 2. HOBBY GRID ====
