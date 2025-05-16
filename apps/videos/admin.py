@@ -11,6 +11,18 @@ from apps.users.models import (
     Challenge, ChallengeElement, ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeDisplaySettings,
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
     QuizUserChoice, QuizAnswer, Regards, UserReward, Invitation)
+from import_export.admin import ExportMixin
+from import_export import resources
+from django.contrib.admin import SimpleListFilter
+from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
+
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+
+class ExportAdminMixin(ExportMixin, admin.ModelAdmin):
+    pass
 
 class UserSchoolInline(admin.TabularInline):
     model = UserSchool
@@ -22,33 +34,110 @@ class UserRewardInline(admin.TabularInline):
     readonly_fields = ('redeemed_at',)
     fields = ('reward', 'points_spent', 'redeemed_at')
 
+class RewardFilter(admin.SimpleListFilter):
+    title = _('Reward')
+    parameter_name = 'reward'
+
+    def lookups(self, request, model_admin):
+        rewards = set(
+            UserReward.objects.values_list('reward__id', 'reward__title')
+        )
+        return sorted(
+            [r for r in rewards if r[1] is not None],
+            key=lambda x: x[1]
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(user_rewards__reward__id=self.value()).distinct()
+        return queryset
+
+class SchoolFilter(admin.SimpleListFilter):
+    title = _('School')
+    parameter_name = 'school'
+
+    def lookups(self, request, model_admin):
+        schools = set(
+            UserSchool.objects.values_list('school__id', 'school__name')
+        )
+        # убираем None или подставляем пустую строку при сортировке
+        filtered_schools = [s for s in schools if s[1] is not None]
+        return sorted(filtered_schools, key=lambda x: x[1])
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(user_schools__school__id=self.value()).distinct()
+        return queryset
+
+class SchoolCodeFilter(admin.SimpleListFilter):
+    title = _('School code')
+    parameter_name = 'school_code'
+
+    def lookups(self, request, model_admin):
+        codes = set(
+            UserSchool.objects.values_list('assigned_code', 'assigned_code')
+        )
+        # Уберём None
+        codes = filter(lambda x: x[0] is not None, codes)
+        return sorted(codes, key=lambda x: x[0])
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(user_schools__assigned_code=self.value()).distinct()
+        return queryset
+
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(ExportMixin, admin.ModelAdmin):
+    resource_class = UserResource
     list_display = ('username', 'email', 'points_count')
     search_fields = ('username', 'email')
     inlines = [UserSchoolInline, UserRewardInline]
     exclude = ('groups', 'user_permissions')
     filter_horizontal = ('completed_content',)
-
+    list_filter = (
+        'is_active',
+        'date_joined',
+        RewardFilter,
+        SchoolFilter,
+        SchoolCodeFilter,
+    )
 
 @admin.register(Invitation)
-class InvitationAdmin(admin.ModelAdmin):
+class InvitationAdmin(ExportAdminMixin):
     list_display = ('inviter', 'invitee_email', 'invited_at', 'accepted')
     search_fields = ('inviter__email', 'invitee_email')
     list_filter = ('accepted', 'invited_at')
 
 @admin.register(Schools)
-class SchoolsAdmin(admin.ModelAdmin):
+class SchoolsAdmin(ExportAdminMixin):
     list_display = ('name', 'code')
     search_fields = ('name', 'code')
 
 
+class SpecificContentTypeFilter(SimpleListFilter):
+    title = 'content type'
+    parameter_name = 'content_type'
+
+    def lookups(self, request, model_admin):
+        allowed_models = [Video, FunFact, Quiz, Challenge, ChitChat]
+        lookups = []
+        for model in allowed_models:
+            ct = ContentType.objects.get_for_model(model)
+            lookups.append((str(ct.id), model._meta.verbose_name))
+        return lookups
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(content_type_id=self.value())
+        return queryset
+
 @admin.register(Content)
-class ContentAdmin(admin.ModelAdmin):
+class ContentAdmin(ExportAdminMixin):
     form = ContentAdminForm
     list_display = ('content_type', 'safe_linked_object')
     readonly_fields = ('poster_base64', 'safe_linked_object')
     fields = ['page', 'content_type', 'object_id', 'poster_base64', 'safe_linked_object']
+    list_filter = (SpecificContentTypeFilter, 'page')
 
     def safe_linked_object(self, obj):
         if not obj.content_type:
@@ -78,11 +167,12 @@ class ContentAdmin(admin.ModelAdmin):
 
 
 @admin.register(FunFact)
-class FunFactAdmin(admin.ModelAdmin):
+class FunFactAdmin(ExportAdminMixin):
     list_display = ('title', 'points')
     search_fields = ('title', 'points')
     readonly_fields = ('photo_base64',)
     readonly_fields = ('photo_preview',)
+    list_filter = ('points',)
 
     def get_readonly_fields(self, request, obj=None):
         return ('photo_base64',) + self.readonly_fields
@@ -98,7 +188,7 @@ class FunFactAdmin(admin.ModelAdmin):
 
 
 @admin.register(Video)
-class VideoAdmin(admin.ModelAdmin):
+class VideoAdmin(ExportAdminMixin):
     list_display = ('title', 'points')
     fields = [
         'title',
@@ -112,6 +202,7 @@ class VideoAdmin(admin.ModelAdmin):
     ]
     search_fields = ('title', 'points')
     readonly_fields = ('poster_preview', 'poster_base64')
+    list_filter = ('points',)
 
     def get_readonly_fields(self, request, obj=None):
         return super().get_readonly_fields(request, obj) + ('poster_base64',)
@@ -146,10 +237,11 @@ class ChitChatOptionInline(admin.TabularInline):
 
 
 @admin.register(ChitChat)
-class ChitChatAdmin(admin.ModelAdmin):
+class ChitChatAdmin(ExportAdminMixin):
     inlines = [ChitChatOptionInline]
     list_display = ('title', 'points')
     search_fields = ('title', 'points')
+    list_filter = ('points',)
 
 
 class ChitChatAnswerInline(admin.TabularInline):
@@ -161,10 +253,11 @@ class ChitChatAnswerInline(admin.TabularInline):
 
 
 @admin.register(ChitChatUserChoice)
-class ChitChatUserChoiceAdmin(admin.ModelAdmin):
+class ChitChatUserChoiceAdmin(ExportAdminMixin):
     list_display = ('user', 'chit_chat', 'created_at')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [ChitChatAnswerInline]
+    list_filter = ('created_at', 'chit_chat')
 
     def get_fields(self, request, obj=None):
         return ['user', 'chit_chat', 'created_at', 'updated_at']
@@ -206,12 +299,15 @@ class ChallengeDisplaySettingsInline(nested_admin.NestedStackedInline):
 
     inlines = []
 
+class ExportNestedAdmin(ExportMixin, nested_admin.NestedModelAdmin):
+    pass
 
 @admin.register(Challenge)
-class ChallengeAdmin(nested_admin.NestedModelAdmin):
+class ChallengeAdmin(ExportNestedAdmin):
     list_display = ('title', 'points')
     readonly_fields = ('photo_preview', 'picture_base64')
     search_fields = ('title',)
+    list_filter = ('points',)
 
     def get_inline_instances(self, request, obj=None):
         inline_instances = []
@@ -283,11 +379,12 @@ class ChallengeUserAttemptInline(nested_admin.NestedStackedInline):
 
 
 @admin.register(ChallengeUserChoice)
-class ChallengeUserChoiceAdmin(nested_admin.NestedModelAdmin):
+class ChallengeUserChoiceAdmin(ExportNestedAdmin):
     model = ChallengeUserChoice
     inlines = [ChallengeUserAttemptInline]
     list_display = ['user', 'challenge']
     search_fields = ['user__username', 'challenge__title']
+    list_filter = ('challenge',)
 
 
 class QuizQuestionInline(admin.TabularInline):
@@ -302,7 +399,7 @@ class QuizQuestionInline(admin.TabularInline):
 
 
 @admin.register(Quiz)
-class QuizAdmin(admin.ModelAdmin):
+class QuizAdmin(ExportAdminMixin):
     inlines = [QuizQuestionInline]
     list_display = ('title',)
 
@@ -314,12 +411,13 @@ class QuizAnswerInline(admin.TabularInline):
 
 
 @admin.register(QuizUserChoice)
-class QuizUserChoiceAdmin(admin.ModelAdmin):
+class QuizUserChoiceAdmin(ExportAdminMixin):
     list_display = ('user', 'quiz', 'submitted_at')
     inlines = [QuizAnswerInline]
-
+    list_filter = ('submitted_at', 'quiz')
 
 @admin.register(Regards)
-class RegardsAdmin(admin.ModelAdmin):
+class RegardsAdmin(ExportAdminMixin):
     list_display = ('title', 'points_needed')
     search_fields = ('title', 'points_needed')
+    list_filter = ('points_needed',)
