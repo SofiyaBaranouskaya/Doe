@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="377564a8-d8b5-41c7-a5ca-04a5f6f079e4" name="Changes" comment="challenge admin add and save users answears create">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/users/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/videos/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/videos/admin.py" afterDir="false" />
-    </list>
+    <list default="true" id="377564a8-d8b5-41c7-a5ca-04a5f6f079e4" name="Changes" comment="challenge admin add and save users answears create" />
     <list id="dfd935b6-cdcf-4566-8fa5-4dbd319c0815" name="Changes (delete env)" comment="Changes (delete env)" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
