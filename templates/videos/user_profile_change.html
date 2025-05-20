@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Profile Modify</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .back_pannel{
+            display: flex;
+            justify-content: space-between;
+            height: 24px;
+            width: 95%;
+            padding-bottom: 30px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .panel {
+           margin: 0px 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .text {
+            position: relative;
+            display: flex;
+            align-items: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .up_part {
+            position: absolute;
+            left: 10px;
+            top: 0px;
+        }
+
+        .profile_line {
+            display:flex;
+            flex-direction: row;
+            align-items: center;
+            margin: 40px 10px 0px 10px;
+        }
+
+        button {
+            background-color: unset;
+            border: unset;
+            padding: 0px !important;
+        }
+
+        h2 {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            height: 26px;
+            margin: 0px 7px 0px 0px;
+        }
+
+        p {
+            width: 100%;
+            text-align: center;
+            margin: 0px;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .input_block {
+            margin-bottom: 20px;
+        }
+
+        input, select {
+          font-family: 'Poppins', sans-serif;
+          height: 50px;
+          width: 100%;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+        }
+
+        select option {
+            padding: 10px;
+            color: #333;
+        }
+
+        textarea {
+          font-family: 'Poppins', sans-serif;
+          width: 100%;
+          height: 120px;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          resize: vertical;
+        }
+
+        input:focus, textarea:focus, select:focus {
+          outline: none;
+          border-color: #FFC6D4;
+        }
+
+        label {
+            margin: 5px;
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+
+        .buttons button {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 92px;
+            background-color: #66B498;
+            color: white;
+            margin: 20px auto 20px auto;
+        }
+
+        .avatar-upload {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .upload-button {
+            width: 137px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #646464;
+            color: white;
+            border: none;
+            border-radius: 100px;
+        }
+
+        .avatar-preview {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid #ddd;
+        }
+
+        #avatar-preview {
+          width: 90px;
+          height: 90px;
+          object-fit: cover;
+        }
+
+        .chosen_card {
+            font-size: 14px;
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .remove-interest {
+            margin-left: 5px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .remove-interest:hover {
+            color: #f00;
+        }
+
+        #otherInterestBlock {
+            margin-top: 10px;
+        }
+
+        #otherInterestInput {
+            width: 88%;
+        }
+
+        #addOtherInterests {
+            background: none;
+            border: none;
+            padding: 12px !important;
+            margin: 0px;
+        }
+
+        .interests-grid {
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .grid-item {
+            width: fit-content;
+            padding: 12px 20px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .grid-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .grid-item.selected {
+            background-color: #66B498;
+            color: white;
+        }
+
+        .grid-item.selected::after {
+            content: "×";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: white;
+            color: #66B498;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 1px solid #66B498;
+        }
+
+        .other-input {
+            margin-top: 20px;
+            width: 88%;
+        }
+
+        .add-other-btn {
+            margin: 20px auto 0px auto;
+        }
+
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-tag {
+            background-color: #66B498;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .selected-tag .remove-tag {
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="header">
+            <svg width="145" height="134" viewBox="0 0 145 134" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="36.494" cy="22.5812" rx="100.494" ry="110.447" fill="#FFE37F"/>
+                <path d="M43.9546 -97.8806C98.9766 -97.8806 143.699 -48.8356 143.699 11.8167C143.699 72.4688 98.9765 121.514 43.9546 121.514C-11.0674 121.514 -55.7895 72.4689 -55.7896 11.8167C-55.7896 -48.8356 -11.0674 -97.8806 43.9546 -97.8806Z" stroke="#2C2C2C" stroke-width="1.5"/>
+            </svg>
+        </div>
+
+        <div class="back_pannel">
+            <div class="icon" onclick="history.back();">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 5L5 12L12 19" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <form id="profile-form" method="post"  enctype="multipart/form-data" action="{% url 'save_profile_steps' %}">
+            {% csrf_token %}
+
+            <div class="panel">
+                <div class="text">
+                    <div class="up_part">
+                        <button type="button" id="prev" class="hidden">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <mask id="mask0_1106_8550" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                                <rect width="24" height="24" fill="#D9D9D9"/>
+                                </mask>
+                                <g mask="url(#mask0_1106_8550)">
+                                <path d="M10 22L0 12L10 2L11.775 3.775L3.55 12L11.775 20.225L10 22Z" fill="#1C1B1F"/>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                    <p> 1 of 4</p>
+                </div>
+                <svg width="100%" height="7" viewBox="0 0 340 7" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100%" height="6.8" rx="3.4" fill="#D9D9D9"/>
+                    <rect id="progress-fill" width="25%" height="7" rx="3.5" fill="#1C1B1F"/>
+                </svg>
+            </div>
+            <div class="profile_line">
+                <h2>Profile</h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 5.99994L18 8.99994M13 19.9999H21M5 15.9999L4 19.9999L8 18.9999L19.586 7.41394C19.9609 7.03889 20.1716 6.53027 20.1716 5.99994C20.1716 5.46961 19.9609 4.961 19.586 4.58594L19.414 4.41394C19.0389 4.039 18.5303 3.82837 18 3.82837C17.4697 3.82837 16.9611 4.039 16.586 4.41394L5 15.9999Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div class="main-content">
+                <!-- Шаг 1 -->
+                <div class="step active">
+                    <div class="input_block">
+                        <div class="avatar-upload">
+                            <input type="file" id="avatar-upload" name="avatar" accept="image/*" style="display: none;">
+                            <div class="avatar-preview" id="avatar-preview" style="background-image: url('{{ user.profile_picture.url }}'); background-size: cover;">
+                            </div>
+                            <label for="avatar-upload" class="upload-button">
+                                Upload
+                                <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <mask id="mask0_1110_9361" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="21" height="20">
+                                    <rect x="0.5" width="20" height="20" fill="#D9D9D9"/>
+                                    </mask>
+                                    <g mask="url(#mask0_1110_9361)">
+                                    <path d="M10.5002 13.3333L6.3335 9.16658L7.50016 7.95825L9.66683 10.1249V3.33325H11.3335V10.1249L13.5002 7.95825L14.6668 9.16658L10.5002 13.3333ZM5.50016 16.6666C5.04183 16.6666 4.64947 16.5034 4.32308 16.177C3.99669 15.8506 3.8335 15.4583 3.8335 14.9999V12.4999H5.50016V14.9999H15.5002V12.4999H17.1668V14.9999C17.1668 15.4583 17.0036 15.8506 16.6772 16.177C16.3509 16.5034 15.9585 16.6666 15.5002 16.6666H5.50016Z" fill="white"/>
+                                    </g>
+                                </svg>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input_block">
+                        <label>First Name*</label>
+<input type="text" placeholder="Your name" name="first_name" value="{{ user.first_name }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>Last Name*</label>
+<input type="text" placeholder="Your name" name="last_name" value="{{ user.last_name }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>Date of Birth*</label>
+<input type="date" name="dob" maxlength="8" value="{{ user.date_of_birth|date:'Y-m-d' }}">
+                    </div>
+                </div>
+
+                <!-- Шаг 2 -->
+                <div class="step" style="margin-top: 20px;">
+                    <div id="schoolsContainer">
+                        {% for uschool in user_schools %}
+                        <div class="school-block">
+                            <div class="input_block">
+                                <label>Current school / Alma mater *</label>
+                                <select name="schools[{{ forloop.counter0 }}][school_id]" class="school-select">
+                                    <option value="" disabled {% if not uschool.school and not uschool.other_school_name %}selected{% endif %}>Select school...</option>
+                                    {% for school in schools %}
+                                        <option value="{{ school.id }}"
+                                            {% if uschool.school and uschool.school.id == school.id %}selected{% endif %}>
+                                            {{ school.name }}
+                                        </option>
+                                    {% endfor %}
+                                    <option value="0" {% if not uschool.school and uschool.other_school_name %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+
+                            <div class="input_block other-school" style="{% if uschool.other_school_name %}display: block;{% else %}display: none;{% endif %}">
+                                <label>If "Other"*</label>
+                                <input type="text" placeholder="Enter school name" name="schools[{{ forloop.counter0 }}][other_name]" value="{{ uschool.other_school_name }}">
+                            </div>
+
+                            <div class="input_block">
+                                <label>(Expected) Graduation Year*</label>
+                                <input type="text" placeholder="YYYY" maxlength="4" name="schools[{{ forloop.counter0 }}][grad_year]" value="{{ uschool.graduation_year }}">
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if not user_schools %}
+                        <div class="school-block">
+                            <div class="input_block">
+                                <label>Current school / Alma mater *</label>
+                                <select name="schools[0][school_id]" class="school-select">
+                                    <option value="" disabled selected>Select school...</option>
+                                    {% for school in schools %}
+                                        <option value="{{ school.id }}">{{ school.name }}</option>
+                                    {% endfor %}
+                                    <option value="0">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="input_block other-school" style="display: none;">
+                                <label>If "Other"*</label>
+                                <input type="text" placeholder="Enter school name" name="schools[0][other_name]">
+                            </div>
+
+                            <div class="input_block">
+                                <label>(Expected) Graduation Year*</label>
+                                <input type="text" placeholder="YYYY" name="schools[0][grad_year]" maxlength="4">
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    <button type="button" id="addSchoolBtn">Add another school</button>
+                </div>
+
+                <!-- Шаг 3 -->
+                <div class="step">
+                    <div class="input_block">
+                        <label>Major(s) / Minor(s) *</label>
+<input type="text" placeholder="Your current focus of study" name="majors" value="{{ user.focus_of_study }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>Current Interests / Aspirations (choose up to 5) *</label>
+                        <div class="see_chosen_interests"></div>
+                        <select name="industry"  id="industrySelect">
+                            <option value="" disabled selected>Select industry...</option>
+                            <option value="Business">Business</option>
+                            <option value="Entrepreneurship">Entrepreneurship</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Law">Law</option>
+                            <option value="Public Policy">Public Policy</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Psychology">Psychology</option>
+                            <option value="Mental Health">Mental Health</option>
+                            <option value="Education / EdTech">Education / EdTech</option>
+                            <option value="Journalism">Journalism</option>
+                            <option value="Media">Media</option>
+                            <option value="Social Impact">Social Impact</option>
+                            <option value="Politics">Politics</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Tech">Tech</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Design">Design</option>
+                            <option value="Fashion / Beauty">Fashion / Beauty</option>
+                            <option value="CPG">CPG</option>
+                            <option value="Sustainability / Climate Tech">Sustainability / Climate Tech</option>
+                            <option value="Biotech">Biotech</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Writing / Publishing">Writing / Publishing</option>
+                            <option value="Performing Arts">Performing Arts</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Consulting">Consulting</option>
+                            <option value="Real Estate">Real Estate</option>
+                            <option value="Urban Development">Urban Development</option>
+                            <option value="Int'l Relations">Int'l Relations</option>
+                            <option value="Venture Capital">Venture Capital</option>
+                            <option value="Content Creation">Content Creation</option>
+                            <option value="Other">Other</option>
+                            <option value="Not Sure Yet">Not Sure Yet</option>
+                        </select>
+                        <input type="hidden" id="hideChosenIndustries" name="industries" value='{{ interests_list|json_script:"interests-json" }}'>
+                        {{ interests_list|json_script:"interests-json" }}
+                    </div>
+
+                    <div class="input_block" id="otherInterestBlock" style="display: none;">
+                        <label>If "Other"*</label>
+                        <input type="text"  id="otherInterestInput" placeholder="Enter your interests/aspirations" name="other_interest">
+                        <button type="button" id="addOtherInterests">
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9824 0.675739C11.2996 0.942157 11.3407 1.41525 11.0743 1.73241L4.77429 9.23241C4.63466 9.39863 4.42986 9.4962 4.21281 9.49991C3.99576 9.50361 3.78776 9.4131 3.64254 9.25174L0.942536 6.25174C0.665442 5.94386 0.6904 5.46964 0.998283 5.19255C1.30617 4.91545 1.78038 4.94041 2.05748 5.24829L4.18049 7.60719L9.92573 0.767623C10.1921 0.450458 10.6652 0.40932 10.9824 0.675739Z" fill="#66B498"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="interests-grid">
+                      <h3>Hobbies and Skills (choose as many as you like) *</h3>
+
+                      <div class="grid-container">
+                        <!-- Первая строка -->
+                        <div class="grid-item" data-value="Coding">Coding</div>
+                        <div class="grid-item" data-value="Writing">Writing</div>
+
+                        <!-- Вторая строка -->
+                        <div class="grid-item" data-value="AI">AI</div>
+                        <div class="grid-item" data-value="Photo / Video">Photo / Video</div>
+                        <div class="grid-item" data-value="Graphics">Graphics</div>
+
+                        <!-- Третья строка -->
+                        <div class="grid-item" data-value="Social">Social</div>
+                        <div class="grid-item" data-value="Creative">Creative</div>
+
+                        <!-- Четвертая строка -->
+                        <div class="grid-item" data-value="Sports">Sports</div>
+                        <div class="grid-item" data-value="Performance">Performance</div>
+                        <div class="grid-item" data-value="Philanthropy">Philanthropy</div>
+
+                        <!-- Пятая строка -->
+                        <div class="grid-item" data-value="Organizing / Managing">Organizing / Managing</div>
+                        <div class="grid-item other-item" data-value="Other">Other</div>
+                        <div class="selected-items"></div>
+
+                      </div>
+
+                      <!-- Поле для Other -->
+                      <div class="other-input-container" style="display: none;">
+                        <input type="text" placeholder="Specify other hobby/skill" class="other-input">
+                        <button class="add-other-btn">
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9824 0.675739C11.2996 0.942157 11.3407 1.41525 11.0743 1.73241L4.77429 9.23241C4.63466 9.39863 4.42986 9.4962 4.21281 9.49991C3.99576 9.50361 3.78776 9.4131 3.64254 9.25174L0.942536 6.25174C0.665442 5.94386 0.6904 5.46964 0.998283 5.19255C1.30617 4.91545 1.78038 4.94041 2.05748 5.24829L4.18049 7.60719L9.92573 0.767623C10.1921 0.450458 10.6652 0.40932 10.9824 0.675739Z" fill="#66B498"/>
+                            </svg>
+                        </button>
+                      </div>
+
+                    </div>
+                </div>
+
+                <!-- Шаг 4 -->
+                <div class="step">
+
+                    <div class="input_block">
+                        <label>Language(s) spoken *</label>
+<input type="text" placeholder="List fluent languages" name="languages" value="{{ user.languages }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>What Motivates You Right Now *</label>
+<input type="text" placeholder="ie: money, objectives, fun, exploration, etc" name="motivation" value="{{ user.motivation }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>City(ies) you’re living in this year</label>
+<input type="text" placeholder="List any/all likely cities you’ll be in" name="cities" value="{{ user.cities }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>Is there anything you’re currently working on or excited about?</label>
+<input type="text" placeholder="ie: job search, startup idea, career advice" name="current_focus" value="{{ user.current_focus }}">
+                    </div>
+
+                    <div class="input_block">
+                        <label>5 current favorite books, podcasts, songs, or movies /series</label>
+<textarea placeholder="Current favorites..." name="fav_media">{{ user.favorite_media }}</textarea>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" id="next">Next</button>
+                    <button type="submit" id="submit" class="hidden">Save</button>
+                </div>
+            </div>
+
+            <input type="hidden" name="chosenIndustries" id="chosenIndustries" value="">
+<input type="hidden" name="chosenHobbies" id="chosenHobbies" value='{{ hobbies_json|safe }}'>
+
+        </form>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ==== 1. INDUSTRY SELECT (final logic) ====
+
+        const industrySelect = document.getElementById('industrySelect');
+        const otherInterestBlock = document.getElementById('otherInterestBlock');
+        const otherInterestInput = document.getElementById('otherInterestInput');
+        const addOtherInterestsBtn = document.getElementById('addOtherInterests');
+        const seeChosenInterests = document.querySelector('.see_chosen_interests');
+        const hiddenIndustryInput = document.getElementById('chosenIndustries');
+
+        let chosenInterests = [];
+
+        // Инициализация выбранных интересов (с бэкенда или из скрытого input)
+        try {
+            const fromBackend = JSON.parse(document.getElementById('interests-json')?.textContent || '[]');
+            chosenInterests = Array.isArray(fromBackend) ? fromBackend.slice(0, 5) : [];
+            updateChosenInterestsDisplay();
+            hiddenIndustryInput.value = JSON.stringify(chosenInterests);
+        } catch {
+            chosenInterests = [];
+        }
+
+        // При выборе из select
+        industrySelect?.addEventListener('change', function () {
+            if (this.value === 'Other') {
+                otherInterestBlock.style.display = 'block';
+            } else {
+                otherInterestBlock.style.display = 'none';
+                if (this.value) {
+                    addInterest(this.value);
+                }
+            }
+        });
+
+        // При добавлении вручную
+        addOtherInterestsBtn?.addEventListener('click', function () {
+            const interests = otherInterestInput.value
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+
+            interests.forEach(addInterest);
+            otherInterestInput.value = '';
+            otherInterestBlock.style.display = 'none';
+        });
+
+        otherInterestInput?.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addOtherInterestsBtn.click();
+            }
+        });
+
+        // Добавление карточки
+        function addInterest(interest) {
+            if (!interest || chosenInterests.includes(interest) || chosenInterests.length >= 5) return;
+
+            chosenInterests.push(interest);
+            updateChosenInterestsDisplay();
+            industrySelect.value = '';
+        }
+
+        // Удаление карточки
+        function removeInterest(index) {
+            if (index >= 0 && index < chosenInterests.length) {
+                chosenInterests.splice(index, 1);
+                updateChosenInterestsDisplay();
+            }
+        }
+
+        // Отображение карточек
+        function updateChosenInterestsDisplay() {
+            if (!seeChosenInterests) return;
+
+            seeChosenInterests.innerHTML = '';
+
+            chosenInterests.forEach((interest, index) => {
+                const card = document.createElement('div');
+                card.className = 'chosen_card';
+                card.innerHTML = `${interest} <span class="remove-interest" data-index="${index}">×</span>`;
+                seeChosenInterests.appendChild(card);
+            });
+
+            document.querySelectorAll('.remove-interest').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    removeInterest(parseInt(this.dataset.index));
+                });
+            });
+
+            hiddenIndustryInput.value = JSON.stringify(chosenInterests);
+
+            const disable = chosenInterests.length >= 5;
+            industrySelect.disabled = disable;
+            otherInterestInput.disabled = disable;
+            addOtherInterestsBtn.disabled = disable;
+        }
+
+
+        // ==== 2. HOBBY GRID ====
+
+        const gridItems = document.querySelectorAll('.grid-item:not(.empty)');
+        const otherItem = document.querySelector('.other-item');
+        const otherInputContainer = document.querySelector('.other-input-container');
+        const otherInput = document.querySelector('.other-input');
+        const addOtherBtn = document.querySelector('.add-other-btn');
+        const selectedItemsContainer = document.querySelector('.selected-items');
+        const hiddenHobbyInput = document.getElementById('chosenHobbies');
+
+        let selectedHobbies = [];
+
+        // Инициализация из скрытого поля
+        if (hiddenHobbyInput) {
+            try {
+                selectedHobbies = JSON.parse(hiddenHobbyInput.value) || [];
+                selectedHobbies.forEach(hobby => {
+                    const element = document.querySelector(`.grid-item[data-value="${hobby}"]`);
+                    if (element) {
+                        element.classList.add('selected');
+                    } else {
+                        // Для кастомных хобби создаем теги
+                        addSelectedHobby(hobby, false);
+                    }
+                });
+            } catch (e) {
+                selectedHobbies = [];
+            }
+        }
+
+        gridItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-tag')) {
+                    e.stopPropagation();
+                    return;
+                }
+
+                const value = this.dataset.value;
+
+                if (value === 'Other') {
+                    const visible = otherInputContainer.style.display === 'flex';
+                    otherInputContainer.style.display = visible ? 'none' : 'flex';
+                    this.classList.toggle('selected', !visible);
+                    if (!visible) otherInput.focus();
+                    return;
+                }
+
+                toggleHobbySelection(this, value);
+            });
+        });
+
+        if (addOtherBtn) {
+            addOtherBtn.addEventListener('click', function() {
+                const customValue = otherInput.value.trim();
+                if (customValue) {
+                    addSelectedHobby(customValue);
+                    otherInput.value = '';
+                    otherInputContainer.style.display = 'none';
+                    otherItem.classList.remove('selected');
+                }
+            });
+
+            otherInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addOtherBtn.click();
+                }
+            });
+        }
+
+        function toggleHobbySelection(element, value) {
+            const index = selectedHobbies.indexOf(value);
+            if (index === -1) {
+                selectedHobbies.push(value);
+                if (element) element.classList.add('selected');
+                addSelectedHobby(value);
+            } else {
+                selectedHobbies.splice(index, 1);
+                if (element) element.classList.remove('selected');
+                removeSelectedHobby(value);
+            }
+            updateHiddenHobbies();
+        }
+
+        function addSelectedHobby(value, update = true) {
+            if (!value || selectedHobbies.includes(value)) return;
+
+            selectedHobbies.push(value);
+
+            // Проверяем, существует ли уже тег
+            if (document.querySelector(`.selected-tag[data-value="${value}"]`)) return;
+
+            const tag = document.createElement('div');
+            tag.className = 'selected-tag';
+            tag.dataset.value = value;
+            tag.innerHTML = `${value} <span class="remove-tag">×</span>`;
+
+            tag.querySelector('.remove-tag').addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeSelectedHobby(value);
+                const gridItem = document.querySelector(`.grid-item[data-value="${value}"]`);
+                if (gridItem) gridItem.classList.remove('selected');
+            });
+
+            selectedItemsContainer.appendChild(tag);
+            if (update) updateHiddenHobbies();
+        }
+
+        function removeSelectedHobby(value) {
+            selectedHobbies = selectedHobbies.filter(item => item !== value);
+            const tag = document.querySelector(`.selected-tag[data-value="${value}"]`);
+            if (tag) tag.remove();
+            updateHiddenHobbies();
+        }
+
+        function updateHiddenHobbies() {
+            if (hiddenHobbyInput) {
+                hiddenHobbyInput.value = JSON.stringify(selectedHobbies);
+            }
+        }
+
+        // Гарантированное обновление перед отправкой
+        document.querySelector('form')?.addEventListener('submit', function() {
+            updateHiddenHobbies();
+        });
+
+
+
+        // ==== 3. STEP NAVIGATION ====
+
+        const steps = document.querySelectorAll('.step');
+        const prevBtn = document.getElementById('prev');
+        const nextBtn = document.getElementById('next');
+        const submitBtn = document.getElementById('submit');
+        const stepText = document.querySelector('.panel .text p');
+        const progressBarFill = document.getElementById('progress-fill');
+
+        let currentStep = 0;
+        const totalSteps = steps.length;
+
+        function showStep(index) {
+            steps.forEach((step, i) => {
+                step.classList.toggle('active', i === index);
+            });
+
+            prevBtn.classList.toggle('hidden', index === 0);
+            nextBtn.classList.toggle('hidden', index === totalSteps - 1);
+            submitBtn.classList.toggle('hidden', index !== totalSteps - 1);
+
+            stepText.textContent = `${index + 1} of ${totalSteps}`;
+            const totalWidth = 340;
+            const filledWidth = totalWidth * ((index + 1) / totalSteps);
+            progressBarFill.setAttribute('width', filledWidth.toString());
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (currentStep < totalSteps - 1) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            });
+        }
+
+        showStep(currentStep);
+
+        // ==== 4. AVATAR UPLOAD ====
+
+        const avatarInput = document.getElementById('avatar-upload');
+        const previewContainer = document.getElementById('avatar-preview');
+
+        if (avatarInput && previewContainer) {
+            avatarInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        previewContainer.innerHTML = '';
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ==== 5. SCHOOL SELECT ====
+
+        const schoolSelect = document.getElementById('schoolSelect');
+        const otherSchoolBlock = document.getElementById('otherSchoolBlock');
+        const otherSchoolInput = document.getElementById('otherSchoolInput');
+
+        if (schoolSelect) {
+            schoolSelect.addEventListener('change', function () {
+                if (this.value === '0') {
+                    otherSchoolBlock.style.display = 'block';
+                } else {
+                    otherSchoolBlock.style.display = 'none';
+                }
+            });
+        }
+
+        // ==== 5. SCHOOL DYNAMIC DISPLAY ====
+
+        let schoolIndex = 1;
+
+        document.getElementById('addSchoolBtn').addEventListener('click', function () {
+            const container = document.getElementById('schoolsContainer');
+            const blocks = container.querySelectorAll('.school-block');
+            const newBlock = blocks[0].cloneNode(true);
+
+            newBlock.querySelectorAll('input, select').forEach(el => {
+                const oldName = el.getAttribute('name');
+                if (oldName) {
+                    const newName = oldName.replace(/\d+/, schoolIndex);
+                    el.setAttribute('name', newName);
+                    el.value = '';
+                }
+            });
+
+            // Сбросить поле "Other"
+            const otherInput = newBlock.querySelector('.other-school input');
+            if (otherInput) otherInput.value = '';
+            newBlock.querySelector('.other-school').style.display = 'none';
+
+            container.appendChild(newBlock);
+            schoolIndex++;
+        });
+
+        document.addEventListener('change', function (e) {
+            if (e.target.classList.contains('school-select')) {
+                const block = e.target.closest('.school-block');
+                const otherBlock = block.querySelector('.other-school');
+                if (e.target.value === "0") {
+                    otherBlock.style.display = 'block';
+                } else {
+                    otherBlock.style.display = 'none';
+                }
+            }
+        });
+
+
+        // Инициализация обработчика на первый select
+        document.querySelector('.school-select').addEventListener('change', function () {
+            const otherBlock = this.closest('.school-block').querySelector('.other-school');
+            otherBlock.style.display = this.value === "0" ? 'block' : 'none';
+        });
+
+    });
+    </script>
+
+</body>
+</html>

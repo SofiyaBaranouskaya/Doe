@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Profile summary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        h1{
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            font-style: normal;
+            padding: 10px 10px 0px;
+            margin: 0px;
+        }
+
+        h2 {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            height: 26px;
+            margin: 0px 0px 0px 19px;
+        }
+
+        h4 {
+            margin: 0px 13px;
+        }
+
+        p {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 120%;
+            color: #2C2C2C;
+            margin: 0px;
+        }
+
+        span {
+            font-weight: 600;
+            font-size: 13px;
+            line-height: 100%;
+            margin: 0px;
+        }
+
+        .header_upper_part{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user_info{
+            display: flex;
+            justify-content: start;
+            align-items: center;
+        }
+
+        .user_name{
+            display: flex;
+            justify-content: start;
+            align-items: center;
+        }
+
+        .profile_icon {
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            background-color: #ccc;
+            border: 1px solid black;
+            margin-left: 16px;
+        }
+
+        .profile_icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .main_content{
+            margin-top: 10px;
+        }
+
+        .activity_container{
+            display: flex;
+            justify-content: start;
+            margin: 10px;
+        }
+
+        .activity_name{
+            align-items: center;
+            margin-left: 24px;
+        }
+
+        .search_feild {
+            width: 134px;
+        }
+
+        .search_container {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .search_icon {
+            margin-right: 15px;
+        }
+
+        .search_field {
+            border: 2px solid #E0E0E0;
+            border-radius: 30px;
+            padding: 12px 20px;
+            width: fit-content;
+            outline: none;
+            font-size: 16px;
+            color: #555;
+            background: transparent;
+            width: 120px;
+            height: 36px;
+            margin: 0px 0px 0px 5px;
+        }
+
+
+        button{
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: -webkit-fill-available;
+            height: 50px;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 92px;
+            color: white;
+            background-color: #FD7981;
+            margin: 20px 10px;
+        }
+
+        .lists{
+            max-height: 232px;
+            border-radius: 25px;
+            border: 2px solid #FD7981;
+            margin: 10px;
+            padding: 10px;
+        }
+
+        .lists_content {
+             max-height: 232px;
+             overflow-y: auto;
+        }
+
+        .chip {
+            display: inline-block;
+            background-color: #ff7f87;
+            color: white;
+            padding: 8px 12px;
+            margin: 4px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .status {
+            margin-top: 20px;
+        }
+
+        .interests_hobbies {
+            margin-bottom: 10px;
+        }
+
+        .inactive{
+            background-color: #D1D1D6B0;
+            color: black;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 80%;
+            text-align: center;
+        }
+
+        .heat {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            align-items: center;
+        }
+
+        .points {
+            display: flex;
+            align-items: center;
+        }
+
+        .points_container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 2px solid #FD7981;
+            border-radius: 25px;
+            padding: 20px 26px 20px 10px;
+            margin: 20px -10px;
+        }
+
+        .reward-item {
+            align-items: center;
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .reward-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        label {
+            text-align: start;
+            width: -webkit-fill-available;
+        }
+
+        .reward-title {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .reward-points {
+            font-size: 14px;
+            color: #F4819D;
+            font-weight: 400;
+        }
+
+        .reward-description {
+            color: #666;
+            margin: 0;
+        }
+
+        input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .redeem_button {
+            background-color: #91E1C4;
+            color: black;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .friend-form {
+            text-align: start;
+            border-radius: 25px;
+            border: 2px solid #FD7981;
+            margin: 40px 0px 20px 0px;
+            padding: 20px 15px;
+        }
+
+        .form-group {
+            margin: 10px 0px;
+        }
+
+        input {
+          height: 45px;
+          width: 100%;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          margin: 5px 0px 0px -5px;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        .send-invitation-btn {
+            background-color: #91E1C4;
+            color: black;
+        }
+
+        .not-enough-points {
+            color: #F4819D;
+            width: min-content;
+            font-weight: 400;
+            margin-left: 5px;
+        }
+
+        .reward-item input[disabled] + label {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .reward-item input[disabled] + label .reward-title,
+        .reward-item input[disabled] + label .reward-points {
+            color: #999;
+        }
+
+
+        .message-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .message-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .message-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #messageContent {
+            margin-top: 10px;
+        }
+
+        .modal_buttons {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .confirm-button {
+            padding: 8px 20px;
+            background-color: #FD7981;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .confirm-button:hover {
+            background-color: #ff5a65;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .cancel-button {
+            padding: 8px 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .cancel-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .nav_pannel{
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 10px 15px 10px;
+            margin-top: auto;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="circle">
+            <svg width="247" height="89" viewBox="0 0 247 89" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="125.347" cy="160.597" rx="125.347" ry="160.597" transform="matrix(1 0 0 -1 -32 80.2192)" fill="#FD7981"/>
+                <path d="M112 87.5793C185.886 87.5793 246.024 17.8585 246.024 -68.4666C246.024 -154.791 185.886 -224.511 112 -224.511C38.1137 -224.511 -22.0242 -154.791 -22.0244 -68.4666C-22.0244 17.8585 38.1136 87.5793 112 87.5793Z" stroke="#2C2C2C" stroke-width="1.95146"/>
+            </svg>
+        </div>
+
+        <div class="header">
+            <div class="header_upper_part">
+                <div style="display:flex; align-items: center;">
+                    <h1>Profile</h1>
+                    <a href="{% url 'user_profile_change' %}">
+                        <svg width="24" height="24" style="margin-bottom: -5px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 20H21" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16.5 3.49998C16.8978 3.10216 17.4374 2.87866 18 2.87866C18.2786 2.87866 18.5544 2.93353 18.8118 3.04014C19.0692 3.14674 19.303 3.303 19.5 3.49998C19.697 3.69697 19.8532 3.93082 19.9598 4.18819C20.0665 4.44556 20.1213 4.72141 20.1213 4.99998C20.1213 5.27856 20.0665 5.55441 19.9598 5.81178C19.8532 6.06915 19.697 6.303 19.5 6.49998L7 19L3 20L4 16L16.5 3.49998Z" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    </a>
+                </div>
+                <div class="search_container">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z" fill="#1D1B20"/>
+                    </svg>
+                    <input type="text" placeholder="Search" class="search_field">
+                </div>
+            </div>
+            <div class="user_info">
+                <div class="profile_icon">
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                </div>
+                <div class="user_text_data">
+                    <div class="user_name">
+                        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+                    </div>
+                    <div class="town"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main_content">
+            <div class="lists">
+                <div class="lists_content">
+                    <div class="interests_hobbies">
+                        <h4>Interests & Aspirations</h4>
+                        <div class="list">
+                            {% for interest in interests_list %}
+                                <span class="chip">{{ interest }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="interests_hobbies">
+                        <h4>Hobbies & Skills</h4>
+                        <div class="list">
+                            {% for hobby in hobbies_list %}
+                                <span class="chip">{{ hobby }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="goal">
+                        <h4>Current Goal / Project</h4>
+                        <p style="margin-left: 10px;">"{{ user.focus_of_study }}"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status">
+                <h2>Status</h2>
+                <p style="margin-left: 19px; margin-bottom: 20px; ">Level: {{ user.level }}</p>
+
+                <div class="activity_container">
+                    <svg width="58" height="50" viewBox="0 0 58 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M46.0053 24.7704C46.0053 38.1767 35.1374 49.0446 21.7311 49.0446C8.32489 49.0446 0 38.1766 0 24.7704C0 11.3642 2.58944 0.285156 15.9957 0.285156C29.4019 0.285156 46.0053 11.3642 46.0053 24.7704Z" fill="#FD7981"/>
+                        <path d="M39.9912 32.4316C40.6501 32.4316 41.2469 33.0491 41.2471 33.8242V39.4502C41.2471 40.2068 40.6511 40.8261 39.9922 40.8262C39.3316 40.8262 38.7364 40.2068 38.7363 39.4512V33.8252C38.7364 33.0492 39.3331 32.4317 39.9912 32.4316ZM37.7715 19.2246C38.3068 18.6022 39.2924 18.5558 39.9307 19.1113L40.0537 19.2305L56.1006 36.6523V36.6533C56.4015 36.9899 56.5723 37.4427 56.5723 37.917C56.5722 38.3318 56.4421 38.7303 56.208 39.0488L56.1006 39.1807L56.0986 39.1836C55.547 39.8239 54.5763 39.8693 53.9404 39.3018L53.8174 39.1797L53.8164 39.1777L37.7666 21.7715C37.1883 21.1287 37.1376 20.0898 37.6582 19.3672L37.7695 19.2266L37.7715 19.2246ZM31.1465 29.2197C31.5908 28.725 32.332 28.6972 32.7969 29.125L32.8867 29.2168L32.8916 29.2227C32.9793 29.3164 33.0544 29.4239 33.1133 29.542L33.167 29.6641C33.2312 29.8303 33.2637 30.0094 33.2637 30.1904C33.2637 30.3715 33.2312 30.5505 33.167 30.7168C33.1188 30.8416 33.0534 30.9568 32.9746 31.0596L32.8916 31.1582L32.8906 31.1592L29.2275 35.1387C28.7702 35.6181 28.0214 35.6357 27.5381 35.2129L27.4453 35.1221C26.9966 34.6369 26.978 33.8029 27.377 33.2695L27.4619 33.168L31.1445 29.2227L31.1465 29.2197ZM39.2754 20.0127C39.0358 19.9748 38.8152 20.0653 38.627 20.2461L38.6182 20.2549L38.6094 20.2646C38.4429 20.4674 38.3689 20.6939 38.3984 20.9297C38.4199 21.101 38.494 21.2612 38.6016 21.4082L38.7197 21.5508L43.6855 26.9209L43.8418 27.0889L43.999 26.9219L44.8271 26.0449L44.9648 25.8994L44.8291 25.752L39.8789 20.3828H39.8779C39.7026 20.1933 39.5017 20.0486 39.2754 20.0127ZM28.6904 20.1943C29.3689 20.1944 29.9619 20.8152 29.9619 21.5693C29.9619 22.3243 29.3688 22.9442 28.6904 22.9443H23.4707C22.8102 22.9443 22.2139 22.3258 22.2139 21.5693C22.2139 20.861 22.7375 20.2729 23.3467 20.2021L23.4697 20.1953L28.6904 20.1943ZM51.3096 20.1943H56.5127C57.1762 20.1943 57.7861 20.8169 57.7861 21.5693C57.7861 22.3225 57.1763 22.9443 56.5127 22.9443H51.3096C50.6311 22.9442 50.0382 22.3235 50.0381 21.5703C50.0381 20.8153 50.6312 20.1944 51.3096 20.1943ZM27.4766 8.00098C27.9338 7.52086 28.6684 7.50339 29.1494 7.92578L29.2422 8.0166L32.8906 11.9971L32.8936 12C33.3564 12.486 33.3886 13.3032 32.9795 13.8486L32.8916 13.9531C32.4481 14.4326 31.7168 14.4626 31.2373 14.043L31.1445 13.9531L27.4805 9.95605H27.4814C26.997 9.41598 26.9989 8.5204 27.4766 8.00098ZM50.7559 8.00098C51.2163 7.51751 51.95 7.48971 52.4287 7.9082L52.5215 7.99805C52.7591 8.25805 52.8944 8.61236 52.8945 8.98438C52.8945 9.31042 52.7901 9.62285 52.6045 9.87012L52.5205 9.97168L48.8389 13.9531C48.3681 14.4622 47.5512 14.4665 47.0596 13.9541C46.6057 13.4468 46.5796 12.6274 46.9736 12.0996L47.0576 11.998L50.7549 8L50.7559 8.00098ZM39.9912 2.33105C40.6516 2.33105 41.247 2.95032 41.2471 3.70605V9.33203C41.247 10.1081 40.6496 10.7255 39.9922 10.7256C39.3332 10.7256 38.7364 10.108 38.7363 9.33203V3.70703C38.7363 2.95051 39.3315 2.33114 39.9912 2.33105Z" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="0.428571"/>
+                    </svg>
+                    <div class="activity_name">
+                        <p>Points Earned</p>
+                        <h2 class="points-display" style="margin: 0px;">{{ user.points_count }}</h2>
+                    </div>
+                </div>
+
+                <div class="activity_container">
+                    <svg width="57" height="51" viewBox="0 0 57 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M48.5483 30.1095C48.5483 43.5158 37.6804 50.8913 24.2742 50.8913C10.8679 50.8913 0 43.5158 0 30.1095C0 16.7033 5.77096 1 19.1772 1C32.5835 1 48.5483 16.7033 48.5483 30.1095Z" fill="#FFE37F"/>
+                        <path d="M41.7007 21.1312C42.1196 20.3903 42.5526 19.6242 42.9803 18.8343C44.4119 16.1914 44.6746 13.5285 43.7614 10.9192C41.9187 5.65461 35.759 2.44694 34.333 1.93515L33.3303 1.57495L31.7653 4.94644L32.5205 5.61089C32.529 5.61819 33.3678 6.40758 33.4237 7.60425C33.4715 8.62578 32.9515 9.72968 31.8785 10.8855C31.1334 11.6878 30.3156 12.4637 29.4498 13.285C25.8068 16.74 21.6777 20.6571 21.6777 28.0673C21.6777 28.169 21.6786 28.2702 21.6804 28.3708C21.7068 30.006 22.0329 31.6195 22.64 33.1186C23.2471 34.6177 24.1233 35.9729 25.2181 37.1063C27.4166 39.4091 30.3644 40.6944 33.4313 40.6875H40.4467L39.5807 38.7948C36.0621 31.1043 38.5504 26.7032 41.7007 21.1312ZM33.4313 38.0625C28.3887 38.0625 24.2107 33.6929 24.1174 28.3221C24.116 28.2376 24.1153 28.1526 24.1152 28.0673C24.1152 21.8429 27.6463 18.4932 31.061 15.254C31.9171 14.4419 32.8025 13.602 33.6021 12.7408C35.1829 11.0384 35.942 9.26554 35.8582 7.47177C35.8215 6.7116 35.6342 5.9687 35.3087 5.29302C37.4293 6.5408 40.452 8.90674 41.4807 11.8454C42.1315 13.7047 41.9334 15.5582 40.875 17.5121C40.4588 18.2806 40.0317 19.0359 39.6187 19.7664C36.5962 25.1123 33.7289 30.1828 36.6136 38.0625H33.4313Z" fill="#2C2C2C"/>
+                        <path d="M53.6674 27.9831C53.6471 27.8964 53.6259 27.8093 53.6039 27.7218C52.7244 24.2493 47.8562 19.7843 47.304 19.2867L46.1952 18.2874L45.4681 19.6333C43.8111 22.7013 42.3891 25.4995 41.7692 28.6742C41.0624 32.2945 41.5382 35.974 43.2241 39.9231L43.5502 40.6874H44.3788C45.8382 40.6919 47.2791 40.3355 48.5905 39.6458C49.9019 38.956 51.0487 37.9512 51.9427 36.7089C52.8311 35.4936 53.4486 34.0749 53.7476 32.5621C54.0467 31.0493 54.0192 29.4827 53.6674 27.9831ZM50.0203 35.0938C49.4296 35.9152 48.6897 36.5984 47.8458 37.1019C47.0019 37.6054 46.0717 37.9186 45.1118 38.0223C42.7093 31.7962 44.1268 27.5523 46.8356 22.345C48.6364 24.1492 50.8312 26.7493 51.2522 28.4121C51.27 28.4823 51.2869 28.5521 51.3032 28.6216C51.5636 29.7342 51.5834 30.8964 51.361 32.0185C51.1386 33.1406 50.6799 34.1927 50.0203 35.0938Z" fill="#2C2C2C"/>
+                    </svg>
+                    <div class="activity_name">
+                        <p>Activities Completed</p>
+                        <h2 style="margin: 0px;">{{ completed_count }}</h2>
+                    </div>
+                </div>
+
+                <div class="activity_container">
+                    <div class="svg_container">
+                        <svg width="63" height="50" viewBox="0 0 63 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M52.1043 25.4814C52.1043 38.8877 37.6804 49.7556 24.2742 49.7556C10.8679 49.7556 0 38.8877 0 25.4814C0 12.0752 4.80246 1.83492e-07 18.2087 1.83492e-07C31.6149 1.83492e-07 52.1043 12.0752 52.1043 25.4814Z" fill="#FFC6D4"/>
+                            <path d="M58.4233 23.6657C59.3284 23.6657 60.2133 23.3763 60.966 22.8339C61.7186 22.2915 62.3052 21.5206 62.6516 20.6186C62.998 19.7167 63.0887 18.7242 62.9121 17.7667C62.7355 16.8092 62.2996 15.9296 61.6595 15.2393C61.0194 14.549 60.2039 14.0789 59.3161 13.8884C58.4283 13.6979 57.5081 13.7957 56.6718 14.1693C55.8355 14.5429 55.1207 15.1756 54.6178 15.9873C54.1149 16.799 53.8465 17.7534 53.8465 18.7297C53.8455 19.1361 53.8943 19.5409 53.9916 19.9336L51.2902 21.4866C50.6965 20.5039 49.923 19.6621 49.0172 19.013C48.1114 18.3638 47.0922 17.9208 46.0222 17.7112C44.9521 17.5016 43.8536 17.5297 42.794 17.7938C41.7343 18.058 40.7358 18.5526 39.8595 19.2473L36.4326 15.5031C36.826 14.7715 37.034 13.9411 37.0353 13.0953C37.0353 12.119 36.7669 11.1647 36.264 10.3529C35.7611 9.54119 35.0463 8.90852 34.21 8.53492C33.3738 8.16132 32.4535 8.06357 31.5657 8.25403C30.6779 8.44449 29.8624 8.91461 29.2223 9.60493C28.5823 10.2953 28.1464 11.1748 27.9698 12.1323C27.7932 13.0898 27.8838 14.0823 28.2302 14.9842C28.5766 15.8862 29.1633 16.6571 29.9159 17.1995C30.6685 17.7419 31.5534 18.0314 32.4586 18.0314C33.3292 18.0252 34.1805 17.754 34.9144 17.2488L38.2633 20.8606C37.059 22.5141 36.4558 24.5849 36.5668 26.6841C36.6778 28.7833 37.4953 30.7666 38.866 32.2618L36.8232 34.3927C37.4395 34.8569 37.9887 35.4167 38.453 36.0541L40.6856 33.7667C41.8909 34.5089 43.2549 34.8992 44.6428 34.8992C46.0307 34.8992 47.3947 34.5089 48.6 33.7667L52.4288 37.7276C52.0103 38.5722 51.886 39.5505 52.0783 40.4854C52.2706 41.4204 52.7668 42.2502 53.4772 42.8247C54.1876 43.3992 55.0653 43.6805 55.9513 43.6176C56.8373 43.5548 57.6732 43.1519 58.3077 42.4819C58.9422 41.812 59.3334 40.9192 59.4104 39.9652C59.4875 39.0111 59.2454 38.0588 58.7279 37.2806C58.2103 36.5024 57.4516 35.9497 56.589 35.7226C55.7264 35.4954 54.8169 35.6087 54.0251 36.0421L50.386 32.2738C51.8252 30.655 52.6255 28.4969 52.6186 26.2542V26.182L50.2633 27.5303C49.955 29.0436 49.1394 30.3807 47.9729 31.285C46.8064 32.1893 45.3713 32.5969 43.9432 32.4297C42.515 32.2626 41.1945 31.5323 40.2351 30.3792C39.2757 29.226 38.745 27.7313 38.745 26.182C38.745 24.6326 39.2757 23.1379 40.2351 21.9848C41.1945 20.8316 42.515 20.1013 43.9432 19.9342C45.3713 19.767 46.8064 20.1746 47.9729 21.0789C49.1394 21.9832 49.955 23.3203 50.2633 24.8336L52.2949 23.6296L55.0633 22.0404C55.4884 22.5475 56.0066 22.9539 56.585 23.2336C57.1634 23.5134 57.7894 23.6606 58.4233 23.6657ZM55.6214 38.0045C55.9067 38.0021 56.1862 38.0912 56.4244 38.2604C56.6627 38.4296 56.849 38.6713 56.9597 38.9548C57.0704 39.2384 57.1005 39.5511 57.0462 39.8531C56.9919 40.1552 56.8557 40.433 56.6547 40.6514C56.4538 40.8698 56.1973 41.0189 55.9176 41.0799C55.638 41.1408 55.3479 41.1107 55.0841 40.9935C54.8203 40.8763 54.5948 40.6773 54.436 40.4216C54.2773 40.166 54.1926 39.8652 54.1926 39.5576C54.1925 39.1478 54.3427 38.7545 54.6104 38.4636C54.878 38.1727 55.2414 38.0077 55.6214 38.0045ZM32.4586 15.6476C31.995 15.6476 31.5417 15.4993 31.1562 15.2215C30.7707 14.9437 30.4703 14.5489 30.2929 14.0869C30.1154 13.6249 30.069 13.1166 30.1595 12.6261C30.2499 12.1357 30.4732 11.6852 30.801 11.3316C31.1288 10.978 31.5465 10.7372 32.0013 10.6397C32.456 10.5421 32.9273 10.5922 33.3557 10.7836C33.784 10.9749 34.1501 11.299 34.4077 11.7147C34.6653 12.1305 34.8028 12.6193 34.8028 13.1194C34.8028 13.7899 34.5558 14.433 34.1162 14.9071C33.6766 15.3812 33.0803 15.6476 32.4586 15.6476ZM58.4233 16.2134C58.8869 16.2134 59.3401 16.3617 59.7256 16.6395C60.1111 16.9173 60.4116 17.3122 60.589 17.7742C60.7664 18.2361 60.8128 18.7445 60.7224 19.2349C60.6319 19.7254 60.4087 20.1758 60.0808 20.5294C59.753 20.883 59.3353 21.1238 58.8806 21.2214C58.4259 21.3189 57.9545 21.2688 57.5262 21.0775C57.0978 20.8861 56.7317 20.5621 56.4741 20.1463C56.2166 19.7305 56.0791 19.2417 56.0791 18.7417C56.0791 18.0712 56.326 17.4281 56.7657 16.954C57.2053 16.4798 57.8015 16.2134 58.4233 16.2134ZM32.4586 35.3318C31.3802 35.3294 30.3255 35.6723 29.428 36.3169C28.5304 36.9616 27.8305 37.879 27.4168 38.9531C27.0031 40.0271 26.8943 41.2094 27.1041 42.3502C27.314 43.491 27.833 44.5389 28.5955 45.3613C29.358 46.1837 30.3297 46.7435 31.3874 46.9698C32.4452 47.1961 33.5414 47.0787 34.5372 46.6326C35.5331 46.1864 36.3837 45.4315 36.9815 44.4635C37.5792 43.4955 37.8971 42.3579 37.8949 41.1949C37.8919 39.6409 37.3182 38.1514 36.2994 37.0526C35.2805 35.9537 33.8995 35.335 32.4586 35.3318ZM32.4586 44.6622C31.8223 44.6646 31.1996 44.4633 30.6695 44.0837C30.1393 43.7042 29.7255 43.1635 29.4805 42.5302C29.2354 41.8968 29.1702 41.1993 29.293 40.5259C29.4158 39.8525 29.7211 39.2336 30.1702 38.7474C30.6194 38.2613 31.1922 37.9299 31.8161 37.7951C32.4401 37.6604 33.087 37.7283 33.6751 37.9904C34.2632 38.2525 34.766 38.6969 35.1197 39.2673C35.4735 39.8378 35.6623 40.5086 35.6623 41.1949C35.6638 41.6497 35.582 42.1003 35.4217 42.5209C35.2613 42.9415 35.0256 43.3238 34.7279 43.6459C34.4303 43.9681 34.0766 44.2237 33.6872 44.3981C33.2978 44.5724 32.8803 44.6622 32.4586 44.6622Z" fill="#231F20"/>
+                        </svg>
+                    </div>
+                    <div class="activity_name">
+                        <p>Connections</p>
+                        <h2 style="margin: 0px;">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button id="redeemBtn">Redeem Points</button>
+                <button id="referFriendBtn" class="refer-friend-btn">Refer a Friend</button>
+                <button class="inactive">CONNECT !</button>
+            </div>
+
+        </div>
+
+        <div id="redeemModal" class="modal">
+            <div class="modal-content">
+                <span class="close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_1547_3988)">
+                        <path d="M12.9403 12L18.467 6.47329C18.5762 6.34576 18.6333 6.18171 18.6268 6.01393C18.6203 5.84614 18.5507 5.68698 18.432 5.56825C18.3133 5.44952 18.1541 5.37997 17.9863 5.37349C17.8186 5.36701 17.6545 5.42408 17.527 5.53329L12.0003 11.06L6.47364 5.52663C6.34811 5.40109 6.17784 5.33057 6.00031 5.33057C5.82277 5.33057 5.65251 5.40109 5.52697 5.52663C5.40144 5.65216 5.33091 5.82243 5.33091 5.99996C5.33091 6.1775 5.40144 6.34776 5.52697 6.47329L11.0603 12L5.52697 17.5266C5.45719 17.5864 5.40051 17.6599 5.36049 17.7426C5.32048 17.8254 5.29799 17.9154 5.29444 18.0073C5.2909 18.0991 5.30637 18.1906 5.33988 18.2762C5.3734 18.3617 5.42424 18.4394 5.48921 18.5044C5.55418 18.5694 5.63188 18.6202 5.71743 18.6537C5.80298 18.6872 5.89453 18.7027 5.98634 18.6992C6.07816 18.6956 6.16824 18.6731 6.25095 18.6331C6.33366 18.5931 6.40721 18.5364 6.46697 18.4666L12.0003 12.94L17.527 18.4666C17.6545 18.5758 17.8186 18.6329 17.9863 18.6264C18.1541 18.62 18.3133 18.5504 18.432 18.4317C18.5507 18.3129 18.6203 18.1538 18.6268 17.986C18.6333 17.8182 18.5762 17.6542 18.467 17.5266L12.9403 12Z" fill="black"/>
+                        </g>
+                        <defs>
+                        <clipPath id="clip0_1547_3988">
+                        <rect width="24" height="24" fill="white"/>
+                        </clipPath>
+                        </defs>
+                    </svg>
+                </span>
+
+                <h2>Redeem Points</h2>
+
+                <div class="heat">
+                    <h2>Status</h2>
+                    <div class="points">
+                        <svg width="58" height="50" viewBox="0 0 58 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M46.0053 24.7704C46.0053 38.1767 35.1374 49.0446 21.7311 49.0446C8.32489 49.0446 0 38.1766 0 24.7704C0 11.3642 2.58944 0.285156 15.9957 0.285156C29.4019 0.285156 46.0053 11.3642 46.0053 24.7704Z" fill="#FD7981"/>
+                            <path d="M39.9912 32.4316C40.6501 32.4316 41.2469 33.0491 41.2471 33.8242V39.4502C41.2471 40.2068 40.6511 40.8261 39.9922 40.8262C39.3316 40.8262 38.7364 40.2068 38.7363 39.4512V33.8252C38.7364 33.0492 39.3331 32.4317 39.9912 32.4316ZM37.7715 19.2246C38.3068 18.6022 39.2924 18.5558 39.9307 19.1113L40.0537 19.2305L56.1006 36.6523V36.6533C56.4015 36.9899 56.5723 37.4427 56.5723 37.917C56.5722 38.3318 56.4421 38.7303 56.208 39.0488L56.1006 39.1807L56.0986 39.1836C55.547 39.8239 54.5763 39.8693 53.9404 39.3018L53.8174 39.1797L53.8164 39.1777L37.7666 21.7715C37.1883 21.1287 37.1376 20.0898 37.6582 19.3672L37.7695 19.2266L37.7715 19.2246ZM31.1465 29.2197C31.5908 28.725 32.332 28.6972 32.7969 29.125L32.8867 29.2168L32.8916 29.2227C32.9793 29.3164 33.0544 29.4239 33.1133 29.542L33.167 29.6641C33.2312 29.8303 33.2637 30.0094 33.2637 30.1904C33.2637 30.3715 33.2312 30.5505 33.167 30.7168C33.1188 30.8416 33.0534 30.9568 32.9746 31.0596L32.8916 31.1582L32.8906 31.1592L29.2275 35.1387C28.7702 35.6181 28.0214 35.6357 27.5381 35.2129L27.4453 35.1221C26.9966 34.6369 26.978 33.8029 27.377 33.2695L27.4619 33.168L31.1445 29.2227L31.1465 29.2197ZM39.2754 20.0127C39.0358 19.9748 38.8152 20.0653 38.627 20.2461L38.6182 20.2549L38.6094 20.2646C38.4429 20.4674 38.3689 20.6939 38.3984 20.9297C38.4199 21.101 38.494 21.2612 38.6016 21.4082L38.7197 21.5508L43.6855 26.9209L43.8418 27.0889L43.999 26.9219L44.8271 26.0449L44.9648 25.8994L44.8291 25.752L39.8789 20.3828H39.8779C39.7026 20.1933 39.5017 20.0486 39.2754 20.0127ZM28.6904 20.1943C29.3689 20.1944 29.9619 20.8152 29.9619 21.5693C29.9619 22.3243 29.3688 22.9442 28.6904 22.9443H23.4707C22.8102 22.9443 22.2139 22.3258 22.2139 21.5693C22.2139 20.861 22.7375 20.2729 23.3467 20.2021L23.4697 20.1953L28.6904 20.1943ZM51.3096 20.1943H56.5127C57.1762 20.1943 57.7861 20.8169 57.7861 21.5693C57.7861 22.3225 57.1763 22.9443 56.5127 22.9443H51.3096C50.6311 22.9442 50.0382 22.3235 50.0381 21.5703C50.0381 20.8153 50.6312 20.1944 51.3096 20.1943ZM27.4766 8.00098C27.9338 7.52086 28.6684 7.50339 29.1494 7.92578L29.2422 8.0166L32.8906 11.9971L32.8936 12C33.3564 12.486 33.3886 13.3032 32.9795 13.8486L32.8916 13.9531C32.4481 14.4326 31.7168 14.4626 31.2373 14.043L31.1445 13.9531L27.4805 9.95605H27.4814C26.997 9.41598 26.9989 8.5204 27.4766 8.00098ZM50.7559 8.00098C51.2163 7.51751 51.95 7.48971 52.4287 7.9082L52.5215 7.99805C52.7591 8.25805 52.8944 8.61236 52.8945 8.98438C52.8945 9.31042 52.7901 9.62285 52.6045 9.87012L52.5205 9.97168L48.8389 13.9531C48.3681 14.4622 47.5512 14.4665 47.0596 13.9541C46.6057 13.4468 46.5796 12.6274 46.9736 12.0996L47.0576 11.998L50.7549 8L50.7559 8.00098ZM39.9912 2.33105C40.6516 2.33105 41.247 2.95032 41.2471 3.70605V9.33203C41.247 10.1081 40.6496 10.7255 39.9922 10.7256C39.3332 10.7256 38.7364 10.108 38.7363 9.33203V3.70703C38.7363 2.95051 39.3315 2.33114 39.9912 2.33105Z" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="0.428571"/>
+                        </svg>
+                        <div class="activity_name" style="margin-left: 10px;">
+                            <h2  class="points-display" style="margin: 0px;">{{ user.points_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="redeemForm" method="post" action="{% url 'redeem_reward' %}">
+                    {% csrf_token %}
+                    <div class="points_container">
+                        {% for reward in rewards %}
+                        <div class="reward-item">
+                            <input type="radio"
+                                   id="reward_{{ reward.id }}"
+                                   name="selected_reward"
+                                   value="{{ reward.id }}"
+                                   required
+                                   {% if user.points_count < reward.points_needed %}disabled{% endif %}>
+                            <label for="reward_{{ reward.id }}">
+                                <div class="reward-header">
+                                    <span class="reward-title">{{ reward.title }}</span>
+                                    <span class="reward-points">{{ reward.points_needed }}pts</span>
+                                    {% if user.points_count < reward.points_needed %}
+                                    <span class="not-enough-points"></span>
+                                    {% endif %}
+                                </div>
+                                <p class="reward-description">{{ reward.description }}</p>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="button" class="redeem_button" onclick="confirmRedeem()">Redeem Points</button>
+                </form>
+
+            </div>
+        </div>
+
+
+        <div id="referFriendModal" class="modal">
+            <div class="modal-content">
+                <span class="close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.9403 12L18.467 6.47329C18.5762 6.34576 18.6333 6.18171 18.6268 6.01393C18.6203 5.84614 18.5507 5.68698 18.432 5.56825C18.3133 5.44952 18.1541 5.37997 17.9863 5.37349C17.8186 5.36701 17.6545 5.42408 17.527 5.53329L12.0003 11.06L6.47364 5.52663C6.34811 5.40109 6.17784 5.33057 6.00031 5.33057C5.82277 5.33057 5.65251 5.40109 5.52697 5.52663C5.40144 5.65216 5.33091 5.82243 5.33091 5.99996C5.33091 6.1775 5.40144 6.34776 5.52697 6.47329L11.0603 12L5.52697 17.5266C5.45719 17.5864 5.40051 17.6599 5.36049 17.7426C5.32048 17.8254 5.29799 17.9154 5.29444 18.0073C5.2909 18.0991 5.30637 18.1906 5.33988 18.2762C5.3734 18.3617 5.42424 18.4394 5.48921 18.5044C5.55418 18.5694 5.63188 18.6202 5.71743 18.6537C5.80298 18.6872 5.89453 18.7027 5.98634 18.6992C6.07816 18.6956 6.16824 18.6731 6.25095 18.6331C6.33366 18.5931 6.40721 18.5364 6.46697 18.4666L12.0003 12.94L17.527 18.4666C17.6545 18.5758 17.8186 18.6329 17.9863 18.6264C18.1541 18.62 18.3133 18.5504 18.432 18.4317C18.5507 18.3129 18.6203 18.1538 18.6268 17.986C18.6333 17.8182 18.5762 17.6542 18.467 17.5266L12.9403 12Z" fill="black"/>
+                    </svg>
+                </span>
+
+                <h2>Refer a Friend</h2>
+
+                <div class="friend-form">
+<div class="form-group">
+    <label>Friend's Name</label>
+    <input type="text" id="friendName" placeholder="Jane Doe" class="form-input" required>
+</div>
+
+<div class="form-group">
+    <label>Friend's Email</label>
+    <input type="email" id="friendEmail" placeholder="jane@example.com" class="form-input" required>
+</div>
+
+<div class="form-group">
+    <label>Friend's phone (optional)</label>
+    <input type="tel" id="friendPhone" placeholder="(123) 456-7890" class="form-input">
+</div>
+
+                </div>
+                <button class="send-invitation-btn">Send Invitation</button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav_pannel">
+        {% include 'videos/nav.html' %}
+    </div>
+
+<div id="messageModal" class="message-modal">
+    <div class="message-modal-content">
+        <span class="message-close">&times;</span>
+        <div id="messageContent"></div>
+        <div class="modal_buttons">
+            <button id="messageConfirm" class="confirm-button">OK</button>
+            <button id="messageCancel" class="cancel-button">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+document.querySelector('.send-invitation-btn').addEventListener('click', async () => {
+    const name = document.getElementById('friendName').value.trim();
+    const email = document.getElementById('friendEmail').value.trim();
+    const phone = document.getElementById('friendPhone').value.trim();
+
+    if (!name || !email) {
+        alert('Please fill in both name and email.');
+        return;
+    }
+
+try {
+    const response = await fetch('/send-invite/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ name, email, phone })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        if (data.message === 'This user is already using Doe') {
+            showMessageModal('This user is already using Doe.', false, { isConfirm: false });
+        } else {
+            showMessageModal('Invitation sent successfully!', true, { isConfirm: false });
+        }
+    } else {
+        showMessageModal(data.error || 'Failed to send invitation.', false, { isConfirm: false });
+    }
+} catch (err) {
+    console.error(err);
+    showMessageModal('Error sending invitation.', false, { isConfirm: false });
+}
+
+});
+
+// функция для получения CSRF-токена (если используешь Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // начинается ли cookie с нужного имени
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    const modal = document.getElementById("redeemModal");
+    const btn = document.getElementById("redeemBtn");
+    const span = document.querySelector(".close");
+
+    btn.onclick = () => {
+        modal.style.display = "block";
+    }
+
+    span.onclick = () => {
+        modal.style.display = "none";
+    }
+
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function showMessageModal(message, isSuccess = true, options = {}) {
+        const modal = document.getElementById('messageModal');
+        const messageContent = document.getElementById('messageContent');
+        const confirmBtn = document.getElementById('messageConfirm');
+        const cancelBtn = document.getElementById('messageCancel');
+
+        // Устанавливаем сообщение
+        messageContent.innerHTML = message;
+
+        // Настройка кнопок
+        confirmBtn.style.display = options.isConfirm ? 'block' : 'block';
+        cancelBtn.style.display = options.isConfirm ? 'block' : 'none';
+
+        // Очищаем предыдущие обработчики
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+
+        // Закрытие окна
+        const closeModal = () => {
+            modal.style.display = "none";
+            if (options.onClose) options.onClose();
+        };
+
+        // Обработчики событий
+        confirmBtn.onclick = () => {
+            if (options.onConfirm) options.onConfirm();
+            closeModal();
+        };
+
+        cancelBtn.onclick = () => {
+            if (options.onCancel) options.onCancel();
+            closeModal();
+        };
+
+        document.querySelector('.message-close').onclick = closeModal;
+        modal.onclick = (event) => {
+            if (event.target === modal) closeModal();
+        };
+
+        modal.style.display = "block";
+    }
+
+    // Новая функция для обновления интерфейса
+    function updateUI(newPoints) {
+        // 1. Обновляем баллы во всех местах
+        document.querySelectorAll('.points-display').forEach(el => {
+            el.textContent = newPoints;
+        });
+
+        // 2. Обновляем состояние наград
+        document.querySelectorAll('.reward-item input').forEach(input => {
+            const pointsNeeded = parseInt(input.nextElementSibling.querySelector('.reward-points').textContent);
+            input.disabled = newPoints < pointsNeeded;
+
+            // Обновляем стили
+            const label = input.nextElementSibling;
+            label.classList.toggle('disabled-reward', newPoints < pointsNeeded);
+        });
+    }
+
+    function confirmRedeem() {
+        const selectedReward = document.querySelector('input[name="selected_reward"]:checked');
+
+        if (!selectedReward) {
+            showMessageModal('Please select a reward', false, { isConfirm: false });
+            return;
+        }
+
+        const rewardId = selectedReward.value;
+        const rewardTitle = document.querySelector(`label[for="reward_${rewardId}"] .reward-title`).textContent;
+        const rewardPoints = document.querySelector(`label[for="reward_${rewardId}"] .reward-points`).textContent;
+
+        showMessageModal(
+            `Are you sure you want to redeem "${rewardTitle}" for ${rewardPoints}?`,
+            true,
+            {
+                isConfirm: true,
+                onConfirm: () => {
+                    fetch("{% url 'redeem_reward' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `selected_reward=${rewardId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Обновляем интерфейс вместо перезагрузки
+                            updateUI(data.new_points);
+                            showMessageModal(data.message, true, { isConfirm: false });
+                        } else {
+                            showMessageModal(data.error, false, { isConfirm: false });
+                        }
+                    })
+                    .catch(error => {
+                        showMessageModal('An error occurred. Please try again.', false, { isConfirm: false });
+                    });
+                }
+            }
+        );
+    }
+
+
+    // Обработчики для модального окна "Refer a Friend"
+    const referModal = document.getElementById("referFriendModal");
+    const referBtn = document.getElementById("referFriendBtn");
+    const referClose = referModal.querySelector(".close");
+
+    referBtn.onclick = () => {
+        referModal.style.display = "block";
+    }
+
+    referClose.onclick = () => {
+        referModal.style.display = "none";
+    }
+
+    window.onclick = (event) => {
+        if (event.target == referModal) {
+            referModal.style.display = "none";
+        }
+    }
+
+</script>
+
+
+</body>
+</html>
