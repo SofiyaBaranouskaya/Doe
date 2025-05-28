@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'nested_admin',
     'social_django',
     'import_export',
+    'storages',
 
     # local apps
     'apps.videos.apps.VideosConfig',
@@ -206,3 +207,69 @@ AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.supabase.co'
 AWS_DEFAULT_ACL = env('AWS_DEFAULT_ACL')
+
+try:
+    # Проверяем, указано ли S3 хранилище
+    if env('DEFAULT_FILE_STORAGE') == 'storages.backends.s3boto3.S3Boto3Storage':
+        # Пытаемся импортировать только если нужно
+        from storages.backends.s3boto3 import S3Boto3Storage
+
+        # Явно создаем экземпляр хранилища
+        s3_storage = S3Boto3Storage(
+            bucket_name=AWS_STORAGE_BUCKET_NAME,
+            endpoint_url=AWS_S3_ENDPOINT_URL,
+            access_key=AWS_ACCESS_KEY_ID,
+            secret_key=AWS_SECRET_ACCESS_KEY,
+            default_acl=AWS_DEFAULT_ACL
+        )
+        print("!!! S3 storage initialized successfully !!!")
+    else:
+        s3_storage = None
+        print("!!! Using default file storage !!!")
+except ImportError as e:
+    print(f"!!! Error importing S3Boto3Storage: {e} !!!")
+    s3_storage = None
+
+# Принудительная инициализация хранилища
+from django.core.files.storage import get_storage_class
+
+default_storage = get_storage_class()()
+print(f"\n!!! Storage initialized as: {default_storage.__class__.__name__} !!!\n")
+
+# В конец settings.py добавьте:
+import logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'storages': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'boto3': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}
+
+# Дополнительная диагностика для staticfiles
+STATICFILES_STORAGE_DEBUG = True
