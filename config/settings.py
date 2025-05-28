@@ -97,7 +97,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 if os.getenv('DATABASE_URL'):
     # Heroku database config
     DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
 elif env.bool("POSTGRES", default=False):
     DATABASES = {
