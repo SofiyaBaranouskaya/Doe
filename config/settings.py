@@ -20,7 +20,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     DEBUG=(bool, False),
-    POSTGRES=(bool, True)
+    POSTGRES=(bool, True),
+    SECRET_KEY=(str, 'dummy-secret-key-for-development'),
+    EMAIL_BACKEND=(str, 'django.core.mail.backends.console.EmailBackend'),
+    EMAIL_HOST=(str, ''),
+    EMAIL_PORT=(int, 0),
+    EMAIL_USE_TLS=(bool, False),
+    EMAIL_HOST_USER=(str, ''),
+    EMAIL_HOST_PASSWORD=(str, ''),
+    DEFAULT_FROM_EMAIL=(str, 'webmaster@localhost'),
+    DEFAULT_FILE_STORAGE=(str, 'django.core.files.storage.FileSystemStorage'),
+    AWS_ACCESS_KEY_ID=(str, ''),
+    AWS_SECRET_ACCESS_KEY=(str, ''),
+    AWS_S3_ENDPOINT_URL=(str, ''),
+    AWS_STORAGE_BUCKET_NAME=(str, ''),
+    AWS_DEFAULT_ACL=(str, 'public-read'),
+    SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
+    SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
@@ -28,10 +44,10 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', default=False)
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['doe-82da822924d4.herokuapp.com', 'localhost', '127.0.0.1']
 
@@ -153,9 +169,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATICFILES_DIRS = []
 # Для корректной работы whitenoise (если используешь)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -209,67 +223,26 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.supabase.co'
 AWS_DEFAULT_ACL = env('AWS_DEFAULT_ACL')
 
 try:
-    # Проверяем, указано ли S3 хранилище
-    if env('DEFAULT_FILE_STORAGE') == 'storages.backends.s3boto3.S3Boto3Storage':
-        # Пытаемся импортировать только если нужно
-        from storages.backends.s3boto3 import S3Boto3Storage
+    import django_heroku
+    # Применяем настройки Heroku
+    django_heroku.settings(
+        locals(),
+        staticfiles=False,  # Мы используем WhiteNoise
+        allowed_hosts=False # У нас уже есть ALLOWED_HOSTS
+    )
+except ImportError:
+    pass
 
-        # Явно создаем экземпляр хранилища
-        s3_storage = S3Boto3Storage(
-            bucket_name=AWS_STORAGE_BUCKET_NAME,
-            endpoint_url=AWS_S3_ENDPOINT_URL,
-            access_key=AWS_ACCESS_KEY_ID,
-            secret_key=AWS_SECRET_ACCESS_KEY,
-            default_acl=AWS_DEFAULT_ACL
-        )
-        print("!!! S3 storage initialized successfully !!!")
-    else:
-        s3_storage = None
-        print("!!! Using default file storage !!!")
-except ImportError as e:
-    print(f"!!! Error importing S3Boto3Storage: {e} !!!")
-    s3_storage = None
+# Security settings for production
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
-# Принудительная инициализация хранилища
-from django.core.files.storage import get_storage_class
-
-default_storage = get_storage_class()()
-print(f"\n!!! Storage initialized as: {default_storage.__class__.__name__} !!!\n")
-
-# В конец settings.py добавьте:
-import logging
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'storages': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-        'boto3': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    }
-}
+# WhiteNoise configuration
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Дополнительная диагностика для staticfiles
 STATICFILES_STORAGE_DEBUG = True
