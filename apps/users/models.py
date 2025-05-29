@@ -14,6 +14,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
+    supabase_id = models.UUIDField(null=True, blank=True)
     profile_picture_url = models.URLField(blank=True, null=True)
 
     points_count = models.IntegerField(default=0)
