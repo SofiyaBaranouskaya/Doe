@@ -357,30 +357,28 @@ def save_profile_steps(request):
 
         # Handle profile picture
         avatar_set = False
+        # Для загруженного файла
         if 'avatar' in request.FILES:
             avatar_file = request.FILES['avatar']
-            # Передаем файл, имя файла и ID пользователя
             public_url = upload_user_avatar(
                 file=avatar_file,
-                file_name=avatar_file.name,
                 user_id=user.id,
+                file_name=avatar_file.name,
                 content_type=avatar_file.content_type
             )
             if public_url:
                 user.profile_picture_url = public_url
                 avatar_set = True
 
+        # Для сгенерированного аватара
         if not avatar_set and not user.profile_picture_url:
-            # Генерируем аватар только если его еще нет
             generated_buffer = generate_initial_avatar(user)
             if generated_buffer:
-                # Создаем файлоподобный объект для загрузки
                 public_url = upload_user_avatar(
                     file=generated_buffer,
-                    file_name=f"avatar_{user.id}.png",
                     user_id=user.id,
-                    content_type='image/png',
-                    is_bytes_buffer=True
+                    file_name=f"avatar_{user.id}.png",
+                    content_type='image/png'
                 )
                 if public_url:
                     user.profile_picture_url = public_url
