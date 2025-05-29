@@ -25,7 +25,8 @@ from django.contrib.auth import get_user_model
 from collections import defaultdict
 from django.core.mail import send_mail
 from django.conf import settings
-from django.utils.html import escape
+from utils.supabase_upload import upload_user_avatar
+from utils.generate_avatar import generate_initial_avatar
 
 
 User = get_user_model()
@@ -352,9 +353,13 @@ def save_profile_steps(request):
 
         # Handle profile picture
         if 'avatar' in request.FILES:
-            user.profile_picture = request.FILES['avatar']
-        elif not user.profile_picture:
-            generate_initial_avatar(user)
+            avatar_file = request.FILES['avatar']
+            public_url = upload_user_avatar(avatar_file, user.id)
+            user.profile_picture_url = public_url
+        elif not user.profile_picture_url:
+            generated_file = generate_initial_avatar(user)  # файл в формате BytesIO
+            public_url = upload_user_avatar(generated_file, user.id, is_file_like=True)
+            user.profile_picture_url = public_url
 
         # Parse JSON-like strings and convert to comma-separated
         interests_raw = request.POST.get('chosenIndustries', '[]')
