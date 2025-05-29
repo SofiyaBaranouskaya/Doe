@@ -1,23 +1,29 @@
-import uuid
-from supabase import create_client
 from django.conf import settings
+from supabase import create_client, Client
 
-supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
-def upload_user_avatar(file, user_id, is_file_like=False):
-    ext = 'png'  # или jpg, если нужно
-    filename = f"profile_pictures/{user_id}_{uuid.uuid4()}.{ext}"
+def upload_user_avatar(file, user_id):
+    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    bucket_name = settings.SUPABASE_BUCKET
+    file_path = f"avatars/{user_id}/{file.name}"
 
-    if not is_file_like:
-        file_content = file.read()
-    else:
-        file.seek(0)
-        file_content = file.read()
+    try:
+        # Загрузка файла
+        upload_response = supabase.storage.from_(bucket_name).upload(
+            file_path,
+            file.read(),
+            file_options={"content-type": file.content_type}
+        )
 
-    # Загружаем в Supabase
-    res = supabase.storage.from_(settings.SUPABASE_BUCKET).upload(filename, file_content, {"content-type": "image/png"})
-    if res.get("error"):
-        raise Exception(res["error"]["message"])
+        # Проверка на ошибки
+        if upload_response.error:
+            print(f"Supabase upload error: {upload_response.error.message}")
+            return None
 
-    return supabase.storage.from_(settings.SUPABASE_BUCKET).get_public_url(filename)
+        # Получение публичного URL
+        url_response = supabase.storage.from_(bucket_name).get_public_url(file_path)
+        return url_response
 
+    except Exception as e:
+        print(f"Error uploading avatar: {str(e)}")
+        return None

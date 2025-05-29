@@ -349,17 +349,41 @@ def save_profile_steps(request):
         # Handle date of birth
         dob_str = request.POST.get('dob')
         if dob_str:
-            user.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
+            try:
+                user.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
+            except ValueError:
+                # Обработка неверного формата даты
+                pass
 
         # Handle profile picture
+        avatar_set = False
         if 'avatar' in request.FILES:
             avatar_file = request.FILES['avatar']
-            public_url = upload_user_avatar(avatar_file, user.id)
-            user.profile_picture_url = public_url
-        elif not user.profile_picture_url:
-            generated_file = generate_initial_avatar(user)  # файл в формате BytesIO
-            public_url = upload_user_avatar(generated_file, user.id, is_file_like=True)
-            user.profile_picture_url = public_url
+            # Передаем файл, имя файла и ID пользователя
+            public_url = upload_user_avatar(
+                file=avatar_file,
+                file_name=avatar_file.name,
+                user_id=user.id,
+                content_type=avatar_file.content_type
+            )
+            if public_url:
+                user.profile_picture_url = public_url
+                avatar_set = True
+
+        if not avatar_set and not user.profile_picture_url:
+            # Генерируем аватар только если его еще нет
+            generated_buffer = generate_initial_avatar(user)
+            if generated_buffer:
+                # Создаем файлоподобный объект для загрузки
+                public_url = upload_user_avatar(
+                    file=generated_buffer,
+                    file_name=f"avatar_{user.id}.png",
+                    user_id=user.id,
+                    content_type='image/png',
+                    is_bytes_buffer=True
+                )
+                if public_url:
+                    user.profile_picture_url = public_url
 
         # Parse JSON-like strings and convert to comma-separated
         interests_raw = request.POST.get('chosenIndustries', '[]')
@@ -394,25 +418,29 @@ def save_profile_steps(request):
             other_name = entry.get('other_name', '')
 
             if school_id == '0' and other_name:
-                school = None
+                # Создаем запись с пользовательским названием школы
+                UserSchool.objects.create(
+                    user=user,
+                    school=None,
+                    graduation_year=grad_year,
+                    other_school_name=other_name
+                )
             else:
                 try:
                     school = Schools.objects.get(id=school_id)
+                    UserSchool.objects.create(
+                        user=user,
+                        school=school,
+                        graduation_year=grad_year
+                    )
                 except Schools.DoesNotExist:
+                    # Школа не найдена, пропускаем
                     continue
-
-            UserSchool.objects.create(
-                user=user,
-                school=school,
-                graduation_year=grad_year,
-                other_school_name=other_name if school is None else None
-            )
 
         user.save()
         return redirect('home')
 
     return render(request, 'users/profile.html')
-
 
 def generate_initial_avatar(user):
     from PIL import Image, ImageDraw, ImageFont
