@@ -32,6 +32,26 @@ class User(AbstractUser):
         related_name='completed_by'
     )
 
+    def get_profile_picture_base64(self):
+        try:
+            if not self.profile_picture:
+                return None
+
+            img = Image.open(self.profile_picture)
+
+            if img.mode in ('RGBA', 'LA'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1])
+                img = background
+
+            buffered = BytesIO()
+            img.save(buffered, format="JPEG", quality=85)
+            return base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+        except Exception as e:
+            print(f"Error converting profile picture to Base64: {e}")
+            return None
+
     def __str__(self):
         return self.username
 

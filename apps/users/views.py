@@ -95,6 +95,7 @@ def user_profile(request):
         'hobbies_list': hobbies_list,
         'completed_count': completed_count,
         'rewards': rewards,
+        'user_profile_picture_base64': user.get_profile_picture_base64(),
     })
 
 
