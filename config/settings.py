@@ -225,10 +225,8 @@ SUPABASE_URL = env('SUPABASE_URL')
 SUPABASE_KEY = env('SUPABASE_KEY')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET')
 
-if DEBUG:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-else:
-    DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
+DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
+
 
 try:
     import django_heroku
