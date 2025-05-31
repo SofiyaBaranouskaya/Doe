@@ -9,6 +9,8 @@ from io import BytesIO
 from PIL import Image
 from django.utils.html import format_html
 
+from utils.supabase_storage import SupabaseStorage
+
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
@@ -152,14 +154,12 @@ class Video(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     video_file = models.FileField(
-        upload_to='video_sourses/',
-        validators=[FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'mkv', 'webm'])]
+        upload_to='videos/',
+        storage=SupabaseStorage(bucket_name='video_sources')
     )
     poster_url = models.ImageField(
-        upload_to='photos/',
-        null=False,
-        blank=False,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'webp'])]
+        upload_to='posters/',
+        storage=SupabaseStorage(bucket_name='photos')
     )
     poster_base64 = models.TextField(blank=True, null=True)
     duration = models.CharField(max_length=20)
@@ -170,7 +170,6 @@ class Video(models.Model):
 
     def clean(self):
         errors = {}
-
         if not self.title:
             errors['title'] = 'Title is required'
         if not self.description:
@@ -183,7 +182,6 @@ class Video(models.Model):
             errors['duration'] = 'Duration is required'
         if not self.poster_url:
             self.poster_base64 = None
-            return
 
         if errors:
             raise ValidationError(errors)

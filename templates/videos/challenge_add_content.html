@@ -142,6 +142,20 @@
             align-items: center;
             justify-content: center;
         }
+        .photo-container {
+            width: 100%;
+            height: 100%; /* или установите желаемую высоту */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* чтобы избежать выхода изображения за пределы контейнера */
+        }
+
+        .photo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover; /* или 'contain', в зависимости от того, как хотите отображать изображение */
+        }
         .card3{
             background-color: #FD7981;
             height: 172px;
@@ -207,6 +221,7 @@
             display: flex;
             justify-content: space-between;
             gap: 10px;
+            overflow-x: auto;
         }
 
         label {

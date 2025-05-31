@@ -190,16 +190,10 @@ class FunFactAdmin(ExportAdminMixin):
 @admin.register(Video)
 class VideoAdmin(ExportAdminMixin):
     list_display = ('title', 'points')
-    fields = [
-        'title',
-        'description',
-        'video_file',
-        'poster_url',
-        'points',
-        'duration',
-        'poster_base64',
-        'poster_preview'
-    ]
+    fields = (
+        'title', 'description', 'video_file', 'poster_url',
+        'duration', 'points', 'poster_preview', 'poster_base64'
+    )
     search_fields = ('title', 'points')
     readonly_fields = ('poster_preview', 'poster_base64')
     list_filter = ('points',)

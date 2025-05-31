@@ -27,9 +27,11 @@ from django.core.mail import send_mail
 from django.conf import settings
 from utils.supabase_upload import upload_user_avatar
 from utils.generate_avatar import generate_initial_avatar
+import logging
 
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 def onboarding_view1(request):
     return render(request, 'users/onboarding1.html')
@@ -382,6 +384,7 @@ def save_profile_steps(request):
                 )
                 if public_url:
                     user.profile_picture_url = public_url
+                generated_buffer.close()
 
         # Parse JSON-like strings and convert to comma-separated
         interests_raw = request.POST.get('chosenIndustries', '[]')
@@ -1101,7 +1104,9 @@ def challenge_view_content(request, pk):
     user_choices = ChallengeUserChoice.objects.filter(
         user=request.user,
         challenge=challenge
-    ).prefetch_related('attempts__answers')  # Сразу подгружаем attempts и answers
+    ).prefetch_related('attempts__answers')
+
+    logger.info("User choices: %s", user_choices)  # Логирование user_choices
 
     display_settings = getattr(challenge, 'display_settings', None)
     display_type = display_settings.display_type if display_settings else 'text'
@@ -1111,11 +1116,10 @@ def challenge_view_content(request, pk):
     # Добавляем опции для радиокнопок
     for element in elements_to_show_after_confirm:
         if element.element == "radio":
-            element.options = element.get_options()  # Получаем опции для радиокнопок
+            element.options = element.get_options()
         else:
-            element.options = None  # Для других типов элементов оставляем None
+            element.options = None
 
-    # Используем правильную связь attempts__is_done
     is_submit_active = user_choices.filter(attempts__is_done=True).count() >= challenge.min_answers_required
 
     for choice in user_choices:
@@ -1141,24 +1145,25 @@ def challenge_view_content(request, pk):
 
             if display_type == 'text':
                 attempt.text_display = []
-                for field in display_settings.text_fields.all():
-                    answer = attempt.answers.filter(element=field.element).first()
-                    value = answer.answer if answer else "—"
-                    color = None
+                if display_settings and hasattr(display_settings, 'text_fields'):
+                    for field in display_settings.text_fields.all():
+                        answer = attempt.answers.filter(element=field.element).first()
+                        value = answer.answer if answer else "—"
+                        color = None
 
-                    if field.element.field_type == 'radio':
-                        options = parse_radio_values(field.element.value)
-                        matched = next(
-                            (opt for opt in options if normalize_label(opt['label']) == normalize_label(value)),
-                            None
-                        )
-                        color = matched['color'] if matched else None
+                        if field.element.field_type == 'radio':
+                            options = parse_radio_values(field.element.value)
+                            matched = next(
+                                (opt for opt in options if normalize_label(opt['label']) == normalize_label(value)),
+                                None
+                            )
+                            color = matched['color'] if matched else None
 
-                    attempt.text_display.append({
-                        'label': field.element.name,
-                        'value': value,
-                        'color': color
-                    })
+                        attempt.text_display.append({
+                            'label': field.element.name,
+                            'value': value,
+                            'color': color
+                        })
 
             elif display_type == 'table':
                 attempt.table_cells = []
@@ -1190,6 +1195,13 @@ def challenge_view_content(request, pk):
             ]
         else:
             choice.attempts_filtered = choice.attempts.all()
+
+    logger.info("Passing to template: %s", {
+        'challenge': challenge,
+        'user_choices': user_choices,
+        'display_type': display_type,
+        'display_settings': display_settings,
+    })
 
     return render(request, 'videos/challenge_view_content.html', {
         'challenge': challenge,
