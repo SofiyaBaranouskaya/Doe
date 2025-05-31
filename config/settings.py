@@ -225,7 +225,10 @@ SUPABASE_URL = env('SUPABASE_URL')
 SUPABASE_KEY = env('SUPABASE_KEY')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET')
 
-DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
+if DEBUG:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+else:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 
 try:
