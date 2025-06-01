@@ -1,58 +1,76 @@
+# utils/supabase_storage.py
+import os
+import mimetypes
+import requests
 from django.core.files.storage import Storage
-from supabase import create_client
+from django.core.files.base import ContentFile
 from django.conf import settings
-import uuid
-import time
+from environ import ImproperlyConfigured
+
 
 class SupabaseStorage(Storage):
-    def __init__(self, bucket_name=None):
-        self.bucket_name = bucket_name
-        self.client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    def __init__(self, bucket_name):
+        if not bucket_name:
+            raise ImproperlyConfigured("SupabaseStorage requires 'bucket_name' parameter.")
+
+        self.bucket = bucket_name
+        self.base_url = settings.SUPABASE_URL
+        self.key = settings.SUPABASE_KEY
+
+        self.headers = {
+            "Authorization": f"Bearer {self.key}",
+            "apikey": self.key,
+        }
+
+    def _get_full_path(self, name):
+        return f"{self.bucket}/{name}"
 
     def _save(self, name, content):
-        data = content.read()
-        name = self.get_available_name(name)
+        file_path = self._get_full_path(name)
+        upload_url = f"{self.base_url}/storage/v1/object/{file_path}"
+        print(f"Trying to save to bucket: {self.bucket}")
 
-        response = self.client.storage.from_(self.bucket_name).upload(
-            name,
-            data,
-            {"content-type": content.content_type}
+        content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
+
+        # Перемотка файла перед чтением
+        if hasattr(content, 'seekable') and content.seekable():
+            content.seek(0)
+
+        response = requests.put(
+            upload_url,
+            data=content.read(),
+            headers={
+                **self.headers,
+                "Content-Type": content_type,
+                "x-upsert": "true",
+            },
         )
 
-        # Проверяем статус ответа
-        if hasattr(response, 'status_code') and response.status_code >= 400:
-            raise Exception(f"Upload failed with status code {response.status_code}")
-
-        # Если response.data или response.get('error') существуют, можно добавить дополнительные проверки
-        # Например:
-        # if hasattr(response, 'data') and response.data is None:
-        #     raise Exception("Upload failed: no data returned")
+        if not response.ok:
+            error_msg = f"Upload failed: {response.status_code} - {response.text}"
+            print(error_msg)
+            raise Exception(error_msg)
 
         return name
 
+    def _open(self, name, mode='rb'):
+        from django.core.files.base import ContentFile
+        download_url = f"{self.base_url}/storage/v1/object/{self.bucket}/{name}"
+        response = requests.get(download_url, headers=self.headers)
+        if response.ok:
+            return ContentFile(response.content)
+        raise IOError(f"Unable to open file: {name}")
+
+
     def url(self, name):
-        return self.client.storage.from_(self.bucket_name).get_public_url(name)
+        return f"{self.base_url}/storage/v1/object/public/{self.bucket}/{name}"
 
     def exists(self, name):
-        # Проверяем наличие файла в Supabase
-        try:
-            response = self.client.storage.from_(self.bucket_name).list()
-            if response.error:
-                print(f"⚠️ Supabase list error: {response.error.message}")
-                return False
-            return any(obj['name'] == name for obj in response.data)
-        except Exception as e:
-            print(f"⚠️ Exists check failed: {e}")
-            return False
+        check_url = f"{self.base_url}/storage/v1/object/info/{self.bucket}/{name}"
+        response = requests.get(check_url, headers=self.headers)
+        return response.status_code == 200
 
-    def get_available_name(self, name, max_length=None):
-        # Генерируем уникальное имя файла
-        ext = name.split('.')[-1]
-        return f"{uuid.uuid4().hex}.{ext}"
-
-    def deconstruct(self):
-        return (
-            'utils.supabase_storage.SupabaseStorage',
-            [],
-            {'bucket_name': self.bucket_name},
-        )
+    def delete(self, name):
+        delete_url = f"{self.base_url}/storage/v1/object/{self.bucket}/{name}"
+        response = requests.delete(delete_url, headers=self.headers)
+        return response.ok

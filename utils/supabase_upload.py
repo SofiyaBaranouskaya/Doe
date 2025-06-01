@@ -2,17 +2,17 @@ from django.conf import settings
 from supabase import create_client, Client
 
 
-def upload_user_avatar(file, user_id, file_name=None, content_type='image/jpeg'):
+def upload_user_avatar(file, user_id, bucket_name, file_name=None, content_type='image/jpeg'):
     """
     Uploads an avatar to Supabase Storage
     :param file: File object or BytesIO buffer
     :param user_id: User ID for path
+    :param bucket_name: The name of the Supabase Storage bucket
     :param file_name: Optional custom file name
     :param content_type: MIME type of the file
     :return: Public URL or None
     """
     supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
-    bucket_name = settings.SUPABASE_BUCKET
 
     # Generate file path
     if file_name:
@@ -25,6 +25,7 @@ def upload_user_avatar(file, user_id, file_name=None, content_type='image/jpeg')
     try:
         # Prepare file data
         if hasattr(file, 'read'):
+            file.seek(0)  # перемотка, если это Django InMemoryUploadedFile
             file_data = file.read()
         else:
             file_data = file
@@ -33,10 +34,9 @@ def upload_user_avatar(file, user_id, file_name=None, content_type='image/jpeg')
         upload_response = supabase.storage.from_(bucket_name).upload(
             file_path,
             file_data,
-            file_options={"content-type": content_type}
+            file_options={"content-type": content_type, "x-upsert": "true"}  # добавь upsert, если нужно заменять
         )
 
-        # Check for errors
         if upload_response.error:
             print(f"Supabase upload error: {upload_response.error.message}")
             return None

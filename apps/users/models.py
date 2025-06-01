@@ -14,11 +14,12 @@ from utils.supabase_storage import SupabaseStorage
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-
-    supabase_id = models.UUIDField(null=True, blank=True)
-    profile_picture_url = models.URLField(blank=True, null=True)
-
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        storage=SupabaseStorage(bucket_name='profile_pictures'),  # без параметров
+        blank=True,
+        null=True
+    )
     points_count = models.IntegerField(default=0)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
@@ -159,7 +160,7 @@ class Video(models.Model):
     )
     poster_url = models.ImageField(
         upload_to='posters/',
-        storage=SupabaseStorage(bucket_name='photos')
+        storage=SupabaseStorage(bucket_name='posters')
     )
     poster_base64 = models.TextField(blank=True, null=True)
     duration = models.CharField(max_length=20)
@@ -227,6 +228,7 @@ class FunFact(models.Model):
     points = models.PositiveIntegerField()
     photo = models.ImageField(
         upload_to='photos/',
+        storage=SupabaseStorage(bucket_name='photos'),
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'webp'])]
     )
 
@@ -353,7 +355,7 @@ class ChitChatAnswer(models.Model):
 
 class Challenge(models.Model):
     title = models.CharField(max_length=255, verbose_name="Title")
-    picture = models.ImageField(upload_to='challenges/', verbose_name="Picture")
+    picture = models.ImageField(upload_to='challenges/', storage=SupabaseStorage(bucket_name='challenges'), verbose_name="Picture")
     instructions = models.TextField(verbose_name="Instructions")
     points = models.IntegerField(verbose_name="Points")
     button_add_name = models.CharField(max_length=50, verbose_name="Button add name")
@@ -523,7 +525,7 @@ QUESTION_TYPE_CHOICES = [
 class QuizQuestion(models.Model):
     quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
     text = models.TextField("Question Text")
-    image = models.ImageField(upload_to='quiz_images/', blank=True, null=True)
+    image = models.ImageField(upload_to='quiz_images/', storage=SupabaseStorage(bucket_name='quiz_images'), blank=True, null=True)
     question_type = models.CharField(max_length=10, choices=QUESTION_TYPE_CHOICES)
     choices = models.TextField(
         blank=True,
