@@ -9,14 +9,12 @@ from io import BytesIO
 from PIL import Image
 from django.utils.html import format_html
 
+from utils.supabase_storage import SupabaseStorage
+
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-
-    supabase_id = models.UUIDField(null=True, blank=True)
-    profile_picture_url = models.URLField(blank=True, null=True)
-
+    profile_picture = models.ImageField(upload_to='profile_pictures/', storage=SupabaseStorage(), blank=True, null=True)
     points_count = models.IntegerField(default=0)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)

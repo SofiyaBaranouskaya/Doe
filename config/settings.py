@@ -15,30 +15,12 @@ import environ
 import os
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env(
-    DEBUG=(bool, False),
-    POSTGRES=(bool, True),
-    SECRET_KEY=(str, 'dummy-secret-key-for-development'),
-    EMAIL_BACKEND=(str, 'django.core.mail.backends.console.EmailBackend'),
-    EMAIL_HOST=(str, ''),
-    EMAIL_PORT=(int, 0),
-    EMAIL_USE_TLS=(bool, False),
-    EMAIL_HOST_USER=(str, ''),
-    EMAIL_HOST_PASSWORD=(str, ''),
-    DEFAULT_FROM_EMAIL=(str, 'webmaster@localhost'),
-    DEFAULT_FILE_STORAGE=(str, 'django.core.files.storage.FileSystemStorage'),
-    AWS_ACCESS_KEY_ID=(str, ''),
-    AWS_SECRET_ACCESS_KEY=(str, ''),
-    AWS_S3_ENDPOINT_URL=(str, ''),
-    AWS_STORAGE_BUCKET_NAME=(str, ''),
-    AWS_DEFAULT_ACL=(str, 'public-read'),
-    SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
-    SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
-)
+env = environ.Env()
+
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -214,22 +196,11 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
-AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.supabase.co'
-AWS_DEFAULT_ACL = env('AWS_DEFAULT_ACL')
-
 SUPABASE_URL = env('SUPABASE_URL')
 SUPABASE_KEY = env('SUPABASE_KEY')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET')
 
-if DEBUG:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-else:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
+DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
 
 try:
     import django_heroku
@@ -252,3 +223,4 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False  # отключаем подписи в ссылках
 AWS_S3_ADDRESSING_STYLE = "path"  # важно для Supabase!
 
+print("FILE STORAGE:", DEFAULT_FILE_STORAGE)
