@@ -188,59 +188,6 @@
             color: #66B498;
         }
 
-        .notification-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7); /* Темный фон */
-            z-index: 999; /* Меньший z-index, чем у уведомления */
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none; /* Не позволяет взаимодействовать с фоном */
-        }
-
-        .notification {
-            position: fixed;
-            width: 200px;
-            top: 47%; /* Центрируем по вертикали */
-            left: 47%; /* Центрируем по горизонтали */
-            transform: translate(-50%, -50%); /* Смещаем на половину ширины и высоты */
-            padding: 20px;
-            margin: 0px 15px;
-            border-radius: 20px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .notification.success {
-            background-color: #80bfa8;
-            color: white;
-            text-align: center;
-            margin: 0px 15px;
-            opacity: 1;
-        }
-
-        .notification.error {
-            background-color: #f44336;
-            opacity: 1;
-        }
-
-        .notification.hidden {
-            display: none;
-        }
-
-        .notification-background.visible {
-            opacity: 1;
-        }
-
-
         .message-content {
             display: flex;
             align-items: center;
@@ -284,6 +231,49 @@
             padding: 15px 20px 30px 20px;
             margin-top: auto;
         }
+
+
+#success-check {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+  display: flex;              /* показываем, когда нет hidden */
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  animation: fadeInScale 0.4s forwards;
+}
+
+/* Изначально скрыт */
+.hidden {
+  display: none !important;  /* !important, чтобы перебить display: flex */
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+#success-check svg {
+  width: 100px;
+  height: 100px;
+  fill: #66B498;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -363,13 +353,6 @@
                 {% csrf_token %}
                 <input type="hidden" name="chit_chat_id" value="{{ chit_chat.id }}">
 
-                <div id="notification-background" class="notification-background hidden"></div>
-                <div id="notification" class="notification hidden">
-                    <span class="notification-text"></span>
-                </div>
-
-
-
                 <div class="task_condition">
                     <div style="margin: -40px 0px 0px 0px;">
                         <p>Choose ONE in each pair. <br> For now - would you rather . . .</p>
@@ -382,6 +365,13 @@
                         </button>
                     </div>
                 </div>
+
+<div id="success-check" class="hidden">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#66B498" aria-hidden="true">
+    <path d="M480-80q-84.33 0-157.33-30.83-73-30.84-127-84.84t-84.84-127Q80-395.67 80-480q0-83.67 30.83-156.67 30.84-73 84.84-127t127-85.16Q395.67-880 480-880q71.67 0 134.33 22.33Q677-835.33 728-796l-48 48.33q-42-31.33-92.33-48.5-50.34-17.16-107.67-17.16-141 0-237.17 96.16Q146.67-621 146.67-480t96.16 237.17Q339-146.67 480-146.67t237.17-96.16Q813.33-339 813.33-480q0-26-3.66-51-3.67-25-11-48.67L851-632q14.33 35.33 21.67 73.33 7.33 38 7.33 78.67 0 84.33-31.17 157.33-31.16 73-85.16 127t-127 84.84Q563.67-80 480-80Zm-58-217.33L255.33-464.67 304-513.33l118 118L831.33-805l49.34 48.67-458.67 459Z"/>
+  </svg>
+</div>
+
 
                 <div class="chit-chat-container">
                     {% if option_pairs %}
@@ -439,71 +429,51 @@
     </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('choices-form');
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const notification = document.getElementById('notification');
-        const notificationText = notification.querySelector('.notification-text');
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('choices-form');
+    const submitBtn = form.querySelector('button[type="submit"]');
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-            // Проверяем, что все пары имеют выбранные значения
-            const radioGroups = document.querySelectorAll('input[type="radio"]:checked');
-            const totalPairs = document.querySelectorAll('.option-pair').length;
+        const radioGroups = document.querySelectorAll('input[type="radio"]:checked');
+        const totalPairs = document.querySelectorAll('.option-pair').length;
 
-            if (radioGroups.length < totalPairs) {
-                showNotification('Please, choose options in each pair', 'error');
-                return;
-            }
-
-            // Блокируем кнопку на время отправки
-            submitBtn.disabled = true;
-
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Thank you! Keep up going! 💸', 'success');
-                } else {
-                    showNotification(data.error || 'Saving error', 'error');
-                }
-            })
-            .catch(error => {
-                showNotification('Network error: ' + error.message, 'error');
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-            });
-        });
-
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            const notificationText = notification.querySelector('.notification-text');
-            const notificationBackground = document.getElementById('notification-background');
-
-            // Устанавливаем текст уведомления и тип
-            notificationText.textContent = message;
-            notification.className = `notification ${type}`;
-
-            // Показываем уведомление и фон
-            notification.classList.remove('hidden');
-            notificationBackground.classList.add('visible');
-
-            // Скрываем уведомление и фон через 3 секунды
-            setTimeout(() => {
-                notification.classList.add('hidden');
-                notificationBackground.classList.remove('visible');
-            }, 2000);
+        if (radioGroups.length < totalPairs) {
+            alert('Please, choose options in each pair');
+            return;
         }
 
+        submitBtn.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const check = document.getElementById('success-check');
+                check.classList.remove('hidden');
+
+                setTimeout(() => {
+                    history.back();
+                }, 1500);
+            } else {
+                alert(data.error || 'Saving error');
+            }
+        })
+        .catch(error => {
+            alert('Network error: ' + error.message);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+        });
     });
+});
 </script>
 
 </body>

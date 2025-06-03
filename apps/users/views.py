@@ -988,57 +988,65 @@ def chitchat_submit(request, pk):
     if not request.user.is_authenticated:
         return JsonResponse({'success': False, 'error': 'Authentication required'}, status=403)
 
-    chitchat = get_object_or_404(ChitChat, pk=pk)
+    try:
+        chitchat = get_object_or_404(ChitChat, pk=pk)
 
-    # Получаем связанный объект Content
-    content_type = ContentType.objects.get_for_model(ChitChat)
-    content, created = Content.objects.get_or_create(
-        content_type=content_type,
-        object_id=chitchat.id,
-        defaults={'title': chitchat.title}  # или другие поля Content
-    )
+        # Получаем или создаём Content, избегая ошибки MultipleObjectsReturned
+        content_type = ContentType.objects.get_for_model(ChitChat)
+        content = Content.objects.filter(content_type=content_type, object_id=chitchat.id).first()
+        if not content:
+            content = Content.objects.create(
+                content_type=content_type,
+                object_id=chitchat.id,
+                title=chitchat.title
+            )
 
-    # Проверяем, не проходил ли пользователь этот чит-чат ранее
-    is_first_attempt = not request.user.completed_content.filter(pk=content.pk).exists()
+        # Проверка на первое прохождение
+        is_first_attempt = not request.user.completed_content.filter(pk=content.pk).exists()
 
-    # Получаем или создаём запись выбора пользователя
-    user_choice, _ = ChitChatUserChoice.objects.get_or_create(
-        chit_chat=chitchat,
-        user=request.user
-    )
-    user_choice.answers.all().delete()  # Удалим старые ответы
+        # Получаем или создаём выбор пользователя
+        user_choice, _ = ChitChatUserChoice.objects.get_or_create(
+            chit_chat=chitchat,
+            user=request.user
+        )
+        user_choice.answers.all().delete()
 
-    # Сохраняем новые ответы
-    data = request.POST
-    for key, value in data.items():
-        if key.startswith('pair-'):
-            try:
-                option_pair_id = int(key.split('-')[1])
-                option_pair = ChitChatOption.objects.get(id=option_pair_id)
-                ChitChatAnswer.objects.create(
-                    user_choice=user_choice,
-                    option_pair=option_pair,
-                    answer=value
-                )
-            except (ValueError, ChitChatOption.DoesNotExist):
-                continue
+        # Обработка ответов
+        data = request.POST
+        for key, value in data.items():
+            if key.startswith('pair-'):
+                try:
+                    option_pair_id = int(key.split('-')[1])
+                    option_pair = ChitChatOption.objects.get(id=option_pair_id)
+                    ChitChatAnswer.objects.create(
+                        user_choice=user_choice,
+                        option_pair=option_pair,
+                        answer=value
+                    )
+                except (ValueError, ChitChatOption.DoesNotExist) as e:
+                    logger.warning(f"Invalid option id or missing option: {key} - {e}")
+                    continue
 
-    # Если это первое прохождение - начисляем баллы и добавляем в completed_content
-    if is_first_attempt:
-        request.user.points_count += chitchat.points  # предполагаем, что у ChitChat есть поле points
-        request.user.completed_content.add(content)
-        request.user.save()
+        # Начисление баллов
+        if is_first_attempt:
+            request.user.points_count += chitchat.points
+            request.user.completed_content.add(content)
+            request.user.save()
+            return JsonResponse({
+                'success': True,
+                'points_added': chitchat.points,
+                'message': f'Chit chat done! You get {chitchat.points} points'
+            })
+
         return JsonResponse({
             'success': True,
-            'points_added': chitchat.points,
-            'message': f'Chit chat done! You get {chitchat.points} points'
+            'points_added': 0,
+            'message': 'Answer saved!'
         })
 
-    return JsonResponse({
-        'success': True,
-        'points_added': 0,
-        'message': 'Answer saved!'
-    })
+    except Exception as e:
+        logger.exception("Unexpected error during chitchat_submit")
+        return JsonResponse({'success': False, 'error': 'Server error'}, status=500)
 
 
 def challenge_detail(request, challenge_id):
