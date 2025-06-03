@@ -111,11 +111,14 @@ class UserSchool(models.Model):
 
 class Content(models.Model):
     PAGE_CHOICES = [
-        ('its_time', "First Moves"),
-        ('rich_girl', "The Levers"),
-        ('you_do_you', "Power Portfolio"),
-        ('levers', "The Playbook (IRL How-To's)"),
-        ('portfolio', "Capital Beyond Cash"),
+        ('things_first', "First Moves"),
+        ('levers', "The Levers"),
+        ('power_portfolio', "Power Portfolio"),
+        ('playbook', "The Playbook (IRL How-To's)"),
+        ('capital_cash', "Capital Beyond Cash"),
+        ('money_sports', "Money & Sports"),
+        ('new_ventures', "New Ventures"),
+        ('rel_money', "Relationships & Money"),
     ]
 
     page = models.CharField(

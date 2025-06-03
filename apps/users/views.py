@@ -520,289 +520,75 @@ def home_view(request):
 def welcome_video(request):
     return render(request, 'videos/welcome_video.html')
 
-
-def reach_girl_page(request):
-    # Получаем все ContentType одним запросом
+def render_page(request, page_name, template_name):
     content_types = ContentType.objects.filter(
         model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
     )
 
-    # Получаем все содержимое с предварительной выборкой
     contents = Content.objects.filter(
         content_type__in=content_types,
-        page='rich_girl'
+        page=page_name
     ).select_related('content_type').order_by('id')
 
-    # Создаем словарь для группировки объектов по типам
     from collections import defaultdict
     objects_by_type = defaultdict(list)
 
     for content in contents:
         objects_by_type[content.content_type.model].append(content.object_id)
 
-    # Получаем все объекты одним запросом для каждого типа
     videos = Video.objects.in_bulk(objects_by_type.get('video', []))
     funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
     challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
     chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
+    quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
 
-    # Фильтруем содержимое
     filtered_contents = []
     for content in contents:
         obj = None
-        quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+        model = content.content_type.model
 
-        if content.content_type.model == 'video':
+        if model == 'video':
             obj = videos.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'funfact':
+        elif model == 'funfact':
             obj = funfacts.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'challenge':
+        elif model == 'challenge':
             obj = challenges.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'chitchat':
+        elif model == 'chitchat':
             obj = chitchats.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'quiz':
+        elif model == 'quiz':
             obj = quizzes.get(content.object_id)
-            if obj and obj.title:
+            if obj:
                 content.quiz = obj
                 content.quiz.total_points = sum(q.points for q in obj.questions.all())
-                filtered_contents.append(content)
 
-    return render(request, 'videos/reach_girl_page.html', {'contents': filtered_contents})
+        if obj and getattr(obj, 'title', None):
+            filtered_contents.append(content)
 
+    return render(request, template_name, {'contents': filtered_contents})
 
-def money_talks_page(request):
-    content_types = ContentType.objects.filter(
-        model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
-    )
+def first_page(request):
+    return render_page(request, 'things_first', 'videos/pages/first_page.html')
 
-    # Получаем все содержимое с предварительной выборкой
-    contents = Content.objects.filter(
-        content_type__in=content_types,
-        page='its_time'
-    ).select_related('content_type').order_by('id')
+def second_page(request):
+    return render_page(request, 'levers', 'videos/pages/second_page.html')
 
-    # Создаем словарь для группировки объектов по типам
-    from collections import defaultdict
-    objects_by_type = defaultdict(list)
+def third_page(request):
+    return render_page(request, 'power_portfolio', 'videos/pages/third_page.html')
 
-    for content in contents:
-        objects_by_type[content.content_type.model].append(content.object_id)
+def forth_page(request):
+    return render_page(request, 'playbook', 'videos/pages/forth_page.html')
 
-    # Получаем все объекты одним запросом для каждого типа
-    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
-    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
-    challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
-    chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
+def fifth_page(request):
+    return render_page(request, 'capital_cash', 'videos/pages/fifth_page.html')
 
-    # Фильтруем содержимое
-    filtered_contents = []
-    for content in contents:
-        obj = None
-        quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+def sixth_page(request):
+    return render_page(request, 'money_sports', 'videos/pages/sixth_page.html')
 
-        if content.content_type.model == 'video':
-            obj = videos.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'funfact':
-            obj = funfacts.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'challenge':
-            obj = challenges.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'chitchat':
-            obj = chitchats.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'quiz':
-            obj = quizzes.get(content.object_id)
-            if obj and obj.title:
-                content.quiz = obj
-                content.quiz.total_points = sum(q.points for q in obj.questions.all())
-                filtered_contents.append(content)
+def seventh_page(request):
+    return render_page(request, 'new_ventures', 'videos/pages/seventh_page.html')
 
-    return render(request, 'videos/talk_money.html', {'contents': filtered_contents})
-
-
-def you_do_you_page(request):
-    # Получаем все ContentType одним запросом
-    content_types = ContentType.objects.filter(
-        model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
-    )
-
-    # Получаем все содержимое с предварительной выборкой
-    contents = Content.objects.filter(
-        content_type__in=content_types,
-        page='you_do_you'
-    ).select_related('content_type').order_by('id')
-
-    # Создаем словарь для группировки объектов по типам
-    from collections import defaultdict
-    objects_by_type = defaultdict(list)
-
-    for content in contents:
-        objects_by_type[content.content_type.model].append(content.object_id)
-
-    # Получаем все объекты одним запросом для каждого типа
-    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
-    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
-    challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
-    chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
-
-    # Фильтруем содержимое
-    filtered_contents = []
-    for content in contents:
-        obj = None
-        quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
-
-        if content.content_type.model == 'video':
-            obj = videos.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'funfact':
-            obj = funfacts.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'challenge':
-            obj = challenges.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'chitchat':
-            obj = chitchats.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'quiz':
-            obj = quizzes.get(content.object_id)
-            if obj and obj.title:
-                content.quiz = obj
-                content.quiz.total_points = sum(q.points for q in obj.questions.all())
-                filtered_contents.append(content)
-
-    return render(request, 'videos/you_do_you.html', {'contents': filtered_contents})
-
-
-def levers_page(request):
-    # Получаем все ContentType одним запросом
-    content_types = ContentType.objects.filter(
-        model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
-    )
-
-    # Получаем все содержимое с предварительной выборкой
-    contents = Content.objects.filter(
-        content_type__in=content_types,
-        page='levers'
-    ).select_related('content_type').order_by('id')
-
-    # Создаем словарь для группировки объектов по типам
-    from collections import defaultdict
-    objects_by_type = defaultdict(list)
-
-    for content in contents:
-        objects_by_type[content.content_type.model].append(content.object_id)
-
-    # Получаем все объекты одним запросом для каждого типа
-    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
-    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
-    challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
-    chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
-
-    # Фильтруем содержимое
-    filtered_contents = []
-    for content in contents:
-        obj = None
-        quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
-
-        if content.content_type.model == 'video':
-            obj = videos.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'funfact':
-            obj = funfacts.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'challenge':
-            obj = challenges.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'chitchat':
-            obj = chitchats.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'quiz':
-            obj = quizzes.get(content.object_id)
-            if obj and obj.title:
-                content.quiz = obj
-                content.quiz.total_points = sum(q.points for q in obj.questions.all())
-                filtered_contents.append(content)
-
-    return render(request, 'videos/levers.html', {'contents': filtered_contents})
-
-
-def portfolio_page(request):
-    # Получаем все ContentType одним запросом
-    content_types = ContentType.objects.filter(
-        model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
-    )
-
-    # Получаем все содержимое с предварительной выборкой
-    contents = Content.objects.filter(
-        content_type__in=content_types,
-        page='portfolio'
-    ).select_related('content_type').order_by('id')
-
-    # Создаем словарь для группировки объектов по типам
-    from collections import defaultdict
-    objects_by_type = defaultdict(list)
-
-    for content in contents:
-        objects_by_type[content.content_type.model].append(content.object_id)
-
-    # Получаем все объекты одним запросом для каждого типа
-    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
-    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
-    challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
-    chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
-
-    # Фильтруем содержимое
-    filtered_contents = []
-    for content in contents:
-        obj = None
-        quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
-
-        if content.content_type.model == 'video':
-            obj = videos.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'funfact':
-            obj = funfacts.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'challenge':
-            obj = challenges.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'chitchat':
-            obj = chitchats.get(content.object_id)
-            if obj and obj.title:
-                filtered_contents.append(content)
-        elif content.content_type.model == 'quiz':
-            obj = quizzes.get(content.object_id)
-            if obj and obj.title:
-                content.quiz = obj
-                content.quiz.total_points = sum(q.points for q in obj.questions.all())
-                filtered_contents.append(content)
-
-    return render(request, 'videos/portfolio.html', {'contents': filtered_contents})
+def eighth_page(request):
+    return render_page(request, 'rel_money', 'videos/pages/eighth_page.html')
 
 
 def get_objects(request):
