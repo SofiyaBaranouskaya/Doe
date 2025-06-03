@@ -635,32 +635,32 @@ def video_detail(request, video_id):
 def fun_fact_detail(request, fun_fact_id):
     fun_fact = get_object_or_404(FunFact, id=fun_fact_id)
 
-    # Инициализируем переменные для шаблона
     points_added = 0
     added_to_completed = False
 
     if request.user.is_authenticated:
-        # Получаем или создаем связанный объект Content
         content_type = ContentType.objects.get_for_model(FunFact)
-        content, created = Content.objects.get_or_create(
-            content_type=content_type,
-            object_id=fun_fact.id,
-            defaults={
-                'title': fun_fact.title,
-                # добавьте другие обязательные поля модели Content
-            }
-        )
 
-        # Проверяем, не просмотрен ли уже этот факт
+        # Пытаемся получить контент или создаём, если не найден
+        content = Content.objects.filter(
+            content_type=content_type,
+            object_id=fun_fact.id
+        ).first()
+
+        if not content:
+            content = Content.objects.create(
+                content_type=content_type,
+                object_id=fun_fact.id,
+                title=fun_fact.title,
+                # добавь здесь обязательные поля, если есть
+            )
+
+        # Проверяем, просмотрен ли уже
         if not request.user.completed_content.filter(pk=content.pk).exists():
-            # Начисляем баллы (предполагаем, что у FunFact есть поле points)
             points_added = fun_fact.points
             request.user.points_count += points_added
-
-            # Добавляем в completed_content
             request.user.completed_content.add(content)
             request.user.save()
-
             added_to_completed = True
 
     return render(request, 'videos/fun_fact.html', {
@@ -668,7 +668,6 @@ def fun_fact_detail(request, fun_fact_id):
         'points_added': points_added,
         'added_to_completed': added_to_completed
     })
-
 
 def chitchat_detail(request, pk):
     chitchat = get_object_or_404(ChitChat, pk=pk)
