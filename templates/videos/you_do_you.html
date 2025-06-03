@@ -154,8 +154,20 @@
             background-color: #FFECE8;
         }
 
+
         .chit-chat {
             background-color: #FFC6D4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .chitchat-text {
+            text-align: center;
+            line-height: 1.2;
+            white-space: pre-line;
+            margin: 0 auto;
         }
 
         .quiz {
@@ -219,7 +231,7 @@
                     {% elif content.content_type.model == 'challenge' %}
                         Challenge
                     {% elif content.content_type.model == 'chitchat' %}
-                        Chit Chat
+                        <div class="chitchat-text">Would you rather...</div>
                     {% elif content.content_type.model == 'quiz' %}
                         Quiz
                     {% endif %}

@@ -85,6 +85,10 @@ class Schools(models.Model):
     name = models.CharField(max_length=70)
     code = models.IntegerField(blank=True, null=True)
 
+    class Meta:
+        verbose_name = "Schools"
+        verbose_name_plural = "Schools"
+
     def __str__(self):
         return self.name
 
@@ -507,6 +511,10 @@ class ChallengeUserAnswer(models.Model):
 class Quiz(models.Model):
     title = models.CharField(max_length=150)
 
+    class Meta:
+        verbose_name = "Quizzes"
+        verbose_name_plural = "Quizzes"
+
     def __str__(self):
         return self.title
 
@@ -583,10 +591,16 @@ class QuizAnswer(models.Model):
     def __str__(self):
         return f"Answer for {self.question.text} by {self.quiz_user_choice.user.username}"
 
+
+
 class Regards(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=255)
     points_needed = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "Rewards"
+        verbose_name_plural = "Rewards"
 
     def __str__(self):
         return self.title

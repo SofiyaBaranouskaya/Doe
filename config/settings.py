@@ -221,5 +221,3 @@ STATICFILES_STORAGE_DEBUG = True
 AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False  # отключаем подписи в ссылках
 AWS_S3_ADDRESSING_STYLE = "path"  # важно для Supabase!
-
-print("FILE STORAGE:", DEFAULT_FILE_STORAGE)
