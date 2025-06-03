@@ -309,6 +309,12 @@
             cursor: pointer;
             font-weight: bold;
         }
+
+        .highlight-error {
+            outline: 1px solid #FFC6D4;
+        }
+
+
     </style>
 </head>
 <body>
@@ -493,7 +499,7 @@
 
                       <div class="grid-container">
                         <!-- Первая строка -->
-                        <div class="grid-item" data-value="Coding">Coding</div>
+                        <div class="grid-item" data-value="Coding" tabindex="0">Coding</div>
                         <div class="grid-item" data-value="Writing">Writing</div>
 
                         <!-- Вторая строка -->
@@ -826,19 +832,6 @@
         let currentStep = 0;
         const totalSteps = steps.length;
 
-function toggleRequiredFields() {
-    document.querySelectorAll('.step').forEach((step, index) => {
-        const inputs = step.querySelectorAll('input[required], select[required]');
-        inputs.forEach(input => {
-            if (step.classList.contains('active')) {
-                input.setAttribute('required', '');
-            } else {
-                input.removeAttribute('required');
-            }
-        });
-    });
-}
-
         function showStep(index) {
             steps.forEach((step, i) => {
                 step.classList.toggle('active', i === index);
@@ -852,17 +845,85 @@ function toggleRequiredFields() {
             const totalWidth = 340;
             const filledWidth = totalWidth * ((index + 1) / totalSteps);
             progressBarFill.setAttribute('width', filledWidth.toString());
-            toggleRequiredFields();
         }
 
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
-                if (currentStep < totalSteps - 1) {
+                const currentStepElement = steps[currentStep];
+                const inputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]');
+
+                let allValid = true;
+
+                for (const input of inputs) {
+                    if (!input.checkValidity()) {
+                        input.reportValidity();
+                        allValid = false;
+                        break;
+                    }
+                }
+
+                // ДОПОЛНИТЕЛЬНО: Проверка для блоков школ
+                if (allValid) {
+                    const schoolSelects = currentStepElement.querySelectorAll('.school-select');
+                    for (const select of schoolSelects) {
+                        if (select.value === '0') {
+                            const otherInput = select.closest('.school-block').querySelector('.other-school input');
+                            if (!otherInput.value.trim()) {
+                                otherInput.setAttribute('required', 'required');
+                                otherInput.reportValidity();
+                                allValid = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+ // ДОБАВЬТЕ ЭТО ДЛЯ ПРОВЕРКИ ИНТЕРЕСОВ И ХОББИ НА СООТВЕТСТВУЮЩИХ ШАГАХ
+if (allValid) {
+    // Проверка для шага 3 (интересы и хобби)
+    if (currentStep === 2) { // Шаг 3 (индексация с 0)
+        if (chosenInterests.length === 0) {
+            const industrySelect = document.getElementById('industrySelect');
+            const inputBlock = industrySelect.closest('.input_block'); // Находим родительский блок
+
+            // Добавляем классы для подсветки
+            industrySelect.classList.add('highlight-error');
+
+            industrySelect.focus();
+            industrySelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            allValid = false;
+
+            // Убираем подсветку через 2 секунды (как у хобби)
+            setTimeout(() => {
+                industrySelect.classList.remove('highlight-error');
+            }, 2000);
+        }
+
+        if (selectedHobbies.length === 0) {
+            const hobbyItems = document.querySelectorAll('.grid-item');
+            if (hobbyItems.length > 0) {
+                hobbyItems[0].focus();
+                hobbyItems[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Опционально: подсветка элементов
+                hobbyItems.forEach(el => el.classList.add('highlight-error'));
+                setTimeout(() => {
+                    hobbyItems.forEach(el => el.classList.remove('highlight-error'));
+                }, 2000);
+            }
+            allValid = false;
+        }
+    }
+}
+
+
+                if (allValid && currentStep < totalSteps - 1) {
                     currentStep++;
                     showStep(currentStep);
                 }
             });
         }
+
 
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
@@ -932,8 +993,22 @@ function toggleRequiredFields() {
                     const newName = oldName.replace(/\d+/, schoolIndex);
                     el.setAttribute('name', newName);
                     el.value = '';
+
+                    // Обновляем required, если поле важное
+                    if (
+                        oldName.includes('[school_id]') ||
+                        oldName.includes('[grad_year]')
+                    ) {
+                        el.setAttribute('required', 'required');
+                    }
+
+                    // Очищаем "required" у поля Other, если оно не активно
+                    if (oldName.includes('[other_name]')) {
+                        el.removeAttribute('required');
+                    }
                 }
             });
+
 
             // Сбросить поле "Other"
             const otherInput = newBlock.querySelector('.other-school input');

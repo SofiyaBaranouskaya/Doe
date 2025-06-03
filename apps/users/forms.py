@@ -11,7 +11,15 @@ class RegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'phone_number', 'password1', 'password2')
+        fields = ('email', 'phone_number', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = self.cleaned_data['email']  # авто-установка username = email
+        if commit:
+            user.save()
+        return user
+
 
 class SchoolForm(forms.Form):
     school = forms.ModelChoiceField(

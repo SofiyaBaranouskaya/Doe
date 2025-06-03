@@ -13,6 +13,7 @@ from utils.supabase_storage import SupabaseStorage
 
 
 class User(AbstractUser):
+    username = models.CharField(max_length=150, unique=True, blank=True)
     email = models.EmailField(unique=True)
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
