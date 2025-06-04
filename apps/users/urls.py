@@ -26,6 +26,8 @@ urlpatterns = [
     path('redeem-reward/', views.redeem_reward, name='redeem_reward'),
     path('custom-redirect/', views.redirect_view, name='custom_redirect'),
 
+    path('events_page/', views.events_page, name='events_page'),
+
     path('profile_page/', views.user_profile, name='user_profile'),
     path('change_profile_data/', views.user_profile_change, name='user_profile_change'),
     path('get_user_points/', views.get_user_points, name='get_user_points'),

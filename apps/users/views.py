@@ -48,6 +48,9 @@ def onboarding_view4(request):
 def profile_end(request):
     return render(request, 'users/profile_end.html')
 
+def events_page(request):
+    return render(request, 'videos/events_page.html')
+
 def google_oauth2_complete(request):
     """
     Обработчик завершения OAuth2 процесса (например, для Google).
