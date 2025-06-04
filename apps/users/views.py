@@ -359,33 +359,32 @@ def save_profile_steps(request):
 
         # Handle profile picture
         avatar_set = False
-        # Для загруженного файла
         if 'avatar' in request.FILES:
             avatar_file = request.FILES['avatar']
-            public_url = upload_user_avatar(
+            relative_path = upload_user_avatar(
                 file=avatar_file,
                 user_id=user.id,
                 file_name=avatar_file.name,
                 bucket_name='profile_pictures',
                 content_type=avatar_file.content_type
             )
-            if public_url:
-                user.profile_picture = public_url
+            if relative_path:
+                user.profile_picture.name = relative_path  # <--- ВАЖНО!
                 avatar_set = True
 
-        # Для сгенерированного аватара
+        # Генерация аватара, если пользователь ничего не загрузил
         if not avatar_set and not user.profile_picture:
             generated_buffer = generate_initial_avatar(user)
             if generated_buffer:
-                public_url = upload_user_avatar(
+                relative_path = upload_user_avatar(
                     file=generated_buffer,
                     user_id=user.id,
                     file_name=f"avatar_{user.id}.png",
                     content_type='image/png',
                     bucket_name='profile_pictures'
                 )
-                if public_url:
-                    user.profile_picture = public_url
+                if relative_path:
+                    user.profile_picture.name = relative_path  # <--- И ЗДЕСЬ ТОЖЕ!
                 generated_buffer.close()
 
         # Parse JSON-like strings and convert to comma-separated

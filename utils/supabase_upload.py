@@ -4,17 +4,19 @@ from supabase import create_client, Client
 
 def upload_user_avatar(file, user_id, bucket_name, file_name=None, content_type='image/jpeg'):
     """
-    Uploads an avatar to Supabase Storage
+    Uploads an avatar to Supabase Storage.
     :param file: File object or BytesIO buffer
-    :param user_id: User ID for path
-    :param bucket_name: The name of the Supabase Storage bucket
-    :param file_name: Optional custom file name
-    :param content_type: MIME type of the file
-    :return: Public URL or None
+    :param user_id: User ID for organizing storage paths
+    :param bucket_name: Supabase Storage bucket name
+    :param file_name: Optional file name
+    :param content_type: MIME type
+    :return: Relative path or None if failed
     """
-    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    try:
+        supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    except Exception:
+        return None
 
-    # Generate file path
     if file_name:
         file_path = f"avatars/{user_id}/{file_name}"
     elif hasattr(file, 'name'):
@@ -23,28 +25,25 @@ def upload_user_avatar(file, user_id, bucket_name, file_name=None, content_type=
         file_path = f"avatars/{user_id}/avatar_{user_id}.png"
 
     try:
-        # Prepare file data
         if hasattr(file, 'read'):
-            file.seek(0)  # перемотка, если это Django InMemoryUploadedFile
+            file.seek(0)
             file_data = file.read()
         else:
             file_data = file
 
-        # Upload file
         upload_response = supabase.storage.from_(bucket_name).upload(
             file_path,
             file_data,
-            file_options={"content-type": content_type, "x-upsert": "true"}  # добавь upsert, если нужно заменять
+            file_options={"content-type": content_type, "x-upsert": "true"}
         )
 
-        if upload_response.error:
-            print(f"Supabase upload error: {upload_response.error.message}")
+        if not (upload_response and hasattr(upload_response, 'path')):
             return None
 
-        # Get public URL
-        url_response = supabase.storage.from_(bucket_name).get_public_url(file_path)
-        return url_response
+        # Optionally check access via get_public_url (optional in prod)
+        supabase.storage.from_(bucket_name).get_public_url(file_path)
 
-    except Exception as e:
-        print(f"Error uploading avatar: {str(e)}")
+        return file_path
+
+    except Exception:
         return None

@@ -17,6 +17,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
+        max_length=500,
         storage=SupabaseStorage(bucket_name='profile_pictures'),  # без параметров
         blank=True,
         null=True

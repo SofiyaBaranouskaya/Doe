@@ -6,8 +6,9 @@ from django.core.files.storage import Storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from environ import ImproperlyConfigured
+from django.utils.deconstruct import deconstructible
 
-
+@deconstructible
 class SupabaseStorage(Storage):
     def __init__(self, bucket_name):
         if not bucket_name:
