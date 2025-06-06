@@ -1053,28 +1053,47 @@ def submit_challenge(request, challenge_id):
 
             for element in challenge.elements.all():
                 field_name = f"field_{element.id}"
-                answer_value = request.POST.get(field_name)
 
-                if answer_value is not None:
-                    ChallengeUserAnswer.objects.create(
-                        attempt=attempt,
-                        element=element,
-                        answer=answer_value
-                    )
+                if element.element == 'file':
+                    uploaded_file = request.FILES.get(field_name)
+                    if uploaded_file:
+                        ChallengeUserAnswer.objects.create(
+                            attempt=attempt,
+                            element=element,
+                            file=uploaded_file,
+                            answer=''  # пустое значение для файла
+                        )
+                else:
+                    answer_value = request.POST.get(field_name)
+                    if answer_value is not None:
+                        ChallengeUserAnswer.objects.create(
+                            attempt=attempt,
+                            element=element,
+                            answer=answer_value
+                        )
+
+            redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
 
             if is_ajax:
-                return JsonResponse({'success': True, 'message': 'Answer saved successfully!'})
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Answer saved successfully!',
+                    'url': redirect_url
+                })
             else:
                 messages.success(request, "Answer saved successfully!")
                 return redirect('challenge_view_content', pk=challenge.id)
 
         except Exception as e:
-            print("Ошибка при сохранении:", e)
-
             if is_ajax:
-                return JsonResponse({'success': False, 'message': f"Ошибка при сохранении: {str(e)}"})
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e),
+                }, status=400)
             else:
-                messages.error(request, f"Ошибка при сохранении: {e}")
+                print("Redirect URL:", redirect_url)
+
+                messages.error(request, f"url редиректа:{redirect_url}. Ошибка при сохранении: {e}")
                 return redirect('challenge_view_content', pk=challenge.id)
 
     # GET-запрос — отдаем форму
@@ -1097,78 +1116,68 @@ def submit_challenge(request, challenge_id):
         'elements_with_options': elements_with_options,
     })
 
+
 @login_required
 def submit_challenge_in_add(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
-
-    points_added = 0
 
     if request.method == 'POST':
         is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
         try:
-            # Получаем или создаем выбор пользователя для данного челленджа
             user_choice, _ = ChallengeUserChoice.objects.get_or_create(
                 user=request.user,
                 challenge=challenge
             )
 
-            # Создаём новую попытку
             attempt = ChallengeUserAttempt.objects.create(
-                choice=user_choice
+                choice=user_choice,
+                is_secondary=True
             )
 
-            # Сохраняем ответы на элементы челленджа
             for element in challenge.elements.all():
                 field_name = f"field_{element.id}"
-                answer_value = request.POST.get(field_name)
 
-                if answer_value is not None:
-                    ChallengeUserAnswer.objects.create(
-                        attempt=attempt,
-                        element=element,
-                        answer=answer_value
-                    )
+                if element.element == 'file':
+                    uploaded_file = request.FILES.get(field_name)
+                    if uploaded_file:
+                        ChallengeUserAnswer.objects.create(
+                            attempt=attempt,
+                            element=element,
+                            file=uploaded_file,
+                            answer=''
+                        )
+                else:
+                    answer_value = request.POST.get(field_name)
+                    if answer_value is not None:
+                        ChallengeUserAnswer.objects.create(
+                            attempt=attempt,
+                            element=element,
+                            answer=answer_value
+                        )
 
-            # Теперь считаем, сколько попыток создано (не важно, завершены или нет)
-            user_choice = ChallengeUserChoice.objects.get(user=request.user, challenge=challenge)
-            created_attempts_count = user_choice.attempts.count()  # Считаем все попытки
-
-            # Проверяем, равно ли количество попыток минимальному количеству
-            if created_attempts_count == challenge.min_answers_required:
-                # Проверяем, были ли уже начислены баллы для этого челленджа
-                if not request.user.completed_content.filter(id=challenge.id).exists():
-                    # Начисляем баллы, если условие min_answers_required выполнено и еще не начислены
-                    points_added = challenge.points
-                    request.user.points_count += points_added  # Добавляем баллы к счету пользователя
-                    request.user.save()  # Сохраняем изменения в пользователе
-
-                    # Создаём или извлекаем объект Content для челленджа
-                    content_type = ContentType.objects.get_for_model(Challenge)
-                    content, created = Content.objects.get_or_create(
-                        content_type=content_type,
-                        object_id=challenge.id,
-                        defaults={'title': challenge.title}
-                    )
-
-                    # Добавляем в completed_content
-                    request.user.completed_content.add(content)
+            redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
 
             if is_ajax:
-                return JsonResponse({'success': True, 'message': 'Answer saved successfully!', 'points_added': points_added})
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Answer saved successfully!',
+                    'url': redirect_url
+                })
             else:
-                if points_added > 0:
-                    messages.success(request, f"Answer saved successfully! You earned {points_added} points.")
-                return redirect('challenge_view_content', pk=challenge.id)
+                return redirect(redirect_url)
 
         except Exception as e:
-            print("Ошибка при сохранении:", e)
-
             if is_ajax:
-                return JsonResponse({'success': False, 'message': f"Ошибка при сохранении: {str(e)}"})
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e),
+                }, status=400)
             else:
                 messages.error(request, f"Ошибка при сохранении: {e}")
                 return redirect('challenge_view_content', pk=challenge.id)
+
+    return redirect('challenge_view_content', pk=challenge.id)
 
 
 @login_required
@@ -1176,10 +1185,16 @@ def edit_challenge_attempt(request, attempt_id):
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
-    answers = {
-        ans.element.id: ans.answer
-        for ans in attempt.answers.all()
-    }
+    answers = {}
+    for ans in attempt.answers.all():
+        if ans.answer and (ans.element.element == "file"):
+            # Для файлов сохраняем полный путь и базовое имя
+            answers[ans.element.id] = {
+                'value': ans.answer,
+                'basename': os.path.basename(ans.answer)
+            }
+        else:
+            answers[ans.element.id] = ans.answer
 
     elements_with_options = []
     for element in challenge.elements.filter(show_after_confirm=False):
@@ -1227,39 +1242,38 @@ def save_attempts_status(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+
             for item in data.get('attempts', []):
                 attempt_id = item.get('id')
                 is_done = item.get('is_done')
                 cancel_edit_delete = item.get('cancel_edit_delete', False)
 
                 old_attempt = ChallengeUserAttempt.objects.get(id=attempt_id)
+                challenge = old_attempt.challenge
 
                 if cancel_edit_delete:
-                    # Создаем новую попытку с теми же параметрами
                     new_name = f"Ответ от {timezone.now().strftime('%d.%m.%Y %H:%M')}"
                     new_attempt = ChallengeUserAttempt.objects.create(
                         user=old_attempt.user,
-                        challenge=old_attempt.challenge,
+                        challenge=challenge,
                         is_done=is_done,
                         name=new_name
                     )
 
-                    # Копируем все ответы
                     for answer in old_attempt.answers.all():
-                        answer.pk = None  # создаёт копию объекта
+                        answer.pk = None
                         answer.attempt = new_attempt
                         answer.save()
                 else:
-                    # Просто обновляем текущую попытку
                     old_attempt.is_done = is_done
                     old_attempt.save()
 
-            return JsonResponse({'status': 'ok'})
+            return JsonResponse({'status': 'success'})
+
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
-
 
 
 def quiz_detail(request, pk):

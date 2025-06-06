@@ -325,6 +325,148 @@
             padding: 15px 20px 30px 20px;
             background-color: white;
         }
+
+/* Основные стили для контейнера загрузки */
+.file-upload-container {
+  margin: 20px 0;
+}
+
+/* Стили для скрытия стандартного инпута */
+.file-upload-input {
+  display: none;
+}
+
+/* Стили для кастомного дизайна */
+.file-upload-label {
+  display: block;
+  cursor: pointer;
+}
+
+.file-upload-design {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 2px dashed #CBD5E0;
+  border-radius: 8px;
+  background-color: #F7FAFC;
+  transition: all 0.3s ease;
+}
+
+.file-upload-design:hover {
+  border-color: #d1d1d1;
+  background-color: #ffffff;
+}
+
+.file-upload-icon {
+  margin-bottom: 12px;
+}
+
+.file-upload-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #2D3748;
+  margin-bottom: 4px;
+}
+
+.file-upload-hint {
+  font-size: 14px;
+  color: #718096;
+}
+
+/* Стили для загруженного файла */
+.uploaded-file {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #EDF2F7;
+  border-radius: 6px;
+}
+
+.uploaded-file svg {
+  margin-right: 8px;
+}
+
+.file-link {
+  color: #3182CE;
+  text-decoration: none;
+  font-size: 14px;
+  word-break: break-all; /* Добавлено для переноса длинных имен */
+}
+
+.file-link:hover {
+  text-decoration: underline;
+}
+
+/* Стили для drag-and-drop эффекта */
+.file-upload-design.drag-over {
+  border-color: #3182CE;
+  background-color: #BEE3F8;
+}
+
+/* Стили для превью файлов */
+.file-preview-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    max-height: 200px;
+    overflow: hidden;
+}
+
+.file-preview-image {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+.file-preview-video {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 4px;
+}
+
+.file-type-icon {
+    background: #4299E1;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.file-name {
+    font-size: 14px;
+    color: #2D3748;
+    word-break: break-all; /* Добавлено для переноса длинных имен */
+    max-width: 100%;
+}
+
+/* Анимации для лучшего UX */
+.file-upload-design {
+    transition: all 0.3s ease, background-image 0.3s ease;
+}
+
+.file-preview-container {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Скрываем загрузочный интерфейс, если файл уже загружен */
+.file-upload-container.has-file .file-upload-label {
+  display: none;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -397,7 +539,9 @@
             <div class="card3"></div>
         </div>
 
-        <form method="POST" action="{% if editing %}{% url 'update_challenge_attempt' attempt_id %}{% else %}{% url 'submit_challenge_in_add' challenge.id %}{% endif %}" id="challenge-form">
+        <form method="POST" enctype="multipart/form-data"
+              action="{% if editing %}{% url 'update_challenge_attempt' attempt_id %}{% else %}{% url 'submit_challenge_in_add' challenge.id %}{% endif %}"
+              id="challenge-form">
             {% csrf_token %}
 
             <div class="main_content">
@@ -407,55 +551,73 @@
                             <label>{{ element.name }}</label>
 
                             {% if element.element == "input" %}
-                                <input
-                                    type="text"
-                                    placeholder="{{ element.value }}"
-                                    name="field_{{ element.id }}"
-                                    value="{{ item.value|default:'' }}"
-                                >
+                                <input type="text" placeholder="{{ element.value }}"
+                                       name="field_{{ element.id }}"
+                                       value="{{ item.value|default:'' }}">
                             {% elif element.element == "date" %}
-                                <input
-                                    type="date"
-                                    placeholder="{{ element.value }}"
-                                    name="field_{{ element.id }}"
-                                    value="{{ item.value|default:'' }}"
-                                >
+                                <input type="date" placeholder="{{ element.value }}"
+                                       name="field_{{ element.id }}"
+                                       value="{{ item.value|default:'' }}">
                             {% elif element.element == "textarea" %}
-                                <textarea
-                                    placeholder="{{ element.value }}"
-                                    name="field_{{ element.id }}"
-                                >{{ item.value|default:'' }}</textarea>
+                                <textarea placeholder="{{ element.value }}"
+                                          name="field_{{ element.id }}">{{ item.value|default:'' }}</textarea>
                             {% elif element.element == "radio" %}
                                 <div class="radio-time_group">
                                     {% for option in options %}
                                         <div class="radio-container">
                                             <label>
-                                                <input
-                                                    type="radio"
-                                                    name="field_{{ element.id }}"
-                                                    value="{{ option.label }}"
-                                                    {% if item.value == option.label %}checked{% endif %}
-                                                    class="radio_button"
-                                                >
+                                                <input type="radio"
+                                                       name="field_{{ element.id }}"
+                                                       value="{{ option.label }}"
+                                                       {% if item.value == option.label %}checked{% endif %}
+                                                       class="radio_button">
                                                 <span class="radio-custom"></span>
                                                 <span class="radio-text">{{ option.label }}</span>
                                             </label>
                                         </div>
                                     {% endfor %}
                                 </div>
-                            {% endif %}
+{% elif element.element == "file" %}
+<div class="file-upload-container">
+  <label class="file-upload-label">
+    <input
+      type="file"
+      name="field_{{ element.id }}"
+      class="file-upload-input"
+      {% if accept_types %}accept="{{ accept_types }}"{% endif %}
+    >
+    <div class="file-upload-design">
+      <svg class="file-upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 15V3M12 3L8 7M12 3L16 7M5 13H3V21C3 21.5523 3.44772 22 4 22H20C20.5523 22 21 21.5523 21 21V13H19" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="file-upload-text">Select files to upload</p>
+      <p class="file-upload-hint">or drop files here</p>
+    </div>
+  </label>
+
+  {% if item.value %}
+  <div class="uploaded-file">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M14 2V8H20" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <a href="{{ item.value }}" target="_blank" class="file-link">Download uploaded file</a>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
                         </div>
                     {% endwith %}
                 {% endfor %}
             </div>
 
             {% if editing %}
-              <button type="submit" class="save" id="change-btn">Change</button>
+                <button type="submit" class="save" id="change-btn">Change</button>
             {% else %}
-              <button type="submit" class="save">Save</button>
+                <button type="submit" class="save">Save</button>
             {% endif %}
-
         </form>
+
 
         <div id="message-box" style="margin-top: 20px;"></div>
 
@@ -466,33 +628,159 @@
     </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('challenge-form');
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('challenge-form');
 
+    if (form) {
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Останавливаем стандартное поведение формы
+            event.preventDefault();
 
-            const formData = new FormData(form);
-            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
-            const formAction = form.getAttribute('action');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
 
-            fetch(formAction, {
+            fetch(form.action, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrfToken,
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
-                body: formData
+                body: new FormData(form)
             })
-            .then(() => {
-                window.location.href = "{% url 'challenge_view_content' challenge.id %}";
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
             })
-            .catch((error) => {
-                console.error('Error while sending form:', error);
-                window.location.href = "{% url 'challenge_view_content' challenge.id %}";
+            .then(data => {
+                console.log("Ответ от сервера:", data);
+                if (data.status === 'success') {
+                    if (!data.url) {
+                        throw new Error("URL для перехода не указан!");
+                    }
+                    window.location.href = data.url;
+                } else if (data.status === 'error') {
+                    throw new Error(data.message || 'Ошибка на сервере');
+                } else {
+                    throw new Error('Неизвестный ответ сервера');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка при отправке: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '{% if editing %}Change{% else %}Save{% endif %}';
             });
         });
-    });
+    }
 
+    // Улучшенный код для загрузки файлов с предпросмотром
+    const fileInputs = document.querySelectorAll('.file-upload-input');
+
+    fileInputs.forEach(input => {
+        const label = input.closest('.file-upload-label');
+        const design = label.querySelector('.file-upload-design');
+        const textElement = design.querySelector('.file-upload-text');
+        const hintElement = design.querySelector('.file-upload-hint');
+        const iconElement = design.querySelector('.file-upload-icon');
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'file-preview-container';
+        design.appendChild(previewContainer);
+
+        // Очистка превью
+        function clearPreview() {
+            previewContainer.innerHTML = '';
+            design.style.backgroundImage = '';
+            textElement.textContent = 'Select files to upload';
+            hintElement.style.display = 'block';
+            if (iconElement) iconElement.style.display = 'block';
+        }
+
+        // Создание превью
+        function createPreview(file) {
+            clearPreview();
+
+            if (file.type.startsWith('image/')) {
+                // Превью для изображений
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgPreview = document.createElement('img');
+                    imgPreview.src = e.target.result;
+                    imgPreview.className = 'file-preview-image';
+                    previewContainer.appendChild(imgPreview);
+
+                    // Скрываем текст и иконку при наличии превью
+                    textElement.textContent = file.name;
+                    hintElement.style.display = 'none';
+                    if (iconElement) iconElement.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('video/')) {
+                // Превью для видео
+                const videoPreview = document.createElement('video');
+                videoPreview.controls = true;
+                videoPreview.className = 'file-preview-video';
+                videoPreview.src = URL.createObjectURL(file);
+                previewContainer.appendChild(videoPreview);
+
+                textElement.textContent = file.name;
+                hintElement.style.display = 'none';
+                if (iconElement) iconElement.style.display = 'none';
+            } else {
+                // Для других типов файлов
+                const fileType = document.createElement('div');
+                fileType.className = 'file-type-icon';
+                fileType.textContent = file.name.split('.').pop().toUpperCase();
+                previewContainer.appendChild(fileType);
+
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                previewContainer.appendChild(fileName);
+            }
+        }
+
+        // Обработка drag-and-drop
+        design.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            design.classList.add('drag-over');
+        });
+
+        design.addEventListener('dragleave', () => {
+            design.classList.remove('drag-over');
+        });
+
+        design.addEventListener('drop', (e) => {
+            e.preventDefault();
+            design.classList.remove('drag-over');
+
+            if (e.dataTransfer.files.length) {
+                input.files = e.dataTransfer.files;
+                createPreview(input.files[0]);
+            }
+        });
+
+        // Обработка выбора файла через кнопку
+        input.addEventListener('change', () => {
+            if (input.files.length) {
+                createPreview(input.files[0]);
+            } else {
+                clearPreview();
+            }
+        });
+
+        // Инициализация при наличии уже загруженного файла
+        if (input.dataset.hasFile === 'true') {
+            textElement.textContent = input.dataset.fileName || 'Uploaded file';
+            hintElement.style.display = 'none';
+            if (iconElement) iconElement.style.display = 'none';
+        }
+    });
+});
 </script>
+
+
 </body>
 </html>

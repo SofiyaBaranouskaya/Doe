@@ -409,6 +409,7 @@ class ChallengeElement(models.Model):
         ('textarea', 'Multiline Input'),
         ('radio', 'Radio Buttons'),
         ('date', 'Date Picker'),
+        ('file', 'File Upload'),
     ]
 
     TYPE_CHOICES = [
@@ -442,6 +443,7 @@ class ChallengeDisplaySettings(models.Model):
     DISPLAY_TYPE_CHOICES = [
         ('text', 'Text Blocks'),
         ('table', 'Table'),
+        ('nothing', 'Nothing'),
     ]
 
     challenge = models.OneToOneField(Challenge, on_delete=models.CASCADE, related_name='display_settings')
@@ -504,8 +506,16 @@ class ChallengeUserAnswer(models.Model):
     attempt = models.ForeignKey(ChallengeUserAttempt, on_delete=models.CASCADE, related_name='answers')
     element = models.ForeignKey('ChallengeElement', on_delete=models.CASCADE)
     answer = models.TextField()
+    file = models.FileField(
+        upload_to='challenge_uploads/',
+        storage=SupabaseStorage(bucket_name='challenge_uploads'),
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
+        if self.file:
+            return f"{self.element.name} → {self.file.name}"
         return f"{self.element.name} → {self.answer}"
 
 

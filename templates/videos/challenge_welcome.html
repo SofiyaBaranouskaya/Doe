@@ -320,8 +320,7 @@
                     </svg>
                 </button>
             </a>
-
-            {% if has_answers %}
+            {% if has_answers and challenge.display_settings.display_type != 'nothing' %}
                 <a href="{% url 'challenge_view_content' challenge.id %}">
                     <button class="view_button">
                         {{ challenge.button_view_name }}
@@ -337,8 +336,9 @@
         {% include 'videos/nav.html' %}
     </div>
 
+
     <script>
-         document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
             const getStartedBtn = document.querySelector(".get_started");
             const instructions = document.querySelector(".instructions");
             const buttonContainer = document.querySelector(".button_container");
@@ -350,6 +350,5 @@
             });
         });
     </script>
-
 </body>
 </html>
