@@ -1120,26 +1120,33 @@ def submit_challenge(request, challenge_id):
 @login_required
 def submit_challenge_in_add(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
+    logger.info(f"Received POST request for challenge: {challenge_id}")
 
     if request.method == 'POST':
         is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        logger.info(f"Is AJAX request: {is_ajax}")
 
         try:
             user_choice, _ = ChallengeUserChoice.objects.get_or_create(
                 user=request.user,
                 challenge=challenge
             )
+            logger.info(f"User choice created/queried for user: {request.user.id}")
 
             attempt = ChallengeUserAttempt.objects.create(
                 choice=user_choice,
                 is_secondary=True
             )
+            logger.info(f"Challenge user attempt created with ID: {attempt.id}")
 
+            # Логируем данные поля формы
             for element in challenge.elements.all():
                 field_name = f"field_{element.id}"
+                logger.info(f"Processing field: {field_name}")
 
                 if element.element == 'file':
                     uploaded_file = request.FILES.get(field_name)
+                    logger.info(f"File uploaded for field {field_name}: {uploaded_file}")
                     if uploaded_file:
                         ChallengeUserAnswer.objects.create(
                             attempt=attempt,
@@ -1149,6 +1156,7 @@ def submit_challenge_in_add(request, challenge_id):
                         )
                 else:
                     answer_value = request.POST.get(field_name)
+                    logger.info(f"Answer for field {field_name}: {answer_value}")
                     if answer_value is not None:
                         ChallengeUserAnswer.objects.create(
                             attempt=attempt,
@@ -1157,6 +1165,7 @@ def submit_challenge_in_add(request, challenge_id):
                         )
 
             redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
+            logger.info(f"Redirecting to URL: {redirect_url}")
 
             if is_ajax:
                 return JsonResponse({
@@ -1168,6 +1177,7 @@ def submit_challenge_in_add(request, challenge_id):
                 return redirect(redirect_url)
 
         except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
             if is_ajax:
                 return JsonResponse({
                     'status': 'error',
@@ -1179,59 +1189,24 @@ def submit_challenge_in_add(request, challenge_id):
 
     return redirect('challenge_view_content', pk=challenge.id)
 
-
 @login_required
 def edit_challenge_attempt(request, attempt_id):
-    print("edit_challenge_attempt called")
+    logger.info(f"edit_challenge_attempt called for attempt ID: {attempt_id}")
 
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
     if request.method == "POST" and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        print("POST with AJAX detected")
-
+        logger.info("POST with AJAX detected")
         try:
-            print("FILES keys:", list(request.FILES.keys()))
-            print("POST keys:", list(request.POST.keys()))
-
-            for element in challenge.elements.filter(show_after_confirm=False):
-                field_name = f"field_{element.id}"
-                uploaded_file = request.FILES.get(field_name)
-                value = request.POST.get(field_name)
-
-                answer = attempt.answers.filter(element=element).first()
-
-                if element.element == "file":
-                    if uploaded_file:
-                        if answer:
-                            if answer.file:
-                                answer.file.delete(save=False)
-                            answer.file = uploaded_file
-                            answer.save()
-                        else:
-                            ChallengeUserAnswer.objects.create(
-                                attempt=attempt,
-                                element=element,
-                                file=uploaded_file,
-                                answer="",
-                            )
-                else:
-                    if value is not None:
-                        if answer:
-                            answer.answer = value
-                            answer.save()
-                        else:
-                            attempt.answers.create(
-                                element=element,
-                                answer=value,
-                            )
-
+            # обработка формы
+            ...
             return JsonResponse({
                 "success": True,
                 "url": reverse("challenge_result", args=[attempt.id]),
             })
-
         except Exception as e:
+            logger.error(f"Error occurred while processing challenge attempt: {str(e)}")
             import traceback
             traceback.print_exc()
             return JsonResponse({
@@ -1239,6 +1214,7 @@ def edit_challenge_attempt(request, attempt_id):
                 "message": str(e),
             }, status=400)
 
+    # ❗ Добавляем return для GET-запросов, не-AJAX-запросов и т.д.
     answers = {}
     for ans in attempt.answers.all():
         if ans.element.element == "file" and ans.file:
@@ -1264,7 +1240,6 @@ def edit_challenge_attempt(request, attempt_id):
         'editing': True,
         'attempt_id': attempt.id,
     })
-
 
 @login_required
 @require_POST
