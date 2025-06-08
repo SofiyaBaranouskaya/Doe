@@ -1182,12 +1182,18 @@ def submit_challenge_in_add(request, challenge_id):
 
 @login_required
 def edit_challenge_attempt(request, attempt_id):
+    print("edit_challenge_attempt called")
+
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
     if request.method == "POST" and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        print("POST with AJAX detected")
 
         try:
+            print("FILES keys:", list(request.FILES.keys()))
+            print("POST keys:", list(request.POST.keys()))
+
             for element in challenge.elements.filter(show_after_confirm=False):
                 field_name = f"field_{element.id}"
                 uploaded_file = request.FILES.get(field_name)
@@ -1263,6 +1269,10 @@ def edit_challenge_attempt(request, attempt_id):
 @login_required
 @require_POST
 def update_challenge_attempt(request, attempt_id):
+    print("update_challenge_attempt called")
+    print("FILES keys:", list(request.FILES.keys()))
+    print("POST keys:", list(request.POST.keys()))
+
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
@@ -1271,6 +1281,8 @@ def update_challenge_attempt(request, attempt_id):
             field_name = f"field_{element.id}"
             answer_value = request.POST.get(field_name)
             uploaded_file = request.FILES.get(field_name)
+
+            print(f"Element {element.id}: answer_value={answer_value}, uploaded_file={uploaded_file}")
 
             if element.element == "file" and uploaded_file:
                 answer, created = ChallengeUserAnswer.objects.get_or_create(attempt=attempt, element=element)

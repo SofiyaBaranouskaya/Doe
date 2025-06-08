@@ -625,72 +625,72 @@
                                         </div>
                                     {% endfor %}
                                 </div>
-{% elif element.element == "file" %}
-<div class="file-upload-container {% if item.value and item.value.value %}has-file{% endif %}"
-     data-controller="file-upload">
+                            {% elif element.element == "file" %}
+                            <div class="file-upload-container {% if item.value and item.value.value %}has-file{% endif %}"
+                                 data-controller="file-upload">
 
-  <!-- Блок кастомного загрузчика -->
-  <label class="file-upload-label">
-    <input
-      type="file"
-      name="field_{{ element.id }}"
-      class="file-upload-input"
-      {% if accept_types %}accept="{{ accept_types }}"{% endif %}
-      {% if item.value and item.value.value %}data-has-file="true" data-file-name="{{ item.value.basename }}"{% endif %}
-    >
-    <div class="file-upload-design">
-      <svg class="file-upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 15V3M12 3L8 7M12 3L16 7M5 13H3V21C3 21.5523 3.44772 22 4 22H20C20.5523 22 21 21.5523 21 21V13H19" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <p class="file-upload-text">Select files to upload</p>
-      <p class="file-upload-hint">or drop files here</p>
-    </div>
-  </label>
+                              <!-- Блок кастомного загрузчика -->
+                              <label class="file-upload-label">
+                                <input
+                                  type="file"
+                                  name="field_{{ element.id }}"
+                                  class="file-upload-input"
+                                  {% if accept_types %}accept="{{ accept_types }}"{% endif %}
+                                  {% if item.value and item.value.value %}data-has-file="true" data-file-name="{{ item.value.basename }}"{% endif %}
+                                >
+                                <div class="file-upload-design">
+                                  <svg class="file-upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 15V3M12 3L8 7M12 3L16 7M5 13H3V21C3 21.5523 3.44772 22 4 22H20C20.5523 22 21 21.5523 21 21V13H19" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                  </svg>
+                                  <p class="file-upload-text">Select files to upload</p>
+                                  <p class="file-upload-hint">or drop files here</p>
+                                </div>
+                              </label>
 
-  <!-- Блок уже загруженного файла -->
-  {% if item.value and item.value.value %}
-    {% with file_url=item.value.value|lower %}
-      {% with file_ext=file_url|slice:"-4:" %}
-        <div class="uploaded-file-preview">
-          {% if file_ext in ".jpg.jpeg.png.gif.webp" %}
-            <div class="file-preview-container">
-              <img src="{{ item.value.value }}" class="file-preview-image" alt="Uploaded preview">
-            </div>
-          {% elif file_ext in ".mp4.webm.mov.avi" %}
-            <div class="file-preview-container">
-              <video controls class="file-preview-video">
-                <source src="{{ item.value.value }}" type="video/mp4">
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          {% endif %}
+                              <!-- Блок уже загруженного файла -->
+                              {% if item.value and item.value.value %}
+                                {% with file_url=item.value.value|lower %}
+                                  {% with file_ext=file_url|slice:"-4:" %}
+                                    <div class="uploaded-file-preview">
+                                      {% if file_ext in ".jpg.jpeg.png.gif.webp" %}
+                                        <div class="file-preview-container">
+                                          <img src="{{ item.value.value }}" class="file-preview-image" alt="Uploaded preview">
+                                        </div>
+                                      {% elif file_ext in ".mp4.webm.mov.avi" %}
+                                        <div class="file-preview-container">
+                                          <video controls class="file-preview-video">
+                                            <source src="{{ item.value.value }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                          </video>
+                                        </div>
+                                      {% endif %}
 
-          <!-- Модифицированный блок информации о файле -->
-          <div class="file-upload-info">
-            <div class="file-info-box">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 2V8H20" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <a href="{{ item.value.value }}" target="_blank" class="file-link">{{ item.value.basename }}</a>
-            </div>
-            <button type="button" class="file-remove-btn" data-action="file-upload#removeFile">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      {% endwith %}
-    {% endwith %}
-  {% endif %}
+                                      <!-- Модифицированный блок информации о файле -->
+                                      <div class="file-upload-info">
+                                        <div class="file-info-box">
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M14 2V8H20" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                          </svg>
+                                          <a href="{{ item.value.value }}" target="_blank" class="file-link">{{ item.value.basename }}</a>
+                                        </div>
+                                        <button type="button" class="file-remove-btn" data-action="file-upload#removeFile">
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M18 6L6 18M6 6L18 18" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  {% endwith %}
+                                {% endwith %}
+                              {% endif %}
 
-  <!-- Скрытое поле для отметки об удалении файла -->
-  {% if item.value and item.value.value %}
-    <input type="hidden" name="field_{{ element.id }}_clear" id="field_{{ element.id }}_clear" value="false">
-  {% endif %}
-</div>
-{% endif %}
+                              <!-- Скрытое поле для отметки об удалении файла -->
+                              {% if item.value and item.value.value %}
+                                <input type="hidden" name="field_{{ element.id }}_clear" id="field_{{ element.id }}_clear" value="false">
+                              {% endif %}
+                            </div>
+                            {% endif %}
 
                         </div>
                     {% endwith %}
