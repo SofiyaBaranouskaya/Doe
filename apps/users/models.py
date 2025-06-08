@@ -426,6 +426,7 @@ class ChallengeElement(models.Model):
     element = models.CharField(max_length=20, choices=ELEMENT_CHOICES, verbose_name="Element")
     field_type = models.CharField(max_length=10, choices=TYPE_CHOICES, verbose_name="Data type")
     value = models.TextField(blank=True, verbose_name="Value")
+    add_other_option = models.BooleanField(default=False, verbose_name='Add variant "Other"')
     show_after_confirm = models.BooleanField(default=False, verbose_name="Show after condition is done")
 
     class Meta:
@@ -435,9 +436,10 @@ class ChallengeElement(models.Model):
         return f"{self.name} ({self.element})"
 
     def get_options(self):
-        if self.element in ["radio", "checkbox"] and self.value:
-            return [opt.strip() for opt in self.value.split(",")]
-        return []
+        options = [opt.strip() for opt in self.value.split(",")] if self.value else []
+        if self.element in ["radio", "checkbox"] and self.add_other_option:
+            options.append("Other")
+        return options
 
 
 class ChallengeDisplaySettings(models.Model):

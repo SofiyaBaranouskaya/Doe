@@ -260,7 +260,7 @@ class ChitChatUserChoiceAdmin(ExportAdminMixin):
 class ChallengeElementInline(nested_admin.NestedTabularInline):
     model = ChallengeElement
     extra = 1
-    fields = ('order', 'name', 'element', 'field_type', 'value', 'show_after_confirm')
+    fields = ('order', 'name', 'element', 'field_type', 'value', 'add_other_option', 'show_after_confirm')
 
 
 class TextFieldDisplayOrderInline(nested_admin.NestedTabularInline):

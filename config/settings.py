@@ -221,3 +221,22 @@ STATICFILES_STORAGE_DEBUG = True
 AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False  # отключаем подписи в ссылках
 AWS_S3_ADDRESSING_STYLE = "path"  # важно для Supabase!
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

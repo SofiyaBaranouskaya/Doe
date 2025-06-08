@@ -1183,6 +1183,9 @@ def edit_challenge_attempt(request, attempt_id):
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
+    # Логируем начальные данные
+    logger.debug(f"Attempt ID: {attempt.id}, Challenge: {challenge.title}, User: {request.user}")
+
     # Собираем сохранённые ответы
     answers = {}
     for ans in attempt.answers.all():
@@ -1196,21 +1199,74 @@ def edit_challenge_attempt(request, attempt_id):
         else:
             answers[ans.element.id] = ans.answer
 
+    logger.debug(f"Initial answers from DB: {answers}")
+
     elements_with_options = []
     for element in challenge.elements.filter(show_after_confirm=False):
         if element.element in ["radio", "checkbox"]:
             options = parse_radio_values(element.value)
-            elements_with_options.append({
+            value = answers.get(element.id)
+
+            field_data = {
                 "element": element,
                 "options": options,
-                "value": answers.get(element.id)
-            })
+                "value": None,
+                "other_value": None,
+            }
+
+            if element.element == "checkbox":
+                option_labels = [opt["label"] for opt in options]
+
+                if isinstance(value, list):
+                    last_value = value[-1] if value else None
+
+                    if last_value and last_value not in option_labels:
+
+                        known_values = [v for v in value if v in option_labels]
+                        field_data["value"] = known_values + ["__other__"]
+                        field_data["other_value"] = last_value
+                    else:
+                        field_data["value"] = value
+                        field_data["other_value"] = None
+                elif isinstance(value, str):
+                    field_data["value"] = [value]
+                    field_data["other_value"] = None
+                else:
+                    field_data["value"] = value
+                    field_data["other_value"] = None
+
+            elif element.element == "radio":
+                option_labels = [opt["label"] for opt in options]
+
+                field_data = {
+                    "element": element,
+                    "options": options,
+                    "value": None,
+                    "other_value": None
+                }
+
+                if value:  # Если есть значение
+                    if value == "__other__":  # Случай 1: явно выбрана опция "Other"
+                        field_data["value"] = "__other__"
+                        field_data["other_value"] = request.POST.get(f"field_{element.id}_other", "")
+                    elif value not in option_labels:  # Случай 2: значение не в списке опций
+                        field_data["value"] = "__other__"
+                        field_data["other_value"] = value
+                    else:  # Случай 3: выбрана стандартная опция
+                        field_data["value"] = value
+            else:
+                field_data["value"] = value
+
+            elements_with_options.append(field_data)
+
         else:
             elements_with_options.append({
                 "element": element,
                 "options": None,
                 "value": answers.get(element.id)
             })
+
+    logger.debug(f"Final answers: {answers}")
 
     return render(request, 'videos/challenge_add_content.html', {
         'challenge': challenge,
@@ -1227,12 +1283,18 @@ def update_challenge_attempt(request, attempt_id):
     challenge = attempt.choice.challenge
 
     try:
+        # Логируем начальные данные
+        logger.debug(f"Attempt ID: {attempt.id}, Challenge: {challenge.title}, User: {request.user}")
+
         for element in challenge.elements.all():
             field_name = f"field_{element.id}"
+            logger.debug(f"Processing element: {element.id} - {element.element}")
 
             if element.element == "file":
+                # Обработка файлов
                 uploaded_file = request.FILES.get(field_name)
                 if uploaded_file:
+                    logger.debug(f"File uploaded: {uploaded_file.name}")
                     answer, created = ChallengeUserAnswer.objects.get_or_create(
                         attempt=attempt,
                         element=element
@@ -1242,16 +1304,57 @@ def update_challenge_attempt(request, attempt_id):
                     answer.file = uploaded_file
                     answer.save()
             elif element.element == "checkbox":
+                # Обработка чекбоксов
                 selected_values = request.POST.getlist(field_name)
+                logger.debug(f"Selected checkbox values for element {element.id}: {selected_values}")
+
+                # Если выбрана опция "Other", проверяем введенное значение
+                if "__other__" in selected_values:
+                    other_value = request.POST.get(f"field_{element.id}_other")
+                    logger.debug(f"Received 'Other' value for checkbox: {other_value}")
+
+                    if other_value:  # Если введено значение для Other
+                        selected_values = [v for v in selected_values if v != "__other__"]  # Убираем __other__
+                        selected_values.append(other_value)  # Добавляем введенное значение
+                        logger.debug(f"Saving custom 'Other' value for checkboxes: {other_value}")
+
+                # Сохраняем выбранные значения
                 answer_value = ",".join(selected_values)
+                logger.debug(f"Saving checkbox answer: {answer_value}")
                 ChallengeUserAnswer.objects.update_or_create(
                     attempt=attempt,
                     element=element,
                     defaults={'answer': answer_value}
                 )
-            else:
+            elif element.element == "radio":
+                # Обработка радиокнопок
                 answer_value = request.POST.get(field_name)
-                if answer_value is not None:
+                logger.debug(f"Received radio value: {answer_value}")
+
+                if answer_value == "__other__":
+                    logger.debug(f"Other option selected for element {element.id}")
+                    other_value = request.POST.get(f"field_{element.id}_other")
+                    logger.debug(f"Received 'Other' value: {other_value}")
+
+                    if other_value:
+                        answer_value = other_value  # Если пользователь ввел значение в поле Other
+                        logger.debug(f"Saving custom 'Other' value: {other_value}")
+                    else:
+                        answer_value = "__other__"  # Если значение не введено, то сохраняем "__other__"
+
+                logger.debug(f"Saving radio answer: {answer_value}")
+                ChallengeUserAnswer.objects.update_or_create(
+                    attempt=attempt,
+                    element=element,
+                    defaults={'answer': answer_value}
+                )
+
+
+            else:
+                # Обработка остальных элементов
+                answer_value = request.POST.get(field_name)
+                if answer_value:
+                    logger.debug(f"Saving other answer: {answer_value}")
                     ChallengeUserAnswer.objects.update_or_create(
                         attempt=attempt,
                         element=element,
@@ -1266,6 +1369,7 @@ def update_challenge_attempt(request, attempt_id):
         })
 
     except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
         import traceback
         traceback.print_exc()
         return JsonResponse({

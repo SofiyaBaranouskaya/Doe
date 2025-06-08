@@ -660,38 +660,91 @@
                                 <textarea placeholder="{{ element.value }}"
                                           name="field_{{ element.id }}">{{ item.value|default:'' }}</textarea>
                             {% elif element.element == "radio" %}
-                                <div class="radio-time_group">
+                            <div class="radio-time_group">
+                                {% for option in options %}
+                                    <div class="radio-container">
+                                        <label>
+                                            <input type="radio"
+                                                   name="field_{{ element.id }}"
+                                                   value="{{ option.label }}"
+                                                   {% if item.value == option.label %}checked{% endif %}
+                                                   class="radio_button">
+                                            <span class="radio-custom"></span>
+                                            <span class="radio-text">{{ option.label }}</span>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+
+                                {% if element.add_other_option %}
+                                    <div class="radio-container">
+                                        <label>
+                                            <input type="radio"
+                                                   name="field_{{ element.id }}"
+                                                   value="__other__"
+                                                   {% if item.value == "__other__" %}checked{% endif %}
+                                                   class="radio_button other-radio"
+                                                   id="radio_other_{{ element.id }}">
+                                            <span class="radio-custom"></span>
+                                            <span class="radio-text">Other:</span>
+                                        </label>
+                                        <input type="text"
+                                               name="field_{{ element.id }}_other"
+                                               id="other_input_{{ element.id }}"
+                                               value="{% if item.value == '__other__' %}{{ item.other_value|default:'' }}{% endif %}"
+                                               placeholder="Your option"
+                                               {% if item.value != '__other__' %}disabled{% endif %}>
+                                    </div>
+
+                                    <script>
+                                        document.getElementById('radio_other_{{ element.id }}').addEventListener('change', function() {
+                                            const otherInput = document.getElementById('other_input_{{ element.id }}');
+                                            otherInput.disabled = !this.checked;
+                                            if (this.checked) {
+                                                otherInput.focus();
+                                            }
+                                        });
+                                    </script>
+                                {% endif %}
+                            </div>
+
+                            {% elif element.element == "checkbox" %}
+                                <div class="checkbox-group">
                                     {% for option in options %}
-                                        <div class="radio-container">
+                                        <div class="checkbox-container">
                                             <label>
-                                                <input type="radio"
+                                                <input type="checkbox"
                                                        name="field_{{ element.id }}"
                                                        value="{{ option.label }}"
-                                                       {% if item.value == option.label %}checked{% endif %}
-                                                       class="radio_button">
-                                                <span class="radio-custom"></span>
-                                                <span class="radio-text">{{ option.label }}</span>
+                                                       {% if item.value and option.label in item.value %}checked{% endif %}
+                                                       class="checkbox_button">
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-text">{{ option.label }}</span>
                                             </label>
                                         </div>
                                     {% endfor %}
-                                </div>
 
-{% elif element.element == "checkbox" %}
-    <div class="checkbox-group">
-        {% for option in options %}
-            <div class="checkbox-container">
-                <label>
-                    <input type="checkbox"
-                           name="field_{{ element.id }}"
-                           value="{{ option.label }}"
-                           {% if item.value and option.label in item.value %}checked{% endif %}
-                           class="checkbox_button">
-                    <span class="checkbox-custom"></span>
-                    <span class="checkbox-text">{{ option.label }}</span>
-                </label>
-            </div>
-        {% endfor %}
-    </div>
+                                    {% if element.add_other_option %}
+                                        <div class="checkbox-container">
+                                            <label>
+                                                <input type="checkbox"
+                                                       name="field_{{ element.id }}"
+                                                       value="__other__"
+                                                       {% if item.value and "__other__" in item.value %}checked{% endif %}
+                                                       class="checkbox_button"
+                                                       id="checkbox_other_{{ element.id }}_{{ forloop.counter }}"
+                                                       onclick="document.getElementById('other_input_{{ element.id }}_{{ forloop.counter }}').focus();">
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-text">Other:</span>
+                                            </label>
+                                            <input type="text"
+                                                   name="field_{{ element.id }}_other"
+                                                   id="other_input_{{ element.id }}_{{ forloop.counter }}"
+                                                   value="{% if item.value and '__other__' in item.value %}{{ item.other_value }}{% endif %}"
+                                                   placeholder="Your option">
+                                        </div>
+                                    {% endif %}
+
+                                </div>
 
                             {% elif element.element == "file" %}
                             <div class="file-upload-container {% if item.value and item.value.value %}has-file{% endif %}"
