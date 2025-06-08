@@ -1185,13 +1185,60 @@ def edit_challenge_attempt(request, attempt_id):
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
+    if request.method == "POST" and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+
+        try:
+            for element in challenge.elements.filter(show_after_confirm=False):
+                field_name = f"field_{element.id}"
+                uploaded_file = request.FILES.get(field_name)
+                value = request.POST.get(field_name)
+
+                answer = attempt.answers.filter(element=element).first()
+
+                if element.element == "file":
+                    if uploaded_file:
+                        if answer:
+                            if answer.file:
+                                answer.file.delete(save=False)
+                            answer.file = uploaded_file
+                            answer.save()
+                        else:
+                            ChallengeUserAnswer.objects.create(
+                                attempt=attempt,
+                                element=element,
+                                file=uploaded_file,
+                                answer="",
+                            )
+                else:
+                    if value is not None:
+                        if answer:
+                            answer.answer = value
+                            answer.save()
+                        else:
+                            attempt.answers.create(
+                                element=element,
+                                answer=value,
+                            )
+
+            return JsonResponse({
+                "success": True,
+                "url": reverse("challenge_result", args=[attempt.id]),
+            })
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                "success": False,
+                "message": str(e),
+            }, status=400)
+
     answers = {}
     for ans in attempt.answers.all():
-        if ans.answer and (ans.element.element == "file"):
-            # Для файлов сохраняем полный путь и базовое имя
+        if ans.element.element == "file" and ans.file:
             answers[ans.element.id] = {
-                'value': ans.answer,
-                'basename': os.path.basename(ans.answer)
+                'value': ans.file.url,
+                'basename': os.path.basename(ans.file.name)
             }
         else:
             answers[ans.element.id] = ans.answer
@@ -1223,7 +1270,15 @@ def update_challenge_attempt(request, attempt_id):
         for element in challenge.elements.all():
             field_name = f"field_{element.id}"
             answer_value = request.POST.get(field_name)
-            if answer_value is not None:
+            uploaded_file = request.FILES.get(field_name)
+
+            if element.element == "file" and uploaded_file:
+                answer, created = ChallengeUserAnswer.objects.get_or_create(attempt=attempt, element=element)
+                if answer.file:
+                    answer.file.delete(save=False)
+                answer.file = uploaded_file
+                answer.save()
+            elif answer_value is not None:
                 ChallengeUserAnswer.objects.update_or_create(
                     attempt=attempt,
                     element=element,
@@ -1233,7 +1288,8 @@ def update_challenge_attempt(request, attempt_id):
         return JsonResponse({'success': True, 'message': 'Changes saved!'})
 
     except Exception as e:
-        print("Error while updating:", e)
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'message': f'Error: {e}'}, status=500)
 
 

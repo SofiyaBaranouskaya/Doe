@@ -144,17 +144,17 @@
         }
         .photo-container {
             width: 100%;
-            height: 100%; /* или установите желаемую высоту */
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* чтобы избежать выхода изображения за пределы контейнера */
+            overflow: hidden;
         }
 
         .photo-container img {
             max-width: 100%;
             max-height: 100%;
-            object-fit: cover; /* или 'contain', в зависимости от того, как хотите отображать изображение */
+            object-fit: cover;
         }
         .card3{
             background-color: #FD7981;
@@ -326,17 +326,14 @@
             background-color: white;
         }
 
-/* Основные стили для контейнера загрузки */
 .file-upload-container {
   margin: 20px 0;
 }
 
-/* Стили для скрытия стандартного инпута */
 .file-upload-input {
   display: none;
 }
 
-/* Стили для кастомного дизайна */
 .file-upload-label {
   display: block;
   cursor: pointer;
@@ -375,7 +372,6 @@
   color: #718096;
 }
 
-/* Стили для загруженного файла */
 .uploaded-file {
   display: flex;
   align-items: center;
@@ -393,20 +389,18 @@
   color: #3182CE;
   text-decoration: none;
   font-size: 14px;
-  word-break: break-all; /* Добавлено для переноса длинных имен */
+  word-break: break-all;
 }
 
 .file-link:hover {
   text-decoration: underline;
 }
 
-/* Стили для drag-and-drop эффекта */
 .file-upload-design.drag-over {
   border-color: #3182CE;
   background-color: #BEE3F8;
 }
 
-/* Стили для превью файлов */
 .file-preview-container {
     width: 100%;
     display: flex;
@@ -442,11 +436,10 @@
 .file-name {
     font-size: 14px;
     color: #2D3748;
-    word-break: break-all; /* Добавлено для переноса длинных имен */
+    word-break: break-all;
     max-width: 100%;
 }
 
-/* Анимации для лучшего UX */
 .file-upload-design {
     transition: all 0.3s ease, background-image 0.3s ease;
 }
@@ -460,12 +453,67 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Скрываем загрузочный интерфейс, если файл уже загружен */
 .file-upload-container.has-file .file-upload-label {
   display: none;
 }
 
+.file-upload-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-top: 8px;
+}
 
+.file-info-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.file-info-box svg {
+  flex-shrink: 0;
+}
+
+.file-link {
+  color: #3182ce;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.file-link:hover {
+  text-decoration: underline;
+}
+
+.file-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+  color: #e53e3e;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.file-remove-btn:hover {
+  background-color: #fed7d7;
+}
+
+.file-remove-btn svg {
+  display: block;
+}
 
     </style>
 </head>
@@ -578,13 +626,17 @@
                                     {% endfor %}
                                 </div>
 {% elif element.element == "file" %}
-<div class="file-upload-container">
+<div class="file-upload-container {% if item.value and item.value.value %}has-file{% endif %}"
+     data-controller="file-upload">
+
+  <!-- Блок кастомного загрузчика -->
   <label class="file-upload-label">
     <input
       type="file"
       name="field_{{ element.id }}"
       class="file-upload-input"
       {% if accept_types %}accept="{{ accept_types }}"{% endif %}
+      {% if item.value and item.value.value %}data-has-file="true" data-file-name="{{ item.value.basename }}"{% endif %}
     >
     <div class="file-upload-design">
       <svg class="file-upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -595,17 +647,51 @@
     </div>
   </label>
 
-  {% if item.value %}
-  <div class="uploaded-file">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M14 2V8H20" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <a href="{{ item.value }}" target="_blank" class="file-link">Download uploaded file</a>
-  </div>
+  <!-- Блок уже загруженного файла -->
+  {% if item.value and item.value.value %}
+    {% with file_url=item.value.value|lower %}
+      {% with file_ext=file_url|slice:"-4:" %}
+        <div class="uploaded-file-preview">
+          {% if file_ext in ".jpg.jpeg.png.gif.webp" %}
+            <div class="file-preview-container">
+              <img src="{{ item.value.value }}" class="file-preview-image" alt="Uploaded preview">
+            </div>
+          {% elif file_ext in ".mp4.webm.mov.avi" %}
+            <div class="file-preview-container">
+              <video controls class="file-preview-video">
+                <source src="{{ item.value.value }}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          {% endif %}
+
+          <!-- Модифицированный блок информации о файле -->
+          <div class="file-upload-info">
+            <div class="file-info-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 2V8H20" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <a href="{{ item.value.value }}" target="_blank" class="file-link">{{ item.value.basename }}</a>
+            </div>
+            <button type="button" class="file-remove-btn" data-action="file-upload#removeFile">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      {% endwith %}
+    {% endwith %}
+  {% endif %}
+
+  <!-- Скрытое поле для отметки об удалении файла -->
+  {% if item.value and item.value.value %}
+    <input type="hidden" name="field_{{ element.id }}_clear" id="field_{{ element.id }}_clear" value="false">
   {% endif %}
 </div>
 {% endif %}
+
                         </div>
                     {% endwith %}
                 {% endfor %}
@@ -631,6 +717,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('challenge-form');
 
+    // Обработка отправки формы
     if (form) {
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -648,23 +735,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: new FormData(form)
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Network error');
-                return response.json();
+            .then(async response => {
+                console.log('Raw response:', response);
+
+                const contentType = response.headers.get("Content-Type") || "";
+                const text = await response.text();
+
+                console.log('Response Content-Type:', contentType);
+                console.log('Raw Response Text:', text);
+
+                if (contentType.includes("application/json")) {
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('Parsed JSON:', data);
+                        return data;
+                    } catch (e) {
+                        console.error("Ошибка парсинга JSON:", e);
+                        throw new Error("Сервер вернул некорректный JSON");
+                    }
+                } else {
+                    throw new Error("Ожидался JSON, но получен другой формат");
+                }
             })
             .then(data => {
-                console.log("Ответ от сервера:", data);
-                if (data.status === 'success') {
-                    if (!data.url) {
-                        throw new Error("URL для перехода не указан!");
+                console.log('Parsed JSON:', data);
+
+                if (data.success === true) {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        alert(data.message || 'Изменения сохранены');
                     }
-                    window.location.href = data.url;
-                } else if (data.status === 'error') {
+                } else if (data.success === false) {
                     throw new Error(data.message || 'Ошибка на сервере');
                 } else {
                     throw new Error('Неизвестный ответ сервера');
                 }
             })
+
             .catch(error => {
                 console.error('Ошибка:', error);
                 alert('Ошибка при отправке: ' + error.message);
@@ -676,10 +784,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Улучшенный код для загрузки файлов с предпросмотром
+    // Обработка загрузки файлов
     const fileInputs = document.querySelectorAll('.file-upload-input');
 
     fileInputs.forEach(input => {
+        const container = input.closest('.file-upload-container');
         const label = input.closest('.file-upload-label');
         const design = label.querySelector('.file-upload-design');
         const textElement = design.querySelector('.file-upload-text');
@@ -689,10 +798,14 @@ document.addEventListener('DOMContentLoaded', function() {
         previewContainer.className = 'file-preview-container';
         design.appendChild(previewContainer);
 
+        // Получаем элемент для очистки файла
+        const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
+        const clearInput = container.querySelector(`#${clearInputId}`) ||
+                          container.querySelector('input[type="hidden"][name$="_clear"]');
+
         // Очистка превью
         function clearPreview() {
             previewContainer.innerHTML = '';
-            design.style.backgroundImage = '';
             textElement.textContent = 'Select files to upload';
             hintElement.style.display = 'block';
             if (iconElement) iconElement.style.display = 'block';
@@ -703,7 +816,6 @@ document.addEventListener('DOMContentLoaded', function() {
             clearPreview();
 
             if (file.type.startsWith('image/')) {
-                // Превью для изображений
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const imgPreview = document.createElement('img');
@@ -711,14 +823,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     imgPreview.className = 'file-preview-image';
                     previewContainer.appendChild(imgPreview);
 
-                    // Скрываем текст и иконку при наличии превью
                     textElement.textContent = file.name;
                     hintElement.style.display = 'none';
                     if (iconElement) iconElement.style.display = 'none';
+
+                    // Помечаем старый файл на удаление
+                    if (clearInput) clearInput.value = 'true';
+                    const existingPreview = container.querySelector('.uploaded-file-preview');
+                    if (existingPreview) existingPreview.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
-            } else if (file.type.startsWith('video/')) {
-                // Превью для видео
+            }
+            else if (file.type.startsWith('video/')) {
                 const videoPreview = document.createElement('video');
                 videoPreview.controls = true;
                 videoPreview.className = 'file-preview-video';
@@ -728,8 +844,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 textElement.textContent = file.name;
                 hintElement.style.display = 'none';
                 if (iconElement) iconElement.style.display = 'none';
-            } else {
-                // Для других типов файлов
+
+                if (clearInput) clearInput.value = 'true';
+                const existingPreview = container.querySelector('.uploaded-file-preview');
+                if (existingPreview) existingPreview.style.display = 'none';
+            }
+            else {
                 const fileType = document.createElement('div');
                 fileType.className = 'file-type-icon';
                 fileType.textContent = file.name.split('.').pop().toUpperCase();
@@ -739,10 +859,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileName.className = 'file-name';
                 fileName.textContent = file.name;
                 previewContainer.appendChild(fileName);
+
+                if (clearInput) clearInput.value = 'true';
+                const existingPreview = container.querySelector('.uploaded-file-preview');
+                if (existingPreview) existingPreview.style.display = 'none';
             }
         }
 
-        // Обработка drag-and-drop
+        // Drag-and-drop обработчики
         design.addEventListener('dragover', (e) => {
             e.preventDefault();
             design.classList.add('drag-over');
@@ -755,14 +879,13 @@ document.addEventListener('DOMContentLoaded', function() {
         design.addEventListener('drop', (e) => {
             e.preventDefault();
             design.classList.remove('drag-over');
-
             if (e.dataTransfer.files.length) {
                 input.files = e.dataTransfer.files;
                 createPreview(input.files[0]);
             }
         });
 
-        // Обработка выбора файла через кнопку
+        // Обработка выбора файла
         input.addEventListener('change', () => {
             if (input.files.length) {
                 createPreview(input.files[0]);
@@ -771,16 +894,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Инициализация при наличии уже загруженного файла
-        if (input.dataset.hasFile === 'true') {
-            textElement.textContent = input.dataset.fileName || 'Uploaded file';
-            hintElement.style.display = 'none';
-            if (iconElement) iconElement.style.display = 'none';
+        // Обработка удаления файла
+        const removeBtn = container.querySelector('.file-remove-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                if (clearInput) clearInput.value = 'true';
+
+                const existingPreview = container.querySelector('.uploaded-file-preview');
+                if (existingPreview) existingPreview.style.display = 'none';
+
+                input.value = '';
+                clearPreview();
+
+                // Активируем загрузчик
+                container.classList.remove('has-file');
+                label.style.display = 'block';
+                design.style.display = 'flex';
+            });
         }
     });
 });
 </script>
-
 
 </body>
 </html>
