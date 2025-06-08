@@ -875,7 +875,7 @@ def challenge_add_content(request, pk):
 
     elements_with_options = []
     for element in challenge.elements.filter(show_after_confirm=False):
-        if element.element == "radio":
+        if element.element in ["radio", "checkbox"]:
             options = parse_radio_values(element.value)
             elements_with_options.append({
                 "element": element,
@@ -1120,33 +1120,24 @@ def submit_challenge(request, challenge_id):
 @login_required
 def submit_challenge_in_add(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
-    logger.info(f"Received POST request for challenge: {challenge_id}")
 
     if request.method == 'POST':
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
-        logger.info(f"Is AJAX request: {is_ajax}")
-
         try:
             user_choice, _ = ChallengeUserChoice.objects.get_or_create(
                 user=request.user,
                 challenge=challenge
             )
-            logger.info(f"User choice created/queried for user: {request.user.id}")
 
             attempt = ChallengeUserAttempt.objects.create(
                 choice=user_choice,
                 is_secondary=True
             )
-            logger.info(f"Challenge user attempt created with ID: {attempt.id}")
 
-            # Логируем данные поля формы
             for element in challenge.elements.all():
                 field_name = f"field_{element.id}"
-                logger.info(f"Processing field: {field_name}")
 
                 if element.element == 'file':
                     uploaded_file = request.FILES.get(field_name)
-                    logger.info(f"File uploaded for field {field_name}: {uploaded_file}")
                     if uploaded_file:
                         ChallengeUserAnswer.objects.create(
                             attempt=attempt,
@@ -1154,9 +1145,15 @@ def submit_challenge_in_add(request, challenge_id):
                             file=uploaded_file,
                             answer=''
                         )
+                elif element.element == 'checkbox':
+                    selected_values = request.POST.getlist(field_name)
+                    ChallengeUserAnswer.objects.create(
+                        attempt=attempt,
+                        element=element,
+                        answer=",".join(selected_values)
+                    )
                 else:
                     answer_value = request.POST.get(field_name)
-                    logger.info(f"Answer for field {field_name}: {answer_value}")
                     if answer_value is not None:
                         ChallengeUserAnswer.objects.create(
                             attempt=attempt,
@@ -1164,57 +1161,29 @@ def submit_challenge_in_add(request, challenge_id):
                             answer=answer_value
                         )
 
-            redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
-            logger.info(f"Redirecting to URL: {redirect_url}")
-
-            if is_ajax:
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Answer saved successfully!',
-                    'url': redirect_url
-                })
-            else:
-                return redirect(redirect_url)
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Answer saved successfully!',
+                'url': reverse('challenge_view_content', kwargs={'pk': challenge.id})
+            })
 
         except Exception as e:
-            logger.error(f"Error occurred: {str(e)}")
-            if is_ajax:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': str(e),
-                }, status=400)
-            else:
-                messages.error(request, f"Ошибка при сохранении: {e}")
-                return redirect('challenge_view_content', pk=challenge.id)
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e),
+            }, status=400)
 
-    return redirect('challenge_view_content', pk=challenge.id)
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method',
+    }, status=405)
 
 @login_required
 def edit_challenge_attempt(request, attempt_id):
-    logger.info(f"edit_challenge_attempt called for attempt ID: {attempt_id}")
-
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
-    if request.method == "POST" and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        logger.info("POST with AJAX detected")
-        try:
-            # обработка формы
-            ...
-            return JsonResponse({
-                "success": True,
-                "url": reverse("challenge_result", args=[attempt.id]),
-            })
-        except Exception as e:
-            logger.error(f"Error occurred while processing challenge attempt: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({
-                "success": False,
-                "message": str(e),
-            }, status=400)
-
-    # ❗ Добавляем return для GET-запросов, не-AJAX-запросов и т.д.
+    # Собираем сохранённые ответы
     answers = {}
     for ans in attempt.answers.all():
         if ans.element.element == "file" and ans.file:
@@ -1222,17 +1191,26 @@ def edit_challenge_attempt(request, attempt_id):
                 'value': ans.file.url,
                 'basename': os.path.basename(ans.file.name)
             }
+        elif ans.element.element == "checkbox":
+            answers[ans.element.id] = ans.answer.split(",") if ans.answer else []
         else:
             answers[ans.element.id] = ans.answer
 
     elements_with_options = []
     for element in challenge.elements.filter(show_after_confirm=False):
-        options = parse_radio_values(element.value) if element.element == "radio" else None
-        elements_with_options.append({
-            "element": element,
-            "options": options,
-            "value": answers.get(element.id)
-        })
+        if element.element in ["radio", "checkbox"]:
+            options = parse_radio_values(element.value)
+            elements_with_options.append({
+                "element": element,
+                "options": options,
+                "value": answers.get(element.id)
+            })
+        else:
+            elements_with_options.append({
+                "element": element,
+                "options": None,
+                "value": answers.get(element.id)
+            })
 
     return render(request, 'videos/challenge_add_content.html', {
         'challenge': challenge,
@@ -1241,43 +1219,59 @@ def edit_challenge_attempt(request, attempt_id):
         'attempt_id': attempt.id,
     })
 
+
 @login_required
 @require_POST
 def update_challenge_attempt(request, attempt_id):
-    print("update_challenge_attempt called")
-    print("FILES keys:", list(request.FILES.keys()))
-    print("POST keys:", list(request.POST.keys()))
-
     attempt = get_object_or_404(ChallengeUserAttempt, pk=attempt_id, choice__user=request.user)
     challenge = attempt.choice.challenge
 
     try:
         for element in challenge.elements.all():
             field_name = f"field_{element.id}"
-            answer_value = request.POST.get(field_name)
-            uploaded_file = request.FILES.get(field_name)
 
-            print(f"Element {element.id}: answer_value={answer_value}, uploaded_file={uploaded_file}")
-
-            if element.element == "file" and uploaded_file:
-                answer, created = ChallengeUserAnswer.objects.get_or_create(attempt=attempt, element=element)
-                if answer.file:
-                    answer.file.delete(save=False)
-                answer.file = uploaded_file
-                answer.save()
-            elif answer_value is not None:
+            if element.element == "file":
+                uploaded_file = request.FILES.get(field_name)
+                if uploaded_file:
+                    answer, created = ChallengeUserAnswer.objects.get_or_create(
+                        attempt=attempt,
+                        element=element
+                    )
+                    if answer.file:
+                        answer.file.delete(save=False)
+                    answer.file = uploaded_file
+                    answer.save()
+            elif element.element == "checkbox":
+                selected_values = request.POST.getlist(field_name)
+                answer_value = ",".join(selected_values)
                 ChallengeUserAnswer.objects.update_or_create(
                     attempt=attempt,
                     element=element,
                     defaults={'answer': answer_value}
                 )
+            else:
+                answer_value = request.POST.get(field_name)
+                if answer_value is not None:
+                    ChallengeUserAnswer.objects.update_or_create(
+                        attempt=attempt,
+                        element=element,
+                        defaults={'answer': answer_value}
+                    )
 
-        return JsonResponse({'success': True, 'message': 'Changes saved!'})
+        redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Changes saved successfully!',
+            'url': redirect_url
+        })
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return JsonResponse({'success': False, 'message': f'Error: {e}'}, status=500)
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e),
+        }, status=500)
 
 
 @login_required

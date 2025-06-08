@@ -515,6 +515,56 @@
   display: block;
 }
 
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-container label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 8px;
+}
+
+.checkbox_button {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 15px;
+    height: 15px;
+    border: 2px solid #E0E0E0;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.checkbox_button:checked + .checkbox-custom {
+    background-color: #66B498;
+    border-color: #66B498;
+}
+
+.checkbox_button:checked + .checkbox-custom::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+
     </style>
 </head>
 <body>
@@ -625,6 +675,24 @@
                                         </div>
                                     {% endfor %}
                                 </div>
+
+{% elif element.element == "checkbox" %}
+    <div class="checkbox-group">
+        {% for option in options %}
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox"
+                           name="field_{{ element.id }}"
+                           value="{{ option.label }}"
+                           {% if item.value and option.label in item.value %}checked{% endif %}
+                           class="checkbox_button">
+                    <span class="checkbox-custom"></span>
+                    <span class="checkbox-text">{{ option.label }}</span>
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+
                             {% elif element.element == "file" %}
                             <div class="file-upload-container {% if item.value and item.value.value %}has-file{% endif %}"
                                  data-controller="file-upload">
@@ -735,47 +803,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: new FormData(form)
             })
-            .then(async response => {
-                console.log('Raw response:', response);
-
-                const contentType = response.headers.get("Content-Type") || "";
-                const text = await response.text();
-
-                console.log('Response Content-Type:', contentType);
-                console.log('Raw Response Text:', text);
-
-                if (contentType.includes("application/json")) {
-                    try {
-                        const data = JSON.parse(text);
-                        console.log('Parsed JSON:', data);
-                        return data;
-                    } catch (e) {
-                        console.error("Ошибка парсинга JSON:", e);
-                        throw new Error("Сервер вернул некорректный JSON");
-                    }
-                } else {
-                    throw new Error("Ожидался JSON, но получен другой формат");
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
             })
             .then(data => {
-                console.log('Parsed JSON:', data);
+                console.log('Server response:', data);
 
-                if (data.success === true) {
+                // Обрабатываем оба возможных формата ответа
+                if ((data.status === 'success') || (data.success === true)) {
                     if (data.url) {
                         window.location.href = data.url;
                     } else {
-                        alert(data.message || 'Изменения сохранены');
+                        alert(data.message || 'Изменения успешно сохранены');
                     }
-                } else if (data.success === false) {
-                    throw new Error(data.message || 'Ошибка на сервере');
                 } else {
-                    throw new Error('Неизвестный ответ сервера');
+                    throw new Error(data.message || 'Неизвестный ответ сервера');
                 }
             })
-
             .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Ошибка при отправке: ' + error.message);
+                console.error('Error:', error);
+                alert('Ошибка: ' + error.message);
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -784,7 +834,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Обработка загрузки файлов
+    // Остальной код обработки файлов остается без изменений
     const fileInputs = document.querySelectorAll('.file-upload-input');
 
     fileInputs.forEach(input => {

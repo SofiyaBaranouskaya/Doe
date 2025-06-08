@@ -408,6 +408,7 @@ class ChallengeElement(models.Model):
         ('input', 'Input'),
         ('textarea', 'Multiline Input'),
         ('radio', 'Radio Buttons'),
+        ('checkbox', 'Checkboxes'),
         ('date', 'Date Picker'),
         ('file', 'File Upload'),
     ]
@@ -434,7 +435,7 @@ class ChallengeElement(models.Model):
         return f"{self.name} ({self.element})"
 
     def get_options(self):
-        if self.element == "radio" and self.value:
+        if self.element in ["radio", "checkbox"] and self.value:
             return [opt.strip() for opt in self.value.split(",")]
         return []
 
