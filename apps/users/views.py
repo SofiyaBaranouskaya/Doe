@@ -871,6 +871,7 @@ def parse_radio_values(value_string):
 
 
 def challenge_add_content(request, pk):
+    print("challenge add content-------------------------")
     challenge = get_object_or_404(Challenge, pk=pk)
 
     elements_with_options = []
@@ -897,6 +898,8 @@ def normalize_label(label):
     return re.sub(r"\s+", "", label).lower()
 
 def challenge_view_content(request, pk):
+    print("challenge view content-------------------------")
+
     challenge = get_object_or_404(Challenge, pk=pk)
     user_choices = ChallengeUserChoice.objects.filter(
         user=request.user,
@@ -1118,65 +1121,101 @@ def submit_challenge(request, challenge_id):
 
 
 @login_required
+@require_POST
 def submit_challenge_in_add(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
 
-    if request.method == 'POST':
-        try:
-            user_choice, _ = ChallengeUserChoice.objects.get_or_create(
-                user=request.user,
-                challenge=challenge
-            )
+    try:
+        # Создаем или получаем выбор пользователя
+        user_choice, _ = ChallengeUserChoice.objects.get_or_create(
+            user=request.user,
+            challenge=challenge
+        )
 
-            attempt = ChallengeUserAttempt.objects.create(
-                choice=user_choice,
-                is_secondary=True
-            )
+        # Создаем новую попытку
+        attempt = ChallengeUserAttempt.objects.create(
+            choice=user_choice,
+            is_secondary=True
+        )
 
-            for element in challenge.elements.all():
-                field_name = f"field_{element.id}"
+        # Обрабатываем каждый элемент формы
+        for element in challenge.elements.all():
+            field_name = f"field_{element.id}"
+            other_field_name = f"{field_name}_other"  # Имя поля для "other" значения
 
-                if element.element == 'file':
-                    uploaded_file = request.FILES.get(field_name)
-                    if uploaded_file:
-                        ChallengeUserAnswer.objects.create(
-                            attempt=attempt,
-                            element=element,
-                            file=uploaded_file,
-                            answer=''
-                        )
-                elif element.element == 'checkbox':
-                    selected_values = request.POST.getlist(field_name)
+            if element.element == 'file':
+                # Обработка файлов
+                uploaded_file = request.FILES.get(field_name)
+                if uploaded_file:
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,
                         element=element,
-                        answer=",".join(selected_values)
+                        file=uploaded_file,
+                        answer=''
                     )
-                else:
-                    answer_value = request.POST.get(field_name)
-                    if answer_value is not None:
-                        ChallengeUserAnswer.objects.create(
-                            attempt=attempt,
-                            element=element,
-                            answer=answer_value
-                        )
 
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Answer saved successfully!',
-                'url': reverse('challenge_view_content', kwargs={'pk': challenge.id})
-            })
+            elif element.element == 'checkbox':
+                # Обработка чекбоксов с опцией "other"
+                selected_values = request.POST.getlist(field_name)
+                other_value = request.POST.get(other_field_name, "").strip()
 
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e),
-            }, status=400)
+                if "__other__" in selected_values and other_value:
+                    # Удаляем __other__ и добавляем кастомное значение
+                    selected_values = [v for v in selected_values if v != "__other__"]
+                    selected_values.append(other_value)
+                elif "__other__" in selected_values and not other_value:
+                    # Оставляем __other__ если поле пустое
+                    pass
 
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request method',
-    }, status=405)
+                # Сохраняем значения чекбоксов
+                ChallengeUserAnswer.objects.create(
+                    attempt=attempt,
+                    element=element,
+                    answer=",".join(selected_values) if selected_values else ""
+                )
+
+            elif element.element == 'radio':
+                # Обработка радио-кнопок с опцией "other"
+                answer_value = request.POST.get(field_name)
+                other_value = request.POST.get(other_field_name, "").strip()
+
+                if answer_value == "__other__" and other_value:
+                    # Заменяем __other__ на кастомное значение
+                    answer_value = other_value
+                elif answer_value == "__other__" and not other_value:
+                    # Оставляем __other__ если поле пустое
+                    pass
+
+                # Сохраняем значение радио-кнопки
+                if answer_value is not None:
+                    ChallengeUserAnswer.objects.create(
+                        attempt=attempt,
+                        element=element,
+                        answer=answer_value
+                    )
+
+            else:
+                # Обработка остальных типов полей
+                answer_value = request.POST.get(field_name)
+                if answer_value is not None:
+                    ChallengeUserAnswer.objects.create(
+                        attempt=attempt,
+                        element=element,
+                        answer=answer_value
+                    )
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Answer saved successfully!',
+            'url': reverse('challenge_view_content', kwargs={'pk': challenge.id})
+        })
+
+    except Exception as e:
+        logger.error(f"Error in submit_challenge_in_add: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e),
+        }, status=400)
 
 @login_required
 def edit_challenge_attempt(request, attempt_id):
