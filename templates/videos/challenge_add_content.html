@@ -326,244 +326,247 @@
             background-color: white;
         }
 
-.file-upload-container {
-  margin: 20px 0;
-}
+        .file-upload-container {
+          margin: 20px 0;
+        }
 
-.file-upload-input {
-  display: none;
-}
+        .file-upload-input {
+          display: none;
+        }
 
-.file-upload-label {
-  display: block;
-  cursor: pointer;
-}
+        .file-upload-label {
+          display: block;
+          cursor: pointer;
+        }
 
-.file-upload-design {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  border: 2px dashed #CBD5E0;
-  border-radius: 8px;
-  background-color: #F7FAFC;
-  transition: all 0.3s ease;
-}
+        .file-upload-design {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 32px;
+          border: 2px dashed #CBD5E0;
+          border-radius: 8px;
+          background-color: #F7FAFC;
+          transition: all 0.3s ease;
+        }
 
-.file-upload-design:hover {
-  border-color: #d1d1d1;
-  background-color: #ffffff;
-}
+        .file-upload-design:hover {
+          border-color: #d1d1d1;
+          background-color: #ffffff;
+        }
 
-.file-upload-icon {
-  margin-bottom: 12px;
-}
+        .file-upload-icon {
+          margin-bottom: 12px;
+        }
 
-.file-upload-text {
-  font-size: 16px;
-  font-weight: 500;
-  color: #2D3748;
-  margin-bottom: 4px;
-}
+        .file-upload-text {
+          font-size: 16px;
+          font-weight: 500;
+          color: #2D3748;
+          margin-bottom: 4px;
+        }
 
-.file-upload-hint {
-  font-size: 14px;
-  color: #718096;
-}
+        .file-upload-hint {
+          font-size: 14px;
+          color: #718096;
+        }
 
-.uploaded-file {
-  display: flex;
-  align-items: center;
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #EDF2F7;
-  border-radius: 6px;
-}
+        .uploaded-file {
+          display: flex;
+          align-items: center;
+          margin-top: 16px;
+          padding: 12px;
+          background-color: #EDF2F7;
+          border-radius: 6px;
+        }
 
-.uploaded-file svg {
-  margin-right: 8px;
-}
+        .uploaded-file svg {
+          margin-right: 8px;
+        }
 
-.file-link {
-  color: #3182CE;
-  text-decoration: none;
-  font-size: 14px;
-  word-break: break-all;
-}
+        .file-link {
+          color: #3182CE;
+          text-decoration: none;
+          font-size: 14px;
+          word-break: break-all;
+        }
 
-.file-link:hover {
-  text-decoration: underline;
-}
+        .file-link:hover {
+          text-decoration: underline;
+        }
 
-.file-upload-design.drag-over {
-  border-color: #3182CE;
-  background-color: #BEE3F8;
-}
+        .file-upload-design.drag-over {
+          border-color: #3182CE;
+          background-color: #BEE3F8;
+        }
 
-.file-preview-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-    max-height: 200px;
-    overflow: hidden;
-}
+        .file-preview-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow: hidden;
+        }
 
-.file-preview-image {
-    max-width: 100%;
-    max-height: 180px;
-    border-radius: 4px;
-    object-fit: contain;
-}
+        .file-preview-image {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 4px;
+            object-fit: contain;
+        }
 
-.file-preview-video {
-    max-width: 100%;
-    max-height: 180px;
-    border-radius: 4px;
-}
+        .file-preview-video {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 4px;
+        }
 
-.file-type-icon {
-    background: #4299E1;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-weight: bold;
-    margin-right: 10px;
-}
+        .file-type-icon {
+            background: #4299E1;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
 
-.file-name {
-    font-size: 14px;
-    color: #2D3748;
-    word-break: break-all;
-    max-width: 100%;
-}
+        .file-name {
+            font-size: 14px;
+            color: #2D3748;
+            word-break: break-all;
+            max-width: 100%;
+        }
 
-.file-upload-design {
-    transition: all 0.3s ease, background-image 0.3s ease;
-}
+        .file-upload-design {
+            transition: all 0.3s ease, background-image 0.3s ease;
+        }
 
-.file-preview-container {
-    animation: fadeIn 0.3s ease;
-}
+        .file-preview-container {
+            animation: fadeIn 0.3s ease;
+        }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-.file-upload-container.has-file .file-upload-label {
-  display: none;
-}
+        .file-upload-container.has-file .file-upload-label {
+          display: none;
+        }
 
-.file-upload-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background-color: #f7fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  margin-top: 8px;
-}
+        .file-upload-info {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 12px;
+          background-color: #f7fafc;
+          border-radius: 6px;
+          border: 1px solid #e2e8f0;
+          margin-top: 8px;
+        }
 
-.file-info-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-grow: 1;
-}
+        .file-info-box {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-grow: 1;
+        }
 
-.file-info-box svg {
-  flex-shrink: 0;
-}
+        .file-info-box svg {
+          flex-shrink: 0;
+        }
 
-.file-link {
-  color: #3182ce;
-  text-decoration: none;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-}
+        .file-link {
+          color: #3182ce;
+          text-decoration: none;
+          font-size: 14px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 200px;
+        }
 
-.file-link:hover {
-  text-decoration: underline;
-}
+        .file-link:hover {
+          text-decoration: underline;
+        }
 
-.file-remove-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  margin-left: 8px;
-  color: #e53e3e;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
+        .file-remove-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          margin-left: 8px;
+          color: #e53e3e;
+          border-radius: 4px;
+          transition: background-color 0.2s;
+        }
 
-.file-remove-btn:hover {
-  background-color: #fed7d7;
-}
+        .file-remove-btn:hover {
+          background-color: #fed7d7;
+        }
 
-.file-remove-btn svg {
-  display: block;
-}
+        .file-remove-btn svg {
+          display: block;
+        }
 
 
-.checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-.checkbox-container {
-    display: flex;
-    align-items: center;
-}
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
 
-.checkbox-container label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    gap: 8px;
-}
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 8px;
+        }
 
-.checkbox_button {
-    display: none;
-}
+        .checkbox_button {
+            display: none;
+        }
 
-.checkbox-custom {
-    width: 15px;
-    height: 15px;
-    border: 2px solid #E0E0E0;
-    border-radius: 4px;
-    display: inline-block;
-    position: relative;
-    transition: all 0.3s;
-}
+        .checkbox-custom {
+            width: 15px;
+            height: 15px;
+            border: 2px solid #E0E0E0;
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+            transition: all 0.3s;
+        }
 
-.checkbox_button:checked + .checkbox-custom {
-    background-color: #66B498;
-    border-color: #66B498;
-}
+        .checkbox_button:checked + .checkbox-custom {
+            background-color: #66B498;
+            border-color: #66B498;
+        }
 
-.checkbox_button:checked + .checkbox-custom::after {
-    content: "";
-    position: absolute;
-    left: 4px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
+        .checkbox_button:checked + .checkbox-custom::after {
+            content: "";
+            position: absolute;
+            left: 4px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
 
+        span.checkbox-text {
+            margin-right: 10px;
+        }
 
     </style>
 </head>
@@ -835,188 +838,188 @@
     </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('challenge-form');
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('challenge-form');
 
-    // Обработка отправки формы
-    if (form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
+        // Обработка отправки формы
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
 
-            const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processing...';
 
-            fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: new FormData(form)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Server response:', data);
-
-                // Обрабатываем оба возможных формата ответа
-                if ((data.status === 'success') || (data.success === true)) {
-                    if (data.url) {
-                        window.location.href = data.url;
-                    } else {
-                        alert(data.message || 'Изменения успешно сохранены');
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: new FormData(form)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                } else {
-                    throw new Error(data.message || 'Неизвестный ответ сервера');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ошибка: ' + error.message);
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '{% if editing %}Change{% else %}Save{% endif %}';
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Server response:', data);
+
+                    // Обрабатываем оба возможных формата ответа
+                    if ((data.status === 'success') || (data.success === true)) {
+                        if (data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            alert(data.message || 'Изменения успешно сохранены');
+                        }
+                    } else {
+                        throw new Error(data.message || 'Неизвестный ответ сервера');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка: ' + error.message);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '{% if editing %}Change{% else %}Save{% endif %}';
+                });
             });
-        });
-    }
-
-    // Остальной код обработки файлов остается без изменений
-    const fileInputs = document.querySelectorAll('.file-upload-input');
-
-    fileInputs.forEach(input => {
-        const container = input.closest('.file-upload-container');
-        const label = input.closest('.file-upload-label');
-        const design = label.querySelector('.file-upload-design');
-        const textElement = design.querySelector('.file-upload-text');
-        const hintElement = design.querySelector('.file-upload-hint');
-        const iconElement = design.querySelector('.file-upload-icon');
-        const previewContainer = document.createElement('div');
-        previewContainer.className = 'file-preview-container';
-        design.appendChild(previewContainer);
-
-        // Получаем элемент для очистки файла
-        const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
-        const clearInput = container.querySelector(`#${clearInputId}`) ||
-                          container.querySelector('input[type="hidden"][name$="_clear"]');
-
-        // Очистка превью
-        function clearPreview() {
-            previewContainer.innerHTML = '';
-            textElement.textContent = 'Select files to upload';
-            hintElement.style.display = 'block';
-            if (iconElement) iconElement.style.display = 'block';
         }
 
-        // Создание превью
-        function createPreview(file) {
-            clearPreview();
+        // Остальной код обработки файлов остается без изменений
+        const fileInputs = document.querySelectorAll('.file-upload-input');
 
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imgPreview = document.createElement('img');
-                    imgPreview.src = e.target.result;
-                    imgPreview.className = 'file-preview-image';
-                    previewContainer.appendChild(imgPreview);
+        fileInputs.forEach(input => {
+            const container = input.closest('.file-upload-container');
+            const label = input.closest('.file-upload-label');
+            const design = label.querySelector('.file-upload-design');
+            const textElement = design.querySelector('.file-upload-text');
+            const hintElement = design.querySelector('.file-upload-hint');
+            const iconElement = design.querySelector('.file-upload-icon');
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'file-preview-container';
+            design.appendChild(previewContainer);
+
+            // Получаем элемент для очистки файла
+            const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
+            const clearInput = container.querySelector(`#${clearInputId}`) ||
+                              container.querySelector('input[type="hidden"][name$="_clear"]');
+
+            // Очистка превью
+            function clearPreview() {
+                previewContainer.innerHTML = '';
+                textElement.textContent = 'Select files to upload';
+                hintElement.style.display = 'block';
+                if (iconElement) iconElement.style.display = 'block';
+            }
+
+            // Создание превью
+            function createPreview(file) {
+                clearPreview();
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const imgPreview = document.createElement('img');
+                        imgPreview.src = e.target.result;
+                        imgPreview.className = 'file-preview-image';
+                        previewContainer.appendChild(imgPreview);
+
+                        textElement.textContent = file.name;
+                        hintElement.style.display = 'none';
+                        if (iconElement) iconElement.style.display = 'none';
+
+                        // Помечаем старый файл на удаление
+                        if (clearInput) clearInput.value = 'true';
+                        const existingPreview = container.querySelector('.uploaded-file-preview');
+                        if (existingPreview) existingPreview.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+                else if (file.type.startsWith('video/')) {
+                    const videoPreview = document.createElement('video');
+                    videoPreview.controls = true;
+                    videoPreview.className = 'file-preview-video';
+                    videoPreview.src = URL.createObjectURL(file);
+                    previewContainer.appendChild(videoPreview);
 
                     textElement.textContent = file.name;
                     hintElement.style.display = 'none';
                     if (iconElement) iconElement.style.display = 'none';
 
-                    // Помечаем старый файл на удаление
                     if (clearInput) clearInput.value = 'true';
                     const existingPreview = container.querySelector('.uploaded-file-preview');
                     if (existingPreview) existingPreview.style.display = 'none';
-                };
-                reader.readAsDataURL(file);
+                }
+                else {
+                    const fileType = document.createElement('div');
+                    fileType.className = 'file-type-icon';
+                    fileType.textContent = file.name.split('.').pop().toUpperCase();
+                    previewContainer.appendChild(fileType);
+
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.textContent = file.name;
+                    previewContainer.appendChild(fileName);
+
+                    if (clearInput) clearInput.value = 'true';
+                    const existingPreview = container.querySelector('.uploaded-file-preview');
+                    if (existingPreview) existingPreview.style.display = 'none';
+                }
             }
-            else if (file.type.startsWith('video/')) {
-                const videoPreview = document.createElement('video');
-                videoPreview.controls = true;
-                videoPreview.className = 'file-preview-video';
-                videoPreview.src = URL.createObjectURL(file);
-                previewContainer.appendChild(videoPreview);
 
-                textElement.textContent = file.name;
-                hintElement.style.display = 'none';
-                if (iconElement) iconElement.style.display = 'none';
-
-                if (clearInput) clearInput.value = 'true';
-                const existingPreview = container.querySelector('.uploaded-file-preview');
-                if (existingPreview) existingPreview.style.display = 'none';
-            }
-            else {
-                const fileType = document.createElement('div');
-                fileType.className = 'file-type-icon';
-                fileType.textContent = file.name.split('.').pop().toUpperCase();
-                previewContainer.appendChild(fileType);
-
-                const fileName = document.createElement('div');
-                fileName.className = 'file-name';
-                fileName.textContent = file.name;
-                previewContainer.appendChild(fileName);
-
-                if (clearInput) clearInput.value = 'true';
-                const existingPreview = container.querySelector('.uploaded-file-preview');
-                if (existingPreview) existingPreview.style.display = 'none';
-            }
-        }
-
-        // Drag-and-drop обработчики
-        design.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            design.classList.add('drag-over');
-        });
-
-        design.addEventListener('dragleave', () => {
-            design.classList.remove('drag-over');
-        });
-
-        design.addEventListener('drop', (e) => {
-            e.preventDefault();
-            design.classList.remove('drag-over');
-            if (e.dataTransfer.files.length) {
-                input.files = e.dataTransfer.files;
-                createPreview(input.files[0]);
-            }
-        });
-
-        // Обработка выбора файла
-        input.addEventListener('change', () => {
-            if (input.files.length) {
-                createPreview(input.files[0]);
-            } else {
-                clearPreview();
-            }
-        });
-
-        // Обработка удаления файла
-        const removeBtn = container.querySelector('.file-remove-btn');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', function() {
-                if (clearInput) clearInput.value = 'true';
-
-                const existingPreview = container.querySelector('.uploaded-file-preview');
-                if (existingPreview) existingPreview.style.display = 'none';
-
-                input.value = '';
-                clearPreview();
-
-                // Активируем загрузчик
-                container.classList.remove('has-file');
-                label.style.display = 'block';
-                design.style.display = 'flex';
+            // Drag-and-drop обработчики
+            design.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                design.classList.add('drag-over');
             });
-        }
+
+            design.addEventListener('dragleave', () => {
+                design.classList.remove('drag-over');
+            });
+
+            design.addEventListener('drop', (e) => {
+                e.preventDefault();
+                design.classList.remove('drag-over');
+                if (e.dataTransfer.files.length) {
+                    input.files = e.dataTransfer.files;
+                    createPreview(input.files[0]);
+                }
+            });
+
+            // Обработка выбора файла
+            input.addEventListener('change', () => {
+                if (input.files.length) {
+                    createPreview(input.files[0]);
+                } else {
+                    clearPreview();
+                }
+            });
+
+            // Обработка удаления файла
+            const removeBtn = container.querySelector('.file-remove-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function() {
+                    if (clearInput) clearInput.value = 'true';
+
+                    const existingPreview = container.querySelector('.uploaded-file-preview');
+                    if (existingPreview) existingPreview.style.display = 'none';
+
+                    input.value = '';
+                    clearPreview();
+
+                    // Активируем загрузчик
+                    container.classList.remove('has-file');
+                    label.style.display = 'block';
+                    design.style.display = 'flex';
+                });
+            }
+        });
     });
-});
 </script>
 
 </body>
