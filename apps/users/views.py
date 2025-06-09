@@ -871,7 +871,6 @@ def parse_radio_values(value_string):
 
 
 def challenge_add_content(request, pk):
-    print("challenge add content-------------------------")
     challenge = get_object_or_404(Challenge, pk=pk)
 
     elements_with_options = []
@@ -898,15 +897,11 @@ def normalize_label(label):
     return re.sub(r"\s+", "", label).lower()
 
 def challenge_view_content(request, pk):
-    print("challenge view content-------------------------")
-
     challenge = get_object_or_404(Challenge, pk=pk)
     user_choices = ChallengeUserChoice.objects.filter(
         user=request.user,
         challenge=challenge
     ).prefetch_related('attempts__answers')
-
-    logger.info("User choices: %s", user_choices)  # Логирование user_choices
 
     display_settings = getattr(challenge, 'display_settings', None)
     display_type = display_settings.display_type if display_settings else 'text'
@@ -943,7 +938,10 @@ def challenge_view_content(request, pk):
 
             attempt.block_color = block_color
 
-            if display_type == 'text':
+            if display_type == 'nothing':
+                return redirect('challenge_detail', challenge_id=challenge.pk)
+
+            elif display_type == 'text':
                 attempt.text_display = []
                 if display_settings and hasattr(display_settings, 'text_fields'):
                     for field in display_settings.text_fields.all():
@@ -1094,8 +1092,6 @@ def submit_challenge(request, challenge_id):
                     'message': str(e),
                 }, status=400)
             else:
-                print("Redirect URL:", redirect_url)
-
                 messages.error(request, f"url редиректа:{redirect_url}. Ошибка при сохранении: {e}")
                 return redirect('challenge_view_content', pk=challenge.id)
 
