@@ -42,9 +42,6 @@ def onboarding_view2(request):
 def onboarding_view3(request):
     return render(request, 'users/onboarding3.html')
 
-def onboarding_view4(request):
-    return render(request, 'users/onboarding4.html')
-
 def profile_end(request):
     return render(request, 'users/profile_end.html')
 

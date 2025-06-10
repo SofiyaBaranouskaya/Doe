@@ -36,7 +36,7 @@
         .first_svg {
             position: absolute;
             top: 0;
-            left: 0;
+            width: 100%;
         }
 
         .second_svg {
@@ -79,6 +79,23 @@
             color: white;
             margin: 130px auto 20px auto;
         }
+
+        @media (min-width: 790px) {
+            .first_svg {
+                width: 100%;
+                height: 500px;
+            }
+
+            .second_svg {
+                right: 50%;
+                left: 50%;
+            }
+
+            .main_content {
+                margin: 15% auto;
+            }
+        }
+
     </style>
 </head>
 <body>

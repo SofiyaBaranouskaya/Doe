@@ -34,12 +34,13 @@
         .first_svg {
             position: absolute;
             top: 0;
-            left: 0;
+            right: 0;
+            width: 100%;
         }
 
         .second_svg {
             position: absolute;
-            top: 25%;
+            top: 20%;
             left: 35%;
         }
 
@@ -205,6 +206,64 @@
 
         .close:hover {
             color: #000;
+        }
+
+        @media (min-width: 790px) {
+            body{
+                font-size: 30px;
+            }
+
+            h2 {
+                font-size: 80px;
+            }
+
+            .first_svg {
+                width: 800px;
+                height: 500px;
+            }
+
+            .second_svg {
+                right: 15%;
+                left: auto;
+            }
+
+            .login-container {
+                margin-top: -130px;
+                width: 60%;
+                z-index: 1;
+            }
+
+            .forgot-password {
+                font-size: 20px;
+            }
+
+            input {
+                height: 70px;
+                font-size: 18px;
+                border-radius: 57px;
+            }
+
+            .login-button {
+                width: 300px;
+            }
+
+            .social-button {
+                width: 300px;
+            }
+
+            p {
+                font-size: 15px;
+            }
+
+            .line-container {
+                margin: auto;
+                width: 300px;
+            }
+
+            .social-buttons {
+                justify-content: center;
+            }
+
         }
     </style>
 </head>
