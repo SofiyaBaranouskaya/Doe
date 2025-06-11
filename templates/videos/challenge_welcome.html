@@ -127,12 +127,16 @@
             margin: 0px 15px;
             border-radius: 30px;
         }
-        .card2_content{
+
+        .card2_content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            width: 100%;
+            height: 100%;
         }
+
         .card3{
             background-color: #FD7981;
             height: 172px;
@@ -141,8 +145,8 @@
         }
 
         .photo-container {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -150,10 +154,11 @@
         }
 
         .photo-container img {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
             object-fit: contain;
-            object-position: center;
         }
 
         .instructions{
@@ -293,6 +298,8 @@
                     <div class="photo-container">
                         {% if challenge.picture_base64 %}
                             <img src="data:image/jpeg;base64,{{ challenge.picture_base64 }}" alt="{{ challenge.title }}" />
+                        {% elif challenge.picture and challenge.picture.url %}
+                            <img src="{{ challenge.picture.url }}" alt="{{ challenge.title }}" />
                         {% endif %}
                     </div>
                 </div>

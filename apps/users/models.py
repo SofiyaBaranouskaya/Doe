@@ -1,5 +1,5 @@
 import re
-
+import mimetypes
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -376,7 +376,7 @@ class ChitChatAnswer(models.Model):
 
 class Challenge(models.Model):
     title = models.CharField(max_length=255, verbose_name="Title")
-    picture = models.ImageField(upload_to='challenges/', storage=SupabaseStorage(bucket_name='challenges'), verbose_name="Picture")
+    picture = models.FileField(upload_to='challenges/', storage=SupabaseStorage(bucket_name='challenges'), verbose_name="Picture")
     instructions = models.TextField(verbose_name="Instructions")
     points = models.IntegerField(verbose_name="Points")
     button_add_name = models.CharField(max_length=50, verbose_name="Button add name")
@@ -398,7 +398,15 @@ class Challenge(models.Model):
         super().save(*args, **kwargs)
 
     def convert_image_to_base64(self):
+        mime_type, encoding = mimetypes.guess_type(self.picture.name)
+        self.picture_mime_type = mime_type
+
+        if mime_type == 'image/svg+xml':
+            self.picture_base64 = None  # не конвертируем SVG
+            return
+
         try:
+            self.picture.seek(0)  # на всякий случай
             img = Image.open(self.picture)
 
             if img.mode in ('RGBA', 'LA'):
