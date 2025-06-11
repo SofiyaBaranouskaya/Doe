@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -10,6 +12,7 @@ from PIL import Image
 from django.utils.html import format_html
 
 from utils.supabase_storage import SupabaseStorage
+from django.utils.safestring import mark_safe
 
 
 class User(AbstractUser):
@@ -250,6 +253,15 @@ class FunFact(models.Model):
         if self.photo and not self.photo_base64:
             self.convert_image_to_base64()
         super().save(*args, **kwargs)
+
+    @property
+    def formatted_description(self):
+        text = self.fact_description
+        text = text.replace('/n', '<br>')
+        text = text.replace('\n', '<br>')
+        text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'_(.*?)_', r'<em>\1</em>', text)
+        return mark_safe(text)
 
     def convert_image_to_base64(self):
         try:

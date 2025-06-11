@@ -86,10 +86,10 @@
         }
 
         .main_content {
-          position: relative;
-          width: 375px;
-          height: 456px;
-          margin-top: 28px;
+            position: relative;
+            width: 375px;
+            height: 456px;
+            margin-top: 28px;
         }
 
         .famous_person_photo{
@@ -106,17 +106,37 @@
             background-position: center;
         }
 
-        .main_content p {
-          font-family: 'Poppins', sans-serif;
-          font-weight: 500;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 300px;
-          text-align: left;
-          margin: 0;
-          font-size: 16px;
+        .text-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .fact-description {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            text-align: left;
+            font-size: 16px;
+            width: 100%;
+            max-height: 100%;
+            overflow: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .fact-description strong {
+            font-weight: 700;
+        }
+
+        .fact-description em {
+            font-style: italic;
         }
 
         .nav_pannel{
@@ -130,7 +150,6 @@
 <body>
     <div class="main">
         <div class="back_pannel">
-
             <div class="icon" onclick="history.back();">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 12L5 12" stroke="#161414" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -150,7 +169,6 @@
                     </defs>
                 </svg>
             </div>
-
         </div>
 
         <div class="fun_fact_title">
@@ -187,10 +205,12 @@
                 <circle cx="222.5" cy="222.5" r="222.5" transform="matrix(1 0 0 -1 -40 445)" fill="#FFE37F"/>
                 <path d="M415 238.518C415 119.05 317.033 22.1826 196.16 22.1826C75.2874 22.1826 -22.6797 119.05 -22.6797 238.518C-22.6797 357.986 75.2874 454.853 196.16 454.853C317.033 454.853 415 357.986 415 238.518Z" stroke="#2C2C2C" stroke-width="2"/>
             </svg>
-            <div class="famous_person_photo">
 
+            <div class="famous_person_photo"></div>
+
+            <div class="text-container">
+                <div class="fact-description" id="fact-text">{{ fun_fact.fact_description }}</div>
             </div>
-            <p>{{ fun_fact.fact_description }}</p>
         </div>
     </div>
 
@@ -198,5 +218,20 @@
         {% include 'videos/nav.html' %}
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const factText = document.getElementById('fact-text');
+            let html = factText.textContent;
+
+            // Обработка переносов строк
+            html = html.replace(/\/n/g, '\n').replace(/\n/g, '<br>');
+
+            // Обработка форматирования
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+
+            factText.innerHTML = html;
+        });
+    </script>
 </body>
 </html>
