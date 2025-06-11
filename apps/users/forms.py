@@ -9,9 +9,11 @@ class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     phone_number = forms.CharField(required=True)
 
-    class Meta:
-        model = User
-        fields = ('email', 'phone_number', 'password1', 'password2')
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("User with this email already exists")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -19,6 +21,10 @@ class RegistrationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+    class Meta:
+        model = User
+        fields = ('email', 'phone_number', 'password1', 'password2')
 
 
 class SchoolForm(forms.Form):

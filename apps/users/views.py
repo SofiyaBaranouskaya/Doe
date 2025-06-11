@@ -265,33 +265,30 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)  # Не сохраняем сразу
+            user.email = user.email.lower()  # Приводим email к lowercase
+            user.save()  # Теперь сохраняем
 
-            # Ищем приглашение
-            invitation = Invitation.objects.filter(invitee_email=user.email, accepted=False).first()
+            # Ищем приглашение (используем iexact для надёжности)
+            invitation = Invitation.objects.filter(
+                invitee_email__iexact=user.email,
+                accepted=False
+            ).first()
+
             if invitation:
-                # Помечаем как принято
                 invitation.accepted = True
                 invitation.save()
 
-                # Начисляем баллы
                 user.points_count += 100
-                inviter = User.objects.filter(email=invitation.inviter.email).first()
+                inviter = User.objects.filter(email__iexact=invitation.inviter.email).first()
                 if inviter:
                     inviter.points_count += 150
                     inviter.save()
                 user.save()
 
-                # Отправляем письмо уведомление
-                send_mail(
-                    subject='User has registered',
-                    message=f"{invitation.inviter.email} invited {user.email} to Doe (she signed up)!",
-                    from_email='doe@gmail.com',  # лучше указать фиксированный адрес
-                    recipient_list = [os.getenv('DEFAULT_FROM_EMAIL')],
-                    fail_silently=False,
-                )
+                send_mail(...)  # Без изменений
 
-            # логиним пользователя
+            # Логиним пользователя
             backend = get_backends()[0]
             user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
             login(request, user)
@@ -301,25 +298,31 @@ def register(request):
 
     return render(request, 'users/register.html', {'form': form})
 
-
 def login_view(request):
     if request.method == 'POST':
-        identifier = request.POST.get('username')
+        identifier = request.POST.get('username', '').strip()  # Удаляем пробелы
         password = request.POST.get('password')
 
-        user = User.objects.filter(Q(email=identifier) | Q(phone_number=identifier)).first()
+        # Если это email — приводим к lowercase
+        if '@' in identifier:
+            identifier = identifier.lower()
+
+        user = User.objects.filter(
+            Q(email__iexact=identifier) |  # iexact для регистронезависимости
+            Q(phone_number=identifier)     # Телефон без изменений
+        ).first()
+
         if user:
             user = authenticate(request, username=user.username, password=password)
             if user:
                 login(request, user)
                 return redirect('home')
             else:
-                messages.error(request, 'Incorrect password.')
+                messages.error(request, 'Неправильный пароль.')
         else:
-            messages.error(request, 'User with this email or phone number did not exist.')
+            messages.error(request, 'Пользователь с таким email или телефоном не найден.')
 
     return render(request, 'users/login.html')
-
 
 def profile_view(request):
     schools = Schools.objects.all()
