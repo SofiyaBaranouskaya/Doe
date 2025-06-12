@@ -26,6 +26,8 @@ urlpatterns = [
     path('custom-redirect/', views.redirect_view, name='custom_redirect'),
 
     path('events_page/', views.events_page, name='events_page'),
+    path('simulator/', views.simulator_page, name='simulator_page'),
+    path('glossary/', views.glossary_page, name='glossary_page'),
 
     path('profile_page/', views.user_profile, name='user_profile'),
     path('change_profile_data/', views.user_profile_change, name='user_profile_change'),

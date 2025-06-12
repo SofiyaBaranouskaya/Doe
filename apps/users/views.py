@@ -48,6 +48,12 @@ def profile_end(request):
 def events_page(request):
     return render(request, 'videos/events_page.html')
 
+def simulator_page(request):
+    return render(request, 'videos/simulator_page.html')
+
+def glossary_page(request):
+    return render(request, 'videos/glossary_page.html')
+
 def google_oauth2_complete(request):
     """
     Обработчик завершения OAuth2 процесса (например, для Google).
