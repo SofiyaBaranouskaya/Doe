@@ -324,9 +324,9 @@ def login_view(request):
                 login(request, user)
                 return redirect('home')
             else:
-                messages.error(request, 'Неправильный пароль.')
+                messages.error(request, 'Incorrect password.')
         else:
-            messages.error(request, 'Пользователь с таким email или телефоном не найден.')
+            messages.error(request, 'User with this email or telephone is not found.')
 
     return render(request, 'users/login.html')
 
