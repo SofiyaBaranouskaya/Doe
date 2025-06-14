@@ -6,9 +6,7 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('', views.onboarding_view1, name='onboarding'),
-    path('onboarding2/', views.onboarding_view2, name='onboarding2'),
-    path('onboarding3/', views.onboarding_view3, name='onboarding3'),
+    path('', views.onboarding_view3, name='onboarding3'),
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('accounts/login/', views.login_view, name='login'),

@@ -92,6 +92,30 @@
             margin-top: -15px;
         }
 
+
+        #success-check {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0.8);
+          background: rgba(0, 0, 0, 0.6);
+          padding: 20px;
+          border-radius: 50%;
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: default;
+          animation: fadeInScale 0.4s forwards;
+        }
+
+        #success-check svg {
+          width: 100px;
+          height: 100px;
+          fill: #66B498;
+        }
+
         .activity_name{
             display: flex;
             flex-direction: row;
@@ -137,8 +161,8 @@
             justify-content: center;
         }
         .photo-container {
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -562,6 +586,10 @@
             margin-right: 10px;
         }
 
+        .hidden {
+          display: none !important;
+        }
+
         @media (min-width: 790px) {
             h1 {
                 font-size: 52px;
@@ -680,7 +708,7 @@
             </svg>
         </div>
 
-        <div class="icon" onclick="window.history.back();">
+        <div class="icon" id="page-icon" data-page="{{ content_page }}">
             <svg class="icon_svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clip-path="url(#clip0_2001_14695)">
                 <path d="M12.9401 12L18.4667 6.47329C18.5759 6.34576 18.633 6.18171 18.6265 6.01393C18.6201 5.84614 18.5505 5.68698 18.4318 5.56825C18.313 5.44952 18.1539 5.37997 17.9861 5.37349C17.8183 5.36701 17.6543 5.42408 17.5267 5.53329L12.0001 11.06L6.4734 5.52663C6.34786 5.40109 6.1776 5.33057 6.00006 5.33057C5.82253 5.33057 5.65227 5.40109 5.52673 5.52663C5.40119 5.65216 5.33067 5.82243 5.33067 5.99996C5.33067 6.1775 5.40119 6.34776 5.52673 6.47329L11.0601 12L5.52673 17.5266C5.45694 17.5864 5.40026 17.6599 5.36025 17.7426C5.32023 17.8254 5.29774 17.9154 5.2942 18.0073C5.29065 18.0991 5.30612 18.1906 5.33964 18.2762C5.37315 18.3617 5.42399 18.4394 5.48896 18.5044C5.55393 18.5694 5.63163 18.6202 5.71718 18.6537C5.80273 18.6872 5.89429 18.7027 5.9861 18.6992C6.07791 18.6956 6.168 18.6731 6.25071 18.6331C6.33342 18.5931 6.40697 18.5364 6.46673 18.4666L12.0001 12.94L17.5267 18.4666C17.6543 18.5758 17.8183 18.6329 17.9861 18.6264C18.1539 18.62 18.313 18.5504 18.4318 18.4317C18.5505 18.3129 18.6201 18.1538 18.6265 17.986C18.633 17.8182 18.5759 17.6542 18.4667 17.5266L12.9401 12Z" fill="black"/>
@@ -932,6 +960,11 @@
             {% endif %}
         </form>
 
+        <div id="success-check" class="hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#66B498" aria-hidden="true">
+            <path d="M480-80q-84.33 0-157.33-30.83-73-30.84-127-84.84t-84.84-127Q80-395.67 80-480q0-83.67 30.83-156.67 30.84-73 84.84-127t127-85.16Q395.67-880 480-880q71.67 0 134.33 22.33Q677-835.33 728-796l-48 48.33q-42-31.33-92.33-48.5-50.34-17.16-107.67-17.16-141 0-237.17 96.16Q146.67-621 146.67-480t96.16 237.17Q339-146.67 480-146.67t237.17-96.16Q813.33-339 813.33-480q0-26-3.66-51-3.67-25-11-48.67L851-632q14.33 35.33 21.67 73.33 7.33 38 7.33 78.67 0 84.33-31.17 157.33-31.16 73-85.16 127t-127 84.84Q563.67-80 480-80Zm-58-217.33L255.33-464.67 304-513.33l118 118L831.33-805l49.34 48.67-458.67 459Z"/>
+          </svg>
+        </div>
 
         <div id="message-box" style="margin-top: 20px;"></div>
 
@@ -943,58 +976,62 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('challenge-form');
+    const form = document.getElementById('challenge-form');
+    const successCheck = document.getElementById('success-check');
 
-        // Обработка отправки формы
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-                const submitBtn = form.querySelector('button[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Processing...';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
 
-                fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: new FormData(form)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Server response:', data);
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: new FormData(form)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if ((data.status === 'success') || (data.success === true)) {
+                    // 1. Показываем галочку только перед редиректом
+                    successCheck.classList.remove('hidden');
 
-                    // Обрабатываем оба возможных формата ответа
-                    if ((data.status === 'success') || (data.success === true)) {
+                    // 2. Ждем 2 секунды перед редиректом
+                    setTimeout(() => {
                         if (data.url) {
                             window.location.href = data.url;
                         } else {
+                            successCheck.classList.add('hidden');
                             alert(data.message || 'Изменения успешно сохранены');
                         }
-                    } else {
-                        throw new Error(data.message || 'Неизвестный ответ сервера');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ошибка: ' + error.message);
-                })
-                .finally(() => {
+                    }, 500);
+                } else {
+                    throw new Error(data.message || 'Неизвестный ответ сервера');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка: ' + error.message);
+            })
+            .finally(() => {
+                // Если редиректа не было, восстанавливаем кнопку
+                if (!successCheck.classList.contains('hidden')) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = '{% if editing %}Change{% else %}Save{% endif %}';
-                });
+                }
             });
-        }
+        });
+    }
 
-        // Остальной код обработки файлов остается без изменений
         const fileInputs = document.querySelectorAll('.file-upload-input');
 
         fileInputs.forEach(input => {
@@ -1123,6 +1160,33 @@
                 });
             }
         });
+
+        const icon = document.getElementById('page-icon');
+        if (icon) {
+            const page = icon.dataset.page;
+
+            // Соответствие между значениями страниц и URL
+            const pageUrls = {
+                'things_first': '/things_first/',
+                'levers': '/levers/',
+                'power_portfolio': '/power_portfolio/',
+                'playbook': '/playbook/',
+                'capital_cash': '/capital_cash/',
+                'money_sports': '/money_sports/',
+                'new_ventures': '/new_ventures/',
+                'rel_money': '/rel_money/'
+            };
+
+            // Обработчик клика
+            icon.addEventListener('click', function() {
+                if (page && pageUrls[page]) {
+                    window.location.href = pageUrls[page];
+                } else {
+                    console.warn('Unknown page:', page);
+                    window.location.href = '/home/'; // Fallback
+                }
+            });
+        }
     });
 </script>
 

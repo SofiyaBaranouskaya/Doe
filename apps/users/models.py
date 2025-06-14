@@ -397,6 +397,14 @@ class Challenge(models.Model):
 
         super().save(*args, **kwargs)
 
+    @property
+    def formatted_description(self):
+        text = self.instructions
+        text = text.replace('/n', '<br>').replace('\n', '<br>')  # Обрабатываем оба варианта
+        text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'_(.*?)_', r'<em>\1</em>', text)
+        return mark_safe(text)
+
     def convert_image_to_base64(self):
         mime_type, encoding = mimetypes.guess_type(self.picture.name)
         self.picture_mime_type = mime_type
