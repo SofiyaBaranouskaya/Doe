@@ -160,9 +160,11 @@ def send_invite(request):
         return JsonResponse({'error': 'User email not found'}, status=400)
 
     try:
+        base_url = request.build_absolute_uri('/')
+
         send_mail(
             subject="You're invited!",
-            message=f"Hi {name},\n\n{request.user.first_name} has invited you to join our platform!",
+            message=f"Hi {name},\n\n{request.user.first_name} has invited you to join Doe platform!\nJoin us here: {base_url}",
             from_email=sender_email,
             recipient_list=[email],
             fail_silently=False,
@@ -293,6 +295,7 @@ def register(request):
         form = RegistrationForm()
 
     return render(request, 'users/register.html', {'form': form})
+
 
 def login_view(request):
     if request.method == 'POST':
