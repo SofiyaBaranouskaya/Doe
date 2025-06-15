@@ -900,15 +900,15 @@
     </div>
 
 <script>
-    document.querySelector('.send-invitation-btn').addEventListener('click', async () => {
-        const name = document.getElementById('friendName').value.trim();
-        const email = document.getElementById('friendEmail').value.trim();
-        const phone = document.getElementById('friendPhone').value.trim();
+document.querySelector('.send-invitation-btn').addEventListener('click', async () => {
+    const name = document.getElementById('friendName').value.trim();
+    const email = document.getElementById('friendEmail').value.trim();
+    const phone = document.getElementById('friendPhone').value.trim();
 
-        if (!name || !email) {
-            alert('Please fill in both name and email.');
-            return;
-        }
+    if (!name || !email) {
+        alert('Please fill in both name and email.');
+        return;
+    }
 
     try {
         const response = await fetch('/send-invite/', {
@@ -917,6 +917,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken')
             },
+            credentials: 'same-origin',  // <-- вот тут магия
             body: JSON.stringify({ name, email, phone })
         });
 
@@ -935,8 +936,8 @@
         console.error(err);
         showMessageModal('Error sending invitation.', false, { isConfirm: false });
     }
+});
 
-    });
 
     // функция для получения CSRF-токена (если используешь Django)
     function getCookie(name) {

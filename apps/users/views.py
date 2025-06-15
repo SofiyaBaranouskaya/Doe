@@ -145,43 +145,33 @@ def get_user_points(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @csrf_exempt
+@require_POST
 def send_invite(request):
-    if request.method == 'POST':
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-        data = json.loads(request.body)
-        name = data.get('name')
-        email = data.get('email')
+    data = json.loads(request.body)
+    name = data.get('name')
+    email = data.get('email')
+    phone = data.get('phone')
 
-        if not name or not email:
-            return JsonResponse({'error': 'Missing fields'}, status=400)
+    sender_email = request.user.email
+    if not sender_email:
+        return JsonResponse({'error': 'User email not found'}, status=400)
 
-        # Проверка: есть ли пользователь с такой почтой
-        if User.objects.filter(email=email).exists():
-            return JsonResponse({'message': 'This user is already using Doe'}, status=200)
-
-        sender_email = request.user.email
-        if not sender_email:
-            return JsonResponse({'error': 'User email not found'}, status=400)
-
-        # Формируем абсолютную ссылку на сайт
-        base_url = request.build_absolute_uri('/')
-
-        message = (
-            f"{name}, congrats! You've been invited to Doe by {sender_email}!\n"
-            f"Join us here: {base_url}"
-        )
-
+    try:
         send_mail(
-            subject='Invitation to Doe',
-            message=message,
+            subject="You're invited!",
+            message=f"Hi {name},\n\n{request.user.first_name} has invited you to join our platform!",
             from_email=sender_email,
             recipient_list=[email],
             fail_silently=False,
         )
 
-        return JsonResponse({'message': 'Invitation sent'})
+        return JsonResponse({'message': 'Invitation sent successfully!'})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'error': 'Failed to send email.'}, status=500)
 
 
 
