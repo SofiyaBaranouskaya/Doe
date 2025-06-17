@@ -143,6 +143,7 @@
             width: 13%;
             border-radius: 0 30px 30px 0;
         }
+
         .card2{
             width: 63%;
             height: 100%;
@@ -154,26 +155,31 @@
             margin: 0px 15px;
             border-radius: 30px;
         }
-        .card2_content{
+        .card2_content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            width: 90%;
+            height: 90%;
         }
+
         .photo-container {
             width: 90%;
             height: 90%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
         }
 
         .photo-container img {
             max-width: 100%;
             max-height: 100%;
-            object-fit: cover;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
+
         .card3{
             background-color: #FD7981;
             height: 172px;
@@ -298,19 +304,32 @@
             margin-left: 5px;
         }
 
-        .save{
-            display: block;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            width: 300px;
-            height: 50px;
-            border: none;
-            border-radius: 92px;
-            background-color: #66B498;
-            color: white;
-            margin-left: auto;
-            margin-right: auto;
-        }
+.save {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    width: 300px;
+    height: 50px;
+    border-radius: 92px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s ease;
+}
+
+/* Активная кнопка */
+.save:enabled {
+    background-color: #66B498;
+    color: white;
+    border: none;
+}
+
+/* Неактивная кнопка */
+.save:disabled {
+    background-color: white;
+    color: #66B498;
+    border: 2px solid #66B498;
+    cursor: not-allowed;
+}
 
         .alert {
             padding: 10px 20px;
@@ -619,7 +638,7 @@
                 margin-top: -65px;
             }
 
-            span {
+            .points span {
                 font-size: 40px;
                 font-weight: 400;
             }
@@ -1031,6 +1050,40 @@
             });
         });
     }
+
+const submitButton = form.querySelector('button[type="submit"]');
+
+// Функция проверки, все ли поля заполнены
+function checkFormCompletion() {
+    const inputs = form.querySelectorAll('input, textarea, select');
+    let allFilled = true;
+
+    inputs.forEach(input => {
+        // Игнорируем скрытые или отключенные поля
+        if (input.type === 'hidden' || input.disabled) return;
+
+        if (input.type === 'radio' || input.type === 'checkbox') {
+            const name = input.name;
+            const group = form.querySelectorAll(`[name="${name}"]`);
+            const isChecked = Array.from(group).some(i => i.checked);
+            if (!isChecked) allFilled = false;
+        } else if (input.type === 'file') {
+            if (!input.files.length) allFilled = false;
+        } else {
+            if (!input.value.trim()) allFilled = false;
+        }
+    });
+
+    submitButton.disabled = !allFilled;
+}
+
+// Навешиваем обработчики на поля
+form.addEventListener('input', checkFormCompletion);
+form.addEventListener('change', checkFormCompletion);
+
+// Первичная проверка при загрузке страницы
+checkFormCompletion();
+
 
         const fileInputs = document.querySelectorAll('.file-upload-input');
 
