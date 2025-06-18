@@ -167,6 +167,12 @@
         .photo-container {
             width: 90%;
             height: 90%;
+<<<<<<< HEAD
+=======
+            display: flex;
+            align-items: center;
+            justify-content: center;
+>>>>>>> c2640ff8dbb06f4cd2fa33280bda874cf760f7c2
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -638,7 +644,11 @@
                 margin-top: -65px;
             }
 
+<<<<<<< HEAD
             .points span {
+=======
+            span {
+>>>>>>> c2640ff8dbb06f4cd2fa33280bda874cf760f7c2
                 font-size: 40px;
                 font-weight: 400;
             }
@@ -1051,6 +1061,7 @@
         });
     }
 
+<<<<<<< HEAD
 const submitButton = form.querySelector('button[type="submit"]');
 
 // Функция проверки, все ли поля заполнены
@@ -1115,6 +1126,38 @@ checkFormCompletion();
             function createPreview(file) {
                 clearPreview();
 
+=======
+        const fileInputs = document.querySelectorAll('.file-upload-input');
+
+        fileInputs.forEach(input => {
+            const container = input.closest('.file-upload-container');
+            const label = input.closest('.file-upload-label');
+            const design = label.querySelector('.file-upload-design');
+            const textElement = design.querySelector('.file-upload-text');
+            const hintElement = design.querySelector('.file-upload-hint');
+            const iconElement = design.querySelector('.file-upload-icon');
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'file-preview-container';
+            design.appendChild(previewContainer);
+
+            // Получаем элемент для очистки файла
+            const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
+            const clearInput = container.querySelector(`#${clearInputId}`) ||
+                              container.querySelector('input[type="hidden"][name$="_clear"]');
+
+            // Очистка превью
+            function clearPreview() {
+                previewContainer.innerHTML = '';
+                textElement.textContent = 'Select files to upload';
+                hintElement.style.display = 'block';
+                if (iconElement) iconElement.style.display = 'block';
+            }
+
+            // Создание превью
+            function createPreview(file) {
+                clearPreview();
+
+>>>>>>> c2640ff8dbb06f4cd2fa33280bda874cf760f7c2
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
