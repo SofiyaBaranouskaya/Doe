@@ -166,8 +166,8 @@
             justify-content: center;
             border: none;
             border-radius: 92px;
-            color: white;
-            background-color: #FD7981;
+            color: black;
+            background-color: #D1D1D6B0;
             margin: 20px 10px;
         }
 
@@ -578,10 +578,12 @@
                 margin: auto;
             }
 
-            button#redeemBtn {
+            button.inactive {
                 min-width: 300px;
                 max-width: 438px;
-                height: 70px;
+                font-size: 20px;
+                font-weight: 600;
+                height: 99px;
                 margin: auto;
             }
 
@@ -775,11 +777,11 @@
 
                     <div class="buttons">
                         <div class="redeem_btn">
-                            <button id="redeemBtn">Redeem Points</button>
+                            <button class="inactive">CONNECT!</button>
                         </div>
                         <div class="two_buttons">
+                            <button id="redeemBtn">Redeem Points</button>
                             <button id="referFriendBtn" class="refer-friend-btn">Refer a Friend</button>
-                            <button class="inactive">CONNECT!</button>
                         </div>
                     </div>
 
