@@ -988,7 +988,7 @@
           </svg>
         </div>
 
-        <div id="message-box" style="margin-top: 20px;"></div>
+<!--        <div id="message-box" style="margin-top: 20px;"></div>-->
 
     </div>
 
@@ -997,209 +997,188 @@
     </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('challenge-form');
     const successCheck = document.getElementById('success-check');
+    const messageBox = document.getElementById('message-box');
 
     if (form) {
         form.addEventListener('submit', function(event) {
             event.preventDefault();
 
             const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing...';
+
+            // Сброс сообщений
+            if (messageBox) {
+                messageBox.textContent = '';
+                messageBox.className = '';
+            }
 
             fetch(form.action, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: new FormData(form)
             })
             .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
                 return response.json();
             })
             .then(data => {
-                if ((data.status === 'success') || (data.success === true)) {
-                    // 1. Показываем галочку только перед редиректом
-                    successCheck.classList.remove('hidden');
+                if (data.status === 'success') {
+                    // Показываем галочку
+                    if (successCheck) successCheck.classList.remove('hidden');
 
-                    // 2. Ждем 2 секунды перед редиректом
+                    // Показываем сообщение об успехе
+                    if (messageBox) {
+                        messageBox.textContent = data.message || 'Successfully saved!';
+                        messageBox.classList.add('success-message');
+                    }
+
+                    // Редирект через 1.5 секунды
                     setTimeout(() => {
                         if (data.url) {
                             window.location.href = data.url;
                         } else {
-                            successCheck.classList.add('hidden');
-                            alert(data.message || 'Изменения успешно сохранены');
+                            const challengeId = form.action.split('/').filter(Boolean).pop();
+                            window.location.href = `/challenge/${challengeId}/view/`;
                         }
-                    }, 500);
+                    }, 1500);
                 } else {
-                    throw new Error(data.message || 'Неизвестный ответ сервера');
+                    throw new Error(data.message || 'Unknown server response');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Ошибка: ' + error.message);
-            })
-            .finally(() => {
-                // Если редиректа не было, восстанавливаем кнопку
-                if (!successCheck.classList.contains('hidden')) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '{% if editing %}Change{% else %}Save{% endif %}';
+                if (messageBox) {
+                    messageBox.textContent = 'Error: ' + (error.message || 'Failed to save');
+                    messageBox.classList.add('error-message');
                 }
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
             });
         });
+
+        // Проверка заполнения формы (упрощенная версия)
+        const submitButton = form.querySelector('button[type="submit"]');
+        function checkFormCompletion() {
+            const inputs = form.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            let allFilled = true;
+
+            inputs.forEach(input => {
+                if (input.disabled) return;
+
+                if (input.type === 'radio' || input.type === 'checkbox') {
+                    const name = input.name;
+                    const group = form.querySelectorAll(`[name="${name}"]`);
+                    const isChecked = Array.from(group).some(i => i.checked);
+                    if (!isChecked) allFilled = false;
+                } else if (input.type === 'file') {
+                    if (!input.files?.length && !input.dataset.hasFile) {
+                        allFilled = false;
+                    }
+                } else {
+                    if (!input.value.trim()) allFilled = false;
+                }
+            });
+
+            submitButton.disabled = !allFilled;
+        }
+
+        form.addEventListener('input', checkFormCompletion);
+        form.addEventListener('change', checkFormCompletion);
+        checkFormCompletion();
     }
 
-const submitButton = form.querySelector('button[type="submit"]');
+    // Обработка загрузки файлов
+    const fileInputs = document.querySelectorAll('.file-upload-input');
+    fileInputs.forEach(input => {
+        const container = input.closest('.file-upload-container');
+        const label = input.closest('.file-upload-label');
+        const design = label?.querySelector('.file-upload-design');
 
-// Функция проверки, все ли поля заполнены
-function checkFormCompletion() {
-    const inputs = form.querySelectorAll('input, textarea, select');
-    let allFilled = true;
+        if (!design) return;
 
-    inputs.forEach(input => {
-        // Игнорируем скрытые или отключенные поля
-        if (input.type === 'hidden' || input.disabled) return;
+        const textElement = design.querySelector('.file-upload-text');
+        const hintElement = design.querySelector('.file-upload-hint');
+        const iconElement = design.querySelector('.file-upload-icon');
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'file-preview-container';
+        design.appendChild(previewContainer);
 
-        if (input.type === 'radio' || input.type === 'checkbox') {
-            const name = input.name;
-            const group = form.querySelectorAll(`[name="${name}"]`);
-            const isChecked = Array.from(group).some(i => i.checked);
-            if (!isChecked) allFilled = false;
-        } else if (input.type === 'file') {
-            if (!input.files.length) allFilled = false;
-        } else {
-            if (!input.value.trim()) allFilled = false;
+        const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
+        const clearInput = container.querySelector(`#${clearInputId}`) ||
+                          container.querySelector('input[type="hidden"][name$="_clear"]');
+
+        function clearPreview() {
+            previewContainer.innerHTML = '';
+            if (textElement) textElement.textContent = 'Select files to upload';
+            if (hintElement) hintElement.style.display = 'block';
+            if (iconElement) iconElement.style.display = 'block';
         }
-    });
 
-    submitButton.disabled = !allFilled;
-}
+        function createPreview(file) {
+            clearPreview();
 
-// Навешиваем обработчики на поля
-form.addEventListener('input', checkFormCompletion);
-form.addEventListener('change', checkFormCompletion);
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgPreview = document.createElement('img');
+                    imgPreview.src = e.target.result;
+                    imgPreview.className = 'file-preview-image';
+                    previewContainer.appendChild(imgPreview);
 
-// Первичная проверка при загрузке страницы
-checkFormCompletion();
-
-
-        const fileInputs = document.querySelectorAll('.file-upload-input');
-
-        fileInputs.forEach(input => {
-            const container = input.closest('.file-upload-container');
-            const label = input.closest('.file-upload-label');
-            const design = label.querySelector('.file-upload-design');
-            const textElement = design.querySelector('.file-upload-text');
-            const hintElement = design.querySelector('.file-upload-hint');
-            const iconElement = design.querySelector('.file-upload-icon');
-            const previewContainer = document.createElement('div');
-            previewContainer.className = 'file-preview-container';
-            design.appendChild(previewContainer);
-
-            // Получаем элемент для очистки файла
-            const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
-            const clearInput = container.querySelector(`#${clearInputId}`) ||
-                              container.querySelector('input[type="hidden"][name$="_clear"]');
-
-            // Очистка превью
-            function clearPreview() {
-                previewContainer.innerHTML = '';
-                textElement.textContent = 'Select files to upload';
-                hintElement.style.display = 'block';
-                if (iconElement) iconElement.style.display = 'block';
-            }
-
-            // Создание превью
-            function createPreview(file) {
-                clearPreview();
-
-        const fileInputs = document.querySelectorAll('.file-upload-input');
-
-        fileInputs.forEach(input => {
-            const container = input.closest('.file-upload-container');
-            const label = input.closest('.file-upload-label');
-            const design = label.querySelector('.file-upload-design');
-            const textElement = design.querySelector('.file-upload-text');
-            const hintElement = design.querySelector('.file-upload-hint');
-            const iconElement = design.querySelector('.file-upload-icon');
-            const previewContainer = document.createElement('div');
-            previewContainer.className = 'file-preview-container';
-            design.appendChild(previewContainer);
-
-            // Получаем элемент для очистки файла
-            const clearInputId = `field_${input.name.replace('field_', '')}_clear`;
-            const clearInput = container.querySelector(`#${clearInputId}`) ||
-                              container.querySelector('input[type="hidden"][name$="_clear"]');
-
-            // Очистка превью
-            function clearPreview() {
-                previewContainer.innerHTML = '';
-                textElement.textContent = 'Select files to upload';
-                hintElement.style.display = 'block';
-                if (iconElement) iconElement.style.display = 'block';
-            }
-
-            // Создание превью
-            function createPreview(file) {
-                clearPreview();
-
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const imgPreview = document.createElement('img');
-                        imgPreview.src = e.target.result;
-                        imgPreview.className = 'file-preview-image';
-                        previewContainer.appendChild(imgPreview);
-
-                        textElement.textContent = file.name;
-                        hintElement.style.display = 'none';
-                        if (iconElement) iconElement.style.display = 'none';
-
-                        // Помечаем старый файл на удаление
-                        if (clearInput) clearInput.value = 'true';
-                        const existingPreview = container.querySelector('.uploaded-file-preview');
-                        if (existingPreview) existingPreview.style.display = 'none';
-                    };
-                    reader.readAsDataURL(file);
-                }
-                else if (file.type.startsWith('video/')) {
-                    const videoPreview = document.createElement('video');
-                    videoPreview.controls = true;
-                    videoPreview.className = 'file-preview-video';
-                    videoPreview.src = URL.createObjectURL(file);
-                    previewContainer.appendChild(videoPreview);
-
-                    textElement.textContent = file.name;
-                    hintElement.style.display = 'none';
+                    if (textElement) textElement.textContent = file.name;
+                    if (hintElement) hintElement.style.display = 'none';
                     if (iconElement) iconElement.style.display = 'none';
 
                     if (clearInput) clearInput.value = 'true';
                     const existingPreview = container.querySelector('.uploaded-file-preview');
                     if (existingPreview) existingPreview.style.display = 'none';
-                }
-                else {
-                    const fileType = document.createElement('div');
-                    fileType.className = 'file-type-icon';
-                    fileType.textContent = file.name.split('.').pop().toUpperCase();
-                    previewContainer.appendChild(fileType);
-
-                    const fileName = document.createElement('div');
-                    fileName.className = 'file-name';
-                    fileName.textContent = file.name;
-                    previewContainer.appendChild(fileName);
-
-                    if (clearInput) clearInput.value = 'true';
-                    const existingPreview = container.querySelector('.uploaded-file-preview');
-                    if (existingPreview) existingPreview.style.display = 'none';
-                }
+                };
+                reader.readAsDataURL(file);
             }
+            else if (file.type.startsWith('video/')) {
+                const videoPreview = document.createElement('video');
+                videoPreview.controls = true;
+                videoPreview.className = 'file-preview-video';
+                videoPreview.src = URL.createObjectURL(file);
+                previewContainer.appendChild(videoPreview);
 
-            // Drag-and-drop обработчики
+                if (textElement) textElement.textContent = file.name;
+                if (hintElement) hintElement.style.display = 'none';
+                if (iconElement) iconElement.style.display = 'none';
+
+                if (clearInput) clearInput.value = 'true';
+                const existingPreview = container.querySelector('.uploaded-file-preview');
+                if (existingPreview) existingPreview.style.display = 'none';
+            }
+            else {
+                const fileType = document.createElement('div');
+                fileType.className = 'file-type-icon';
+                fileType.textContent = file.name.split('.').pop().toUpperCase();
+                previewContainer.appendChild(fileType);
+
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                previewContainer.appendChild(fileName);
+
+                if (clearInput) clearInput.value = 'true';
+                const existingPreview = container.querySelector('.uploaded-file-preview');
+                if (existingPreview) existingPreview.style.display = 'none';
+            }
+        }
+
+        if (design) {
             design.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 design.classList.add('drag-over');
@@ -1217,63 +1196,57 @@ checkFormCompletion();
                     createPreview(input.files[0]);
                 }
             });
+        }
 
-            // Обработка выбора файла
-            input.addEventListener('change', () => {
-                if (input.files.length) {
-                    createPreview(input.files[0]);
-                } else {
-                    clearPreview();
-                }
-            });
-
-            // Обработка удаления файла
-            const removeBtn = container.querySelector('.file-remove-btn');
-            if (removeBtn) {
-                removeBtn.addEventListener('click', function() {
-                    if (clearInput) clearInput.value = 'true';
-
-                    const existingPreview = container.querySelector('.uploaded-file-preview');
-                    if (existingPreview) existingPreview.style.display = 'none';
-
-                    input.value = '';
-                    clearPreview();
-
-                    // Активируем загрузчик
-                    container.classList.remove('has-file');
-                    label.style.display = 'block';
-                    design.style.display = 'flex';
-                });
+        input.addEventListener('change', () => {
+            if (input.files.length) {
+                createPreview(input.files[0]);
+            } else {
+                clearPreview();
             }
         });
 
-        const icon = document.getElementById('page-icon');
-        if (icon) {
-            const page = icon.dataset.page;
+        const removeBtn = container.querySelector('.file-remove-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                if (clearInput) clearInput.value = 'true';
+                const existingPreview = container.querySelector('.uploaded-file-preview');
+                if (existingPreview) existingPreview.style.display = 'none';
 
-            // Соответствие между значениями страниц и URL
-            const pageUrls = {
-                'things_first': '/things_first/',
-                'levers': '/levers/',
-                'power_portfolio': '/power_portfolio/',
-                'playbook': '/playbook/',
-                'capital_cash': '/capital_cash/',
-                'money_sports': '/money_sports/',
-                'new_ventures': '/new_ventures/',
-                'rel_money': '/rel_money/'
-            };
+                input.value = '';
+                clearPreview();
 
-            // Обработчик клика
-            icon.addEventListener('click', function() {
-                if (page && pageUrls[page]) {
-                    window.location.href = pageUrls[page];
-                } else {
-                    console.warn('Unknown page:', page);
-                    window.location.href = '/home/'; // Fallback
-                }
+                if (container) container.classList.remove('has-file');
+                if (label) label.style.display = 'block';
+                if (design) design.style.display = 'flex';
             });
         }
     });
+
+    // Обработка клика по иконке страницы
+    const icon = document.getElementById('page-icon');
+    if (icon) {
+        const page = icon.dataset.page;
+        const pageUrls = {
+            'things_first': '/things_first/',
+            'levers': '/levers/',
+            'power_portfolio': '/power_portfolio/',
+            'playbook': '/playbook/',
+            'capital_cash': '/capital_cash/',
+            'money_sports': '/money_sports/',
+            'new_ventures': '/new_ventures/',
+            'rel_money': '/rel_money/'
+        };
+
+        icon.addEventListener('click', function() {
+            if (page && pageUrls[page]) {
+                window.location.href = pageUrls[page];
+            } else {
+                window.location.href = '/home/';
+            }
+        });
+    }
+});
 </script>
 
 </body>

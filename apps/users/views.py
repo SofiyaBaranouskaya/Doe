@@ -1170,12 +1170,15 @@ def submit_challenge_in_add(request, challenge_id):
         # Обрабатываем каждый элемент формы
         for element in challenge.elements.all():
             field_name = f"field_{element.id}"
-            other_field_name = f"{field_name}_other"  # Имя поля для "other" значения
+            other_field_name = f"{field_name}_other"
 
             if element.element == 'file':
-                # Обработка файлов
                 uploaded_file = request.FILES.get(field_name)
                 if uploaded_file:
+                    # Проверка размера файла (пример: не более 5MB)
+                    if uploaded_file.size > 5 * 1024 * 1024:
+                        raise ValueError(f"Файл слишком большой: {element.name}")
+
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,
                         element=element,
@@ -1184,19 +1187,13 @@ def submit_challenge_in_add(request, challenge_id):
                     )
 
             elif element.element == 'checkbox':
-                # Обработка чекбоксов с опцией "other"
                 selected_values = request.POST.getlist(field_name)
                 other_value = request.POST.get(other_field_name, "").strip()
 
                 if "__other__" in selected_values and other_value:
-                    # Удаляем __other__ и добавляем кастомное значение
                     selected_values = [v for v in selected_values if v != "__other__"]
                     selected_values.append(other_value)
-                elif "__other__" in selected_values and not other_value:
-                    # Оставляем __other__ если поле пустое
-                    pass
 
-                # Сохраняем значения чекбоксов
                 ChallengeUserAnswer.objects.create(
                     attempt=attempt,
                     element=element,
@@ -1204,18 +1201,12 @@ def submit_challenge_in_add(request, challenge_id):
                 )
 
             elif element.element == 'radio':
-                # Обработка радио-кнопок с опцией "other"
                 answer_value = request.POST.get(field_name)
                 other_value = request.POST.get(other_field_name, "").strip()
 
                 if answer_value == "__other__" and other_value:
-                    # Заменяем __other__ на кастомное значение
                     answer_value = other_value
-                elif answer_value == "__other__" and not other_value:
-                    # Оставляем __other__ если поле пустое
-                    pass
 
-                # Сохраняем значение радио-кнопки
                 if answer_value is not None:
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,
@@ -1223,24 +1214,26 @@ def submit_challenge_in_add(request, challenge_id):
                         answer=answer_value
                     )
 
-            else:
-                # Обработка остальных типов полей
-                answer_value = request.POST.get(field_name)
-                if answer_value is not None:
+            else:  # input, textarea, date
+                answer_value = request.POST.get(field_name, "").strip()
+                if answer_value:
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,
                         element=element,
                         answer=answer_value
                     )
+
+        # Всегда редиректим на страницу просмотра
+        redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
 
         return JsonResponse({
             'status': 'success',
-            'message': 'Answer saved successfully!',
-            'url': reverse('challenge_view_content', kwargs={'pk': challenge.id})
+            'message': 'Ответ успешно сохранен!',
+            'url': redirect_url
         })
 
     except Exception as e:
-        logger.error(f"Error in submit_challenge_in_add: {str(e)}", exc_info=True)
+        logger.error(f"Ошибка при сохранении ответа: {str(e)}", exc_info=True)
         return JsonResponse({
             'status': 'error',
             'message': str(e),
