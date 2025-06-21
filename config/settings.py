@@ -31,7 +31,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['doe-82da822924d4.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['doe.wuaze.com', 'localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
     'https://doe-82da822924d4.herokuapp.com',
 ]
@@ -227,6 +227,11 @@ STATICFILES_STORAGE_DEBUG = True
 AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False  # отключаем подписи в ссылках
 AWS_S3_ADDRESSING_STYLE = "path"  # важно для Supabase!
+
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
 
 LOGGING = {
     'version': 1,
