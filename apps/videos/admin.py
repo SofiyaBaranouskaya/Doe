@@ -1,3 +1,5 @@
+import os
+
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -189,26 +191,37 @@ class FunFactAdmin(ExportAdminMixin):
 
 @admin.register(Video)
 class VideoAdmin(ExportAdminMixin):
-    list_display = ('title', 'points')
+    list_display = ('title', 'points', 'video_link')
     fields = (
-        'title', 'description', 'video_file', 'poster_url',
+        'title', 'description', 'video_file', 'video_link', 'poster_url',
         'duration', 'points', 'poster_preview'
     )
     search_fields = ('title', 'points')
-    readonly_fields = ('poster_preview',)
+    readonly_fields = ('poster_preview', 'poster_base64', 'video_link')
     list_filter = ('points',)
 
     def get_readonly_fields(self, request, obj=None):
-        return super().get_readonly_fields(request, obj) + ('poster_base64',)
+        # Добавляем poster_base64 и video_link в readonly поля всегда
+        return super().get_readonly_fields(request, obj)
 
     def poster_preview(self, obj):
         if obj.poster_base64:
-            return mark_safe(f'<img src="data:image/jpeg;base64,{obj.poster_base64}" width="150" />')
+            return format_html('<img src="data:image/jpeg;base64,{}" width="150" />', obj.poster_base64)
         elif obj.poster_url:
-            return mark_safe(f'<img src="{obj.poster_url.url}" width="150" />')
+            return format_html('<img src="{}" width="150" />', obj.poster_url.url)
         return "No poster"
 
     poster_preview.short_description = 'Poster Preview'
+
+    def video_link(self, obj):
+        if obj.video_file:
+            # Берём имя файла, заменяем пробелы на _
+            filename = os.path.basename(obj.video_file.name).replace(' ', '_')
+            url = f"https://link.storjshare.io/s/jx3blensqenp6hmoiz444ldnnrxq/videobucket/{filename}"
+            return format_html('<a href="{}" target="_blank">{}</a>', url, filename)
+        return "No video"
+
+    video_link.short_description = 'Video Link'
 
 
 class ChitChatOptionForm(forms.ModelForm):
@@ -347,8 +360,17 @@ class ChallengeAdmin(ExportNestedAdmin):
 class ChallengeUserAnswerInline(nested_admin.NestedTabularInline):
     model = ChallengeUserAnswer
     extra = 0
-    readonly_fields = ('element', 'answer')
+    readonly_fields = ('element', 'answer', 'file_link')
+    fields = ('element', 'answer', 'file_link')
 
+    def file_link(self, obj):
+        if obj.file:
+            filename = os.path.basename(obj.file.name).replace(' ', '_')
+            url = f"https://link.storjshare.io/s/ju35potrmsjldivqbuhgnygn5lqq/videobucket/uservideochallenges/{filename}"
+            return format_html('<a href="{}" target="_blank">{}</a>', url, filename)
+        return "Нет файла"
+
+    file_link.short_description = 'File (Video)'
 
 class ChallengeUserAttemptInline(nested_admin.NestedStackedInline):
     model = ChallengeUserAttempt
