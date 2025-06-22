@@ -1,3 +1,4 @@
+import os
 import re
 import mimetypes
 from django.contrib.auth.models import AbstractUser
@@ -11,6 +12,7 @@ from io import BytesIO
 from PIL import Image
 from django.utils.html import format_html
 
+from apps.users.storage_backends import StorjVideoStorage
 from utils.supabase_storage import SupabaseStorage
 from django.utils.safestring import mark_safe
 
@@ -166,10 +168,8 @@ class Content(models.Model):
 class Video(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    video_file = models.FileField(
-        upload_to='videos/',
-        storage=SupabaseStorage(bucket_name='video_sources')
-    )
+    video_file = models.FileField(storage=StorjVideoStorage(), upload_to='')
+    filename = models.CharField(max_length=200)
     poster_url = models.ImageField(
         upload_to='posters/',
         storage=SupabaseStorage(bucket_name='posters')
@@ -202,6 +202,15 @@ class Video(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
 
+        # Авто-запись имени файла при загрузке
+        if self.video_file and hasattr(self.video_file, 'name'):
+            raw_name = os.path.basename(self.video_file.name)
+            self.filename = raw_name.replace(' ', '_')
+
+        # Попробуем сохранить полный URL
+        if self.video_file and hasattr(self.video_file, 'url'):
+            self.video_url = self.video_file.url
+
         if self.pk:
             old_video = Video.objects.get(pk=self.pk)
             if old_video.poster_url != self.poster_url or not self.poster_base64:
@@ -232,6 +241,9 @@ class Video(models.Model):
         except Exception as e:
             print(f"Error converting poster image to Base64: {e}")
             self.poster_base64 = None
+
+    def get_storj_url(self):
+        return f"https://link.storjshare.io/s/jx3blensqenp6hmoiz444ldnnrxq/videobucket/{self.filename}?wrap=0"
 
 
 class FunFact(models.Model):

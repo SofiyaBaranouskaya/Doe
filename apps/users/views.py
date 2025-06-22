@@ -32,6 +32,8 @@ import logging
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+def tester(request):
+    return render(request, 'test.html')
 
 def onboarding_view1(request):
     return render(request, 'users/onboarding1.html')
@@ -1177,7 +1179,7 @@ def submit_challenge_in_add(request, challenge_id):
                 if uploaded_file:
                     # Проверка размера файла (пример: не более 5MB)
                     if uploaded_file.size > 5 * 1024 * 1024:
-                        raise ValueError(f"Файл слишком большой: {element.name}")
+                        raise ValueError(f"File is too big: {element.name}")
 
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,

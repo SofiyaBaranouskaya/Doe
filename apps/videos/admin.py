@@ -192,10 +192,10 @@ class VideoAdmin(ExportAdminMixin):
     list_display = ('title', 'points')
     fields = (
         'title', 'description', 'video_file', 'poster_url',
-        'duration', 'points', 'poster_preview', 'poster_base64'
+        'duration', 'points', 'poster_preview'
     )
     search_fields = ('title', 'points')
-    readonly_fields = ('poster_preview', 'poster_base64')
+    readonly_fields = ('poster_preview',)
     list_filter = ('points',)
 
     def get_readonly_fields(self, request, obj=None):

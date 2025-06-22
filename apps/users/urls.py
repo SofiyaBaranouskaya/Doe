@@ -47,6 +47,8 @@ urlpatterns = [
     path('video/<int:video_id>/', views.video_detail, name='video_detail'),
     path('fun_fact/<int:fun_fact_id>/', views.fun_fact_detail, name='fun_fact_detail'),
 
+    path('tester/', views.tester, name='test'),
+
     path('challenge/<int:challenge_id>/', views.challenge_detail, name='challenge_detail'),
     path('<int:challenge_id>/content/', views.challenge_detail_content, name='challenge_detail_content'),
     path('challenge/<int:pk>/add-content/', views.challenge_add_content, name='challenge_add_content'),
