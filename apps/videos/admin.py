@@ -366,7 +366,7 @@ class ChallengeUserAnswerInline(nested_admin.NestedTabularInline):
     def file_link(self, obj):
         if obj.file:
             filename = os.path.basename(obj.file.name).replace(' ', '_')
-            url = f"https://link.storjshare.io/s/ju35potrmsjldivqbuhgnygn5lqq/videobucket/uservideochallenges/{filename}"
+            url = f"https://link.storjshare.io/s/ju35potrmsjldivqbuhgnygn5lqq/videobucket/usersvideo/{filename}"
             return format_html('<a href="{}" target="_blank">{}</a>', url, filename)
         return "Нет файла"
 

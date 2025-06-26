@@ -28,6 +28,7 @@ from django.conf import settings
 from utils.supabase_upload import upload_user_avatar
 from utils.generate_avatar import generate_initial_avatar
 import logging
+from .tasks import process_uploaded_file
 
 
 User = get_user_model()
@@ -1093,12 +1094,16 @@ def submit_challenge(request, challenge_id):
                 if element.element == 'file':
                     uploaded_file = request.FILES.get(field_name)
                     if uploaded_file:
-                        ChallengeUserAnswer.objects.create(
+                        answer = ChallengeUserAnswer.objects.create(
                             attempt=attempt,
                             element=element,
                             file=uploaded_file,
                             answer=''  # пустое значение для файла
                         )
+                        logger.info(f"Запускаем обработку файла в фоне, answer_id={answer.id}")
+                        process_uploaded_file.delay(answer.id)
+                    else:
+                        logger.warning(f"Файл для поля {field_name} не был загружен")
                 else:
                     answer_value = request.POST.get(field_name)
                     if answer_value is not None:
@@ -1121,13 +1126,20 @@ def submit_challenge(request, challenge_id):
                 return redirect('challenge_view_content', pk=challenge.id)
 
         except Exception as e:
+            logger.error(f"Ошибка при сохранении ответа: {e}", exc_info=True)
+            # Обработка ошибки размера файла (пример)
+            if 'Uploaded file is too big' in str(e) or 'Request data too big' in str(e):
+                error_message = 'File is too big: Upload your video!'
+            else:
+                error_message = str(e)
+
             if is_ajax:
                 return JsonResponse({
                     'status': 'error',
-                    'message': str(e),
+                    'message': error_message,
                 }, status=400)
             else:
-                messages.error(request, f"url редиректа:{redirect_url}. Ошибка при сохранении: {e}")
+                messages.error(request, f"url редиректа:{redirect_url}. Ошибка при сохранении: {error_message}")
                 return redirect('challenge_view_content', pk=challenge.id)
 
     # GET-запрос — отдаем форму
@@ -1149,7 +1161,6 @@ def submit_challenge(request, challenge_id):
         'challenge': challenge,
         'elements_with_options': elements_with_options,
     })
-
 
 @login_required
 @require_POST
@@ -1177,10 +1188,6 @@ def submit_challenge_in_add(request, challenge_id):
             if element.element == 'file':
                 uploaded_file = request.FILES.get(field_name)
                 if uploaded_file:
-                    # Проверка размера файла (пример: не более 5MB)
-                    if uploaded_file.size > 5 * 1024 * 1024:
-                        raise ValueError(f"File is too big: {element.name}")
-
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,
                         element=element,

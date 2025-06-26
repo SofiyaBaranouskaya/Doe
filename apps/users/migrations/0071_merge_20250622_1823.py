@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0063_video_filename_alter_video_video_file'),
+        ('users', '0063_alter_video_video_file'),
         ('users', '0070_remove_video_access_grant_id_video_video_url_and_more'),
     ]
 

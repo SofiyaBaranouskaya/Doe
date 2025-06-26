@@ -549,12 +549,7 @@ class ChallengeUserAnswer(models.Model):
     attempt = models.ForeignKey(ChallengeUserAttempt, on_delete=models.CASCADE, related_name='answers')
     element = models.ForeignKey('ChallengeElement', on_delete=models.CASCADE)
     answer = models.TextField()
-    file = models.FileField(
-        upload_to='challenge_uploads/',
-        storage=SupabaseStorage(bucket_name='challenge_uploads'),
-        blank=True,
-        null=True
-    )
+    file = models.FileField(storage=StorjVideoStorage(), upload_to='usersvideo')
 
     def __str__(self):
         if self.file:
