@@ -14,7 +14,7 @@ from apps.users.models import (
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
     QuizUserChoice, QuizAnswer, Regards, UserReward, Invitation)
 from import_export.admin import ExportMixin
-from import_export import resources
+from import_export import resources, fields
 from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
@@ -25,6 +25,32 @@ class UserResource(resources.ModelResource):
 
 class ExportAdminMixin(ExportMixin, admin.ModelAdmin):
     pass
+class QuizUserChoiceResource(resources.ModelResource):
+    user = fields.Field(attribute='user', column_name='user')
+    quiz = fields.Field(attribute='quiz', column_name='quiz')
+    submitted_at = fields.Field(attribute='submitted_at', column_name='submitted_at')
+
+    # Добавляем обобщённое поле, куда будем вставлять ответы
+    answers_summary = fields.Field(column_name='answers_summary')
+
+    def dehydrate_answers_summary(self, obj):
+        """
+        Вернёт строку, объединяющую все ответы в формате:
+        "Вопрос 1 (2 балла): Ответ - OK; Вопрос 2 (1 балл): Ответ - Неверно"
+        """
+        answers = QuizAnswer.objects.filter(quiz_user_choice=obj)
+        rows = []
+        for a in answers:
+            question_text = a.question.text if a.question else "???"
+            is_ok = "CORRECT" if a.is_correct else "INCORRECT"
+            points = a.question.points if a.question and a.question.points else 0
+            row = f"{question_text} ({points} points.): {a.user_answer} - {is_ok}"
+            rows.append(row)
+        return "\n".join(rows)
+
+    class Meta:
+        model = QuizUserChoice
+        fields = ('user', 'quiz', 'submitted_at', 'answers_summary')
 
 class UserSchoolInline(admin.TabularInline):
     model = UserSchool
@@ -428,6 +454,7 @@ class QuizAnswerInline(admin.TabularInline):
 
 @admin.register(QuizUserChoice)
 class QuizUserChoiceAdmin(ExportAdminMixin):
+    resource_class = QuizUserChoiceResource
     list_display = ('user', 'quiz', 'submitted_at')
     inlines = [QuizAnswerInline]
     list_filter = ('submitted_at', 'quiz')
