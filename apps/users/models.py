@@ -146,7 +146,10 @@ class Content(models.Model):
     )
 
     def __str__(self):
-        return f"Content #{self.id} (Type: {self.content_type.model if self.content_type else 'unknown'})"
+        if self.value:
+            title = getattr(self.value, 'title', None) or str(self.value)
+            return f'{self.value.__class__.__name__} "{title}"'
+        return f'Content #{self.pk}'
 
     def save(self, *args, **kwargs):
         if hasattr(self, 'value') and self.value and isinstance(self.value, Video):
