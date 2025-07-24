@@ -1166,13 +1166,18 @@ def submit_challenge(request, challenge_id):
 @require_POST
 def submit_challenge_in_add(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
+    user = request.user
 
     try:
-        # Создаем или получаем выбор пользователя
         user_choice, _ = ChallengeUserChoice.objects.get_or_create(
-            user=request.user,
+            user=user,
             challenge=challenge
         )
+
+        # Считаем, сколько уже было попыток ДО этой
+        already_attempts_count = ChallengeUserAttempt.objects.filter(
+            choice=user_choice
+        ).count()
 
         # Создаем новую попытку
         attempt = ChallengeUserAttempt.objects.create(
@@ -1180,7 +1185,9 @@ def submit_challenge_in_add(request, challenge_id):
             is_secondary=True
         )
 
-        # Обрабатываем каждый элемент формы
+        # Считаем сколько ответов добавляем в этой попытке
+        new_answer_count = 0
+
         for element in challenge.elements.all():
             field_name = f"field_{element.id}"
             other_field_name = f"{field_name}_other"
@@ -1194,6 +1201,7 @@ def submit_challenge_in_add(request, challenge_id):
                         file=uploaded_file,
                         answer=''
                     )
+                    new_answer_count += 1
 
             elif element.element == 'checkbox':
                 selected_values = request.POST.getlist(field_name)
@@ -1203,11 +1211,13 @@ def submit_challenge_in_add(request, challenge_id):
                     selected_values = [v for v in selected_values if v != "__other__"]
                     selected_values.append(other_value)
 
-                ChallengeUserAnswer.objects.create(
-                    attempt=attempt,
-                    element=element,
-                    answer=",".join(selected_values) if selected_values else ""
-                )
+                if selected_values:
+                    ChallengeUserAnswer.objects.create(
+                        attempt=attempt,
+                        element=element,
+                        answer=",".join(selected_values)
+                    )
+                    new_answer_count += 1
 
             elif element.element == 'radio':
                 answer_value = request.POST.get(field_name)
@@ -1216,12 +1226,13 @@ def submit_challenge_in_add(request, challenge_id):
                 if answer_value == "__other__" and other_value:
                     answer_value = other_value
 
-                if answer_value is not None:
+                if answer_value:
                     ChallengeUserAnswer.objects.create(
                         attempt=attempt,
                         element=element,
                         answer=answer_value
                     )
+                    new_answer_count += 1
 
             else:  # input, textarea, date
                 answer_value = request.POST.get(field_name, "").strip()
@@ -1231,18 +1242,33 @@ def submit_challenge_in_add(request, challenge_id):
                         element=element,
                         answer=answer_value
                     )
+                    new_answer_count += 1
 
-        # Всегда редиректим на страницу просмотра
-        redirect_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
+        # Считаем общее количество попыток, включая эту
+        total_attempts = already_attempts_count + 1
+
+        required_attempts = challenge.min_answers_required
+
+        if not user_choice.is_done and total_attempts >= required_attempts:
+            user_choice.is_done = True
+            user_choice.save()
+
+            user.points_count += challenge.points
+            user.save()
+
+            content_type = ContentType.objects.get_for_model(Challenge)
+            content = Content.objects.filter(object_id=challenge.pk, content_type=content_type).first()
+            if content:
+                user.completed_content.add(content)
 
         return JsonResponse({
             'status': 'success',
             'message': 'Ответ успешно сохранен!',
-            'url': redirect_url
+            'url': reverse('challenge_view_content', kwargs={'pk': challenge.id})
         })
 
     except Exception as e:
-        logger.error(f"Ошибка при сохранении ответа: {str(e)}", exc_info=True)
+        print(f"Ошибка при сохранении ответа: {str(e)}")
         return JsonResponse({
             'status': 'error',
             'message': str(e),

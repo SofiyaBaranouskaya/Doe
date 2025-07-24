@@ -530,6 +530,7 @@ class ChallengeUserChoice(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='challenge_choices')
     challenge = models.ForeignKey('Challenge', on_delete=models.CASCADE, related_name='user_choices')
     created_at = models.DateTimeField(auto_now_add=True)
+    is_done = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'challenge')  # 1 запись на пользователя и челендж
