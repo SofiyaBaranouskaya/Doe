@@ -130,13 +130,20 @@ class Content(models.Model):
     page = models.CharField(
         max_length=50,
         choices=PAGE_CHOICES,
-        default='its_time',
+        default='things_first',
         verbose_name='Page'
     )
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     value = GenericForeignKey('content_type', 'object_id')
+
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Display order',
+        help_text='Order of display on the page'
+    )
+
     poster_base64 = models.TextField(
         blank=True,
         null=True,
@@ -152,8 +159,17 @@ class Content(models.Model):
         return f'Content #{self.pk}'
 
     def save(self, *args, **kwargs):
+        # Автоматически назначаем следующий order для новой записи на этой странице
+        if not self.order:
+            last_order = Content.objects.filter(page=self.page).aggregate(
+                models.Max('order')
+            )['order__max'] or 0
+            self.order = last_order + 1
+
+        # Если контент — видео, сохраняем poster_base64
         if hasattr(self, 'value') and self.value and isinstance(self.value, Video):
             self.poster_base64 = getattr(self.value, 'poster_base64', None)
+
         super().save(*args, **kwargs)
 
     @property
@@ -166,6 +182,7 @@ class Content(models.Model):
         indexes = [
             models.Index(fields=['content_type', 'object_id']),
         ]
+        ordering = ['page', 'order']  # сортируем по странице, затем по order
 
 
 class Video(models.Model):
@@ -661,3 +678,56 @@ class Regards(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Glossary(models.Model):
+    COLOR_CHOICES = [
+        ("#FF7B7730", "#FF7B7730"),
+        ("#FFC6D4",  "#FFC6D4"),
+        ("#FF7B7763", "#FF7B7763"),
+        ("#FFE37F63", "#FFE37F63"),
+    ]
+
+    category = models.CharField(
+        max_length=100,
+        verbose_name="Category"
+    )
+
+    term = models.CharField(
+        max_length=100,
+        verbose_name="Term"
+    )
+
+    explanation = models.TextField(
+        verbose_name="Explanation"
+    )
+
+    color = models.CharField(
+        max_length=10,
+        choices=COLOR_CHOICES,
+        verbose_name="Color"
+    )
+
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Display order",
+        help_text="Defines in what order this item appears."
+    )
+
+    def __str__(self):
+        return f"{self.term} ({self.category})"
+
+    def save(self, *args, **kwargs):
+        # Auto-assign next order number if not set
+        if not self.order:
+            last_order = Glossary.objects.aggregate(
+                models.Max('order')
+            )['order__max'] or 0
+            self.order = last_order + 1
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Glossary"
+        verbose_name_plural = "Glossary"

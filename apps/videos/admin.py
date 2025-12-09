@@ -12,7 +12,7 @@ from apps.users.models import (
     ChitChat, ChitChatOption, ChitChatUserChoice,
     Challenge, ChallengeElement, ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeDisplaySettings,
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
-    QuizUserChoice, QuizAnswer, Regards, UserReward, Invitation)
+    QuizUserChoice, QuizAnswer, Regards, UserReward, Invitation, Glossary)
 from import_export.admin import ExportMixin
 from import_export import resources, fields
 from django.contrib.admin import SimpleListFilter
@@ -160,22 +160,21 @@ class SpecificContentTypeFilter(SimpleListFilter):
         return queryset
 
 @admin.register(Content)
-class ContentAdmin(ExportAdminMixin):
+class ContentAdmin(admin.ModelAdmin):
     form = ContentAdminForm
-    list_display = ('content_type', 'safe_linked_object')
+    list_display = ('page', 'content_type', 'safe_linked_object', 'order')
+    list_editable = ('order',)
     readonly_fields = ('poster_base64', 'safe_linked_object')
-    fields = ['page', 'content_type', 'object_id', 'poster_base64', 'safe_linked_object']
+    fields = ['page', 'order', 'content_type', 'object_id', 'poster_base64', 'safe_linked_object']
     list_filter = (SpecificContentTypeFilter, 'page')
 
     def safe_linked_object(self, obj):
         if not obj.content_type:
             return "No content type"
-
         try:
             model_class = obj.content_type.model_class()
             if not model_class:
                 return f"Model {obj.content_type.model} not found"
-
             if obj.object_id:
                 try:
                     related_obj = model_class._base_manager.get(pk=obj.object_id)
@@ -192,7 +191,6 @@ class ContentAdmin(ExportAdminMixin):
 
     safe_linked_object.short_description = 'Linked Object'
     safe_linked_object.allow_tags = True
-
 
 @admin.register(FunFact)
 class FunFactAdmin(ExportAdminMixin):
@@ -464,3 +462,36 @@ class RegardsAdmin(ExportAdminMixin):
     list_display = ('title', 'points_needed')
     search_fields = ('title', 'points_needed')
     list_filter = ('points_needed',)
+
+
+@admin.register(Glossary)
+class GlossaryAdmin(admin.ModelAdmin):
+    list_display = ("term", "category", "color_display", "order")
+    list_editable = ("order",)
+    list_filter = ("category",)
+    search_fields = ("term", "category", "explanation")
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Добавляем визуальное представление цветов в help_text
+        help_text = '<div style="display: flex; gap: 10px; margin: 10px 0;">'
+        for color_value, color_code in Glossary.COLOR_CHOICES:
+            help_text += f'''
+                <div style="text-align: center;">
+                    <div style="width: 30px; height: 30px; background: {color_code}; 
+                                border: 1px solid #ccc; display: inline-block;"></div>
+                    <div style="font-size: 10px;">{color_code}</div>
+                </div>
+            '''
+        help_text += '</div>'
+
+        form.base_fields['color'].help_text = format_html(help_text)
+        return form
+
+    def color_display(self, obj):
+        return format_html(
+            '<div style="width: 24px; height: 24px; background: {}; border-radius: 4px; border: 1px solid #aaa;"></div>',
+            obj.color
+        )
+
+    color_display.short_description = "Color"

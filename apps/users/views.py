@@ -17,8 +17,8 @@ from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
 from .models import Video, FunFact, Content, Challenge, ChitChat, ChitChatOption, ChitChatUserChoice, \
     ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeUserAttempt, Schools, UserSchool, Quiz, \
-    QuizUserChoice, QuizAnswer, QuizQuestion, Regards, UserReward, Invitation
-from django.contrib.auth import authenticate, login, get_backends
+    QuizUserChoice, QuizAnswer, QuizQuestion, Regards, UserReward, Invitation, Glossary
+from django.contrib.auth import authenticate, login, get_backends, logout
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth import get_user_model
@@ -55,7 +55,17 @@ def simulator_page(request):
     return render(request, 'videos/simulator_page.html')
 
 def glossary_page(request):
-    return render(request, 'videos/glossary_page.html')
+    items = Glossary.objects.all().order_by("order")
+    return render(request, "videos/glossary_page.html", {"items": items})
+
+def saved_page(request):
+    return render(request, 'videos/saved_page.html')
+
+def hot_takes_page(request):
+    return render(request, 'videos/hot_takes_page.html')
+
+def favourites_page(request):
+    return render(request, 'videos/favourites_page.html')
 
 def google_oauth2_complete(request):
     """
@@ -532,7 +542,7 @@ def render_page(request, page_name, template_name):
     contents = Content.objects.filter(
         content_type__in=content_types,
         page=page_name
-    ).select_related('content_type').order_by('id')
+    ).select_related('content_type').order_by('order')
 
     from collections import defaultdict
     objects_by_type = defaultdict(list)
@@ -593,6 +603,10 @@ def seventh_page(request):
 
 def eighth_page(request):
     return render_page(request, 'rel_money', 'videos/pages/eighth_page.html')
+
+def signout(request):
+    logout(request)
+    return redirect('login')
 
 
 def get_objects(request):

@@ -5,14 +5,24 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Cheat Sheet!</title>
+    <title>Glossary</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
         body{
             margin: 0px;
-            overflow-x: hidden;
+            overflow: hidden;
+        }
+
+        .main{
+            width: 100%;
+            height: 100vh;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0px;
+            overflow: hidden;
         }
 
         h1{
@@ -24,16 +34,134 @@
             margin: 0px;
         }
 
-        h3{
+        .all_header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header{
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 20px;
+            margin-top: 0px;
+        }
+
+        .search_filter_div{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: auto auto 10px auto;
+            position: relative;
+        }
+
+        .search_container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .search_field {
             font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #E0E0E0;
+            border-radius: 30px;
+            padding: 12px 40px 12px 20px; /* справа отступ под крестик */
+            width: 280px;
+            outline: none;
+            color: #555;
+            background: transparent;
+        }
+
+        .reset_search {
+            position: absolute;
+            right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter {
+            display:flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+
+        .filter p {
             font-size: 20px;
-            font-weight: 700;
-            margin: -10px 0px 0px 10px;
+            color: gray;
+            padding: 0 10px;
+        }
+
+        /* Hover эффект */
+        .filter_variants p.selectable:hover {
+            color: #FD7981;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* Активный фильтр (после клика) */
+        .filter_variants p.selectable.active {
+            color: #FD7981;
+            text-decoration: underline;
+        }
+
+        .filter_variants {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+
+        .main_content {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .glossary_content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .all_containers {
+            width: 100%;
+            height: auto;
+            display: flex;
+            flex-grow: 1;
+            justify-content: center;
+            overflow-x: hidden;
+            flex-wrap: wrap;
+            overflow-y: auto;
+            padding-left: 5px;
+            padding-top: 10px;
+        }
+
+        .container {
+            width: 140px;
+            height: 120px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
 
         p {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-family: 'Baloo Bhaijaan 2', sans-serif;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             line-height: 120%;
             color: #2C2C2C;
@@ -41,62 +169,170 @@
             margin: 0px;
         }
 
-        .first_part {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-start;
-          height: 300px;
-          margin-top: -50px;
-        }
-
-        svg {
-          display: block;
-          height: auto;
-          max-width: 100%;
-        }
-
-        .second_svg {
-            margin: auto auto auto 0px;
-        }
-
-        .third_svg {
-            margin-top: auto;
-        }
-
-        .all_content {
-            display: flex;
-            margin-top: -50px;
-        }
-
-        .main_content {
-            width: 90%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0px auto;
-        }
-
-        #nav_pannel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: -webkit-fill-available;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: white;
-            margin: auto;
+        .doe_icon {
+            display: none;
         }
 
         .nav_pc {
             display: none;
         }
 
+        .extra_header_name{
+            display: none;
+        }
+
+        .container {
+            perspective: 1000px;
+            cursor: pointer;
+            flex-shrink: 0;     /* Чтобы карточки не сжимались */
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            display: flex;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            padding: 15px;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .card-back p {
+            font-size: 18px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 10px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            word-wrap: break-word;
+            height: 100%;
+            box-sizing: border-box; /* padding учитывается в высоте */
+            display: block;
+        }
+
+        /* Стилизация скролла (Chrome, Edge, Safari) */
+        .card-back p::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card-back p::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+
+        .card-back p::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        /* Для Firefox */
+        .card-back p {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,0,0,0.2) transparent;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            text-align: center;
+        }
+
+        .category-section {
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 60px;
+            width: 100%;
+        }
+
+        .category-label {
+            width: 240px;
+            height: 41px;
+            background-color: #FD7981;
+            border-radius: 20.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            color: white;
+            text-align: center;
+            padding: 0 25px;
+            box-sizing: border-box;
+            /* Для обрезки длинного текста */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .category-cards-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
         @media (min-width: 790px) {
+            .doe_icon {
+                display: block;
+                margin-left: 47px;
+            }
+
             h1 {
                 font-size: 52px;
+            }
+
+            p {
+                font-size: 25px;
+            }
+
+            .extra_header_name{
+                display: flex;
+            }
+
+            .all_containers {
+                gap: 20px;
+                justify-content: start;
+                margin: 0 auto;
+            }
+
+            .container {
+                width: 280px;
+                height: 240px;
+            }
+
+            .search_filter_div{
+                align-items: flex-end;
+                margin-right: 90px;
+            }
+
+            .category-header {
+                justify-content: flex-start;
+            }
+
+            .category-cards-wrapper {
+                justify-content: flex-start;
+                gap: 20px;
             }
 
             .nav_pannel {
@@ -105,61 +341,288 @@
 
             .nav_pc {
                 display: flex;
+                margin-right: 100px;
             }
         }
     </style>
 </head>
 <body>
 <div class="main">
-    <div class="first_part">
-        <svg width="105" height="302" viewBox="0 0 105 302" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="-66.4018" cy="135.246" rx="123.203" ry="123.523" transform="rotate(107.218 -66.4018 135.246)" fill="#FFE37F"/>
-            <path d="M64.86 183.497C44.8825 247.961 -23.7089 283.986 -88.3462 263.955C-152.983 243.924 -189.181 175.424 -169.204 110.961C-149.226 46.4968 -80.636 10.4713 -15.9987 30.5023C48.6387 50.5335 84.8374 119.034 64.86 183.497Z" stroke="#2C2C2C" stroke-width="2"/>
-        </svg>
-        <svg width="182" height="131" viewBox="0 0 182 131" fill="none" xmlns="http://www.w3.org/2000/svg" class="second_svg">
-            <path d="M27.7079 84.6686C27.7079 81.9428 28.1209 79.5887 28.9469 77.6063C29.7729 75.5826 30.9086 73.9099 32.3541 72.5883C33.8409 71.2667 35.5549 70.2962 37.496 69.6767C39.4784 69.0159 41.6053 68.6855 43.8768 68.6855C44.7028 68.6855 45.5082 68.7681 46.2929 68.9333C47.0776 69.0572 47.7177 69.2224 48.2133 69.4289V59.393C48.6263 59.2691 49.2871 59.1452 50.1957 59.0213C51.1043 58.8561 52.0336 58.7735 52.9835 58.7735C53.8921 58.7735 54.6974 58.8354 55.3995 58.9593C56.1429 59.0832 56.7624 59.331 57.258 59.7027C57.7536 60.0744 58.1253 60.5907 58.3731 61.2515C58.6209 61.871 58.7448 62.697 58.7448 63.7295V93.0938C58.7448 95.0349 57.8362 96.5836 56.019 97.74C54.8213 98.5247 53.2726 99.2062 51.3728 99.7844C49.473 100.404 47.2841 100.714 44.8061 100.714C42.1216 100.714 39.7055 100.342 37.5579 99.5985C35.4516 98.8551 33.6551 97.7813 32.1683 96.3771C30.7228 94.9729 29.6077 93.3003 28.823 91.3592C28.0796 89.3768 27.7079 87.1466 27.7079 84.6686ZM45.3017 76.9248C43.0715 76.9248 41.3575 77.565 40.1598 78.8453C38.9621 80.1256 38.3633 82.0667 38.3633 84.6686C38.3633 87.2292 38.9208 89.1703 40.0359 90.4919C41.151 91.7722 42.7617 92.4123 44.868 92.4123C45.6114 92.4123 46.2722 92.3091 46.8504 92.1026C47.4699 91.8548 47.9449 91.5863 48.2753 91.2972V77.6682C47.4493 77.1726 46.4581 76.9248 45.3017 76.9248ZM96.4685 84.6686C96.4685 87.2292 96.0761 89.5213 95.2914 91.545C94.5067 93.5274 93.3916 95.2001 91.9461 96.563C90.5419 97.9259 88.8486 98.9584 86.8662 99.6605C84.8838 100.363 82.6743 100.714 80.2376 100.714C77.8009 100.714 75.5913 100.342 73.6089 99.5985C71.6265 98.8551 69.9126 97.802 68.4671 96.4391C67.0629 95.0349 65.9684 93.3416 65.1837 91.3592C64.399 89.3768 64.0067 87.1466 64.0067 84.6686C64.0067 82.2319 64.399 80.0223 65.1837 78.0399C65.9684 76.0575 67.0629 74.3849 68.4671 73.022C69.9126 71.6178 71.6265 70.544 73.6089 69.8006C75.5913 69.0572 77.8009 68.6855 80.2376 68.6855C82.6743 68.6855 84.8838 69.0778 86.8662 69.8625C88.8486 70.6059 90.5419 71.6797 91.9461 73.0839C93.3916 74.4468 94.5067 76.1195 95.2914 78.1019C96.0761 80.0843 96.4685 82.2732 96.4685 84.6686ZM74.786 84.6686C74.786 87.1879 75.2609 89.129 76.2108 90.4919C77.202 91.8135 78.5649 92.4743 80.2995 92.4743C82.0341 92.4743 83.3557 91.7928 84.2643 90.4299C85.2142 89.067 85.6892 87.1466 85.6892 84.6686C85.6892 82.1906 85.2142 80.2908 84.2643 78.9692C83.3144 77.6063 81.9722 76.9248 80.2376 76.9248C78.503 76.9248 77.1607 77.6063 76.2108 78.9692C75.2609 80.2908 74.786 82.1906 74.786 84.6686ZM117.528 100.714C115.091 100.714 112.819 100.383 110.713 99.7224C108.648 99.0203 106.831 97.9878 105.262 96.6249C103.733 95.262 102.515 93.5481 101.606 91.4831C100.739 89.4181 100.306 87.002 100.306 84.2349C100.306 81.5091 100.739 79.1757 101.606 77.2346C102.515 75.2522 103.692 73.6415 105.138 72.4025C106.583 71.1222 108.235 70.1929 110.094 69.6147C111.952 68.9952 113.852 68.6855 115.793 68.6855C117.982 68.6855 119.964 69.0159 121.74 69.6767C123.557 70.3375 125.106 71.2461 126.386 72.4025C127.708 73.5589 128.72 74.9424 129.422 76.5531C130.165 78.1638 130.537 79.9191 130.537 81.8189C130.537 83.2231 130.145 84.2969 129.36 85.0403C128.575 85.7837 127.481 86.2586 126.077 86.4651L110.775 88.7573C111.229 90.1202 112.159 91.1527 113.563 91.8548C114.967 92.5156 116.578 92.846 118.395 92.846C120.088 92.846 121.678 92.6395 123.165 92.2265C124.693 91.7722 125.932 91.2559 126.882 90.6777C127.543 91.0907 128.1 91.6689 128.555 92.4123C129.009 93.1557 129.236 93.9404 129.236 94.7664C129.236 96.6249 128.369 98.0085 126.634 98.9171C125.313 99.6192 123.826 100.094 122.174 100.342C120.522 100.59 118.973 100.714 117.528 100.714ZM115.793 76.3673C114.802 76.3673 113.935 76.5325 113.191 76.8629C112.489 77.1933 111.911 77.6269 111.457 78.1638C111.002 78.6594 110.651 79.2376 110.403 79.8984C110.197 80.5179 110.073 81.1581 110.032 81.8189L120.625 80.0843C120.501 79.2583 120.047 78.4323 119.262 77.6063C118.478 76.7803 117.321 76.3673 115.793 76.3673Z" fill="#FD7981"/>
-            <path d="M122.14 37.7573C124.646 38.1485 129.164 37.509 135.684 32.2926C142.204 27.0766 146.367 27.7601 147.211 34.4847C148.055 41.2096 144.982 54.5035 150.227 53.8343C155.472 53.1652 157.154 55.6297 156.114 60.3421C155.075 65.0542 156.514 78.7654 154.854 82.5698C153.194 86.374 125.255 58.8259 110.66 53.5163C96.0647 48.2068 96.6171 47.6182 100.528 40.0008C104.44 32.3838 105.021 31.163 108.459 32.4173C111.897 33.6721 117.657 23.0749 120.169 27.8172C122.681 32.5597 119.684 37.3741 122.14 37.7573Z" fill="url(#paint0_linear_1788_124666)"/>
-            <path d="M158.939 73.9524C144.561 59.8033 129.627 51.5667 119.63 47.1485C108.794 42.3597 101.263 40.9002 101.188 40.8859L101.382 39.9539C101.457 39.9682 109.069 41.4405 119.992 46.2648C130.065 50.7133 145.113 59.0086 159.599 73.2643L158.939 73.9524Z" fill="#2C2C2C"/>
-            <mask id="path-4-inside-1_1788_124666" fill="white">
-            <path d="M95.7234 48.8271L96.071 48.207C96.1332 48.0963 102.447 38.501 105.574 30.033C105.373 29.9546 105.132 29.8456 104.875 29.6984C103.834 29.1029 102.169 27.6509 102.709 24.6184C103.176 21.9887 105.51 20.4618 108.517 20.8186C108.904 20.864 110.993 21.873 110.243 21.4435C112.151 22.5354 112.648 24.2445 112.076 26.4002C111.272 29.431 108.877 30.2414 107.8 30.3833C107.712 32.7564 108.082 34.2954 108.853 34.7366C109.086 34.8696 109.362 34.9107 109.698 34.8619C111.712 34.5685 114.618 31.2945 117.699 25.8578C116.828 25.2489 115.529 23.9036 116.037 21.4918C116.286 20.3069 116.902 19.6314 118.058 19.0881C119.312 18.4987 120.799 18.5058 121.847 19.1056C122.455 19.4535 123.034 19.7023 123.223 20.3477C123.708 22.0051 123.503 23.6622 122.675 24.7801C122.189 25.4361 121.264 26.2097 119.571 26.3302C119.241 30.3258 117.797 39.4518 121.326 41.4719C121.856 41.7754 122.467 41.9219 123.142 41.9073C124.984 41.8674 131.714 40.0433 143.535 30.227C142.787 29.4648 142.082 28.3827 142.212 27.0785C142.358 25.609 143.102 24.4308 144.351 23.6483C145.211 23.1105 146.627 22.6278 148.496 23.382C149.932 23.9612 151.035 24.7511 151.357 26.1492C151.696 27.6183 151.021 28.9976 150.468 29.8655C149.49 31.4004 148.457 32.1441 146.665 31.8526C145.614 37.5419 143.07 53.7736 147.656 56.3989C147.895 56.5353 148.154 56.6341 148.426 56.6919C153.318 57.7338 159.213 53.762 162.473 51.125C162.075 50.1461 161.686 48.3034 163.316 46.5966C164.669 45.1815 166.441 45.0922 167.962 45.9628C168.982 46.5473 169.645 47.6217 169.779 48.9107C169.941 50.4674 169.351 51.7746 168.03 52.669C166.845 53.4714 165.459 53.5585 164.197 52.9184C159.361 62.5833 158.502 65.2545 158.53 65.7467C159.714 65.4398 162.852 63.3329 166.3 60.6158C165.962 59.6456 165.597 57.8782 166.796 56.6585C167.995 55.4378 169.672 55.3264 170.907 56.0331C171.431 56.333 172.087 56.9701 172.241 58.3005C172.425 59.9063 171.946 61.1866 170.774 61.9896C169.795 62.6597 168.598 62.6832 167.484 62.0555C162.179 68.8448 158.904 74.8128 155.163 82.0066L154.867 82.5771L154.42 82.1384C154.284 82.0043 140.587 68.6228 123.572 58.8822C113.601 53.1737 104.463 49.8174 96.4132 48.9051L95.7234 48.8271ZM124.048 58.0527C139.439 66.8636 152.128 78.6332 154.632 81.0177C158.419 73.85 163.783 65.7926 166.803 61.4052C164.102 63.5312 160.698 65.9978 159.094 66.3034C158.832 66.3533 158.651 66.2928 158.534 66.2231C157.971 65.9004 156.937 65.2837 163.593 52.0487L163.836 51.5668L164.272 51.8565C165.336 52.5627 166.522 52.562 167.524 51.8833C168.55 51.1886 169.132 49.9615 169.007 48.7572C168.902 47.7547 168.419 46.9584 167.644 46.515C166.498 45.8589 165.026 46.1531 163.98 47.2473C162.604 48.6874 163.069 50.2352 163.469 51.0299L163.641 51.3718L163.34 51.6192C160.017 54.3561 153.689 59.4962 148.267 58.3411C147.902 58.2635 147.555 58.1314 147.236 57.9486C142.311 55.13 144.225 39.7194 145.836 31.2138L145.931 30.7152L146.414 30.83C148.484 31.3226 149.365 30.4435 149.954 29.5187C150.383 28.8454 150.72 27.578 150.445 26.387C150.188 25.2744 149.457 24.4605 148.289 23.9883C147.094 23.5062 145.953 23.5712 144.986 24.1759C143.984 24.8036 143.26 25.9711 143.143 27.1501C143.03 28.2869 143.849 29.2611 144.556 29.8783L144.972 30.2409L144.538 30.6039C139.431 34.8796 129.259 42.4938 123.579 42.6166C122.736 42.6349 121.966 42.4479 121.29 42.0612C117.374 39.8195 118.226 31.0062 118.657 26.0514C114.391 33.6613 111.492 35.5562 109.808 35.8011C109.268 35.8797 108.787 35.8005 108.377 35.5658C107.212 34.8989 106.71 33.0034 106.886 29.9324L106.912 29.4771L107.362 29.4735C107.494 29.4726 110.624 29.4122 111.441 26.3298C112.031 24.1063 110.857 22.8964 109.767 22.2728C109.238 21.97 108.692 21.7975 108.386 21.7609C105.874 21.4629 104.007 22.6414 103.63 24.7637C103.214 27.1044 104.336 28.2881 105.351 28.8691C105.881 29.1729 106.329 29.2779 106.334 29.2791L106.885 29.406L106.644 29.9338C103.754 36.2129 98.5972 45.5742 97.2248 48.0448C105.229 49.0789 114.249 52.4437 124.048 58.0527ZM167.412 60.8606L167.638 61.0215C168.556 61.6755 169.493 61.734 170.262 61.2071C171.126 60.6156 171.611 59.3899 171.469 58.1577C171.381 57.3985 171.085 56.87 170.588 56.5856C169.735 56.097 168.327 56.4263 167.449 57.3192C166.499 58.2867 167.024 59.9171 167.294 60.5732L167.412 60.8606ZM121.53 19.659C120.745 19.2098 119.564 19.2147 118.592 19.6717C117.719 20.082 117.137 20.7908 116.952 21.6682C116.513 23.7513 117.75 24.8079 118.526 25.2521L118.789 25.3992L119.151 25.3981C120.422 25.3937 121.357 24.9983 121.932 24.2233C122.579 23.3496 122.726 22.0099 122.325 20.639C122.203 20.2206 121.935 19.8911 121.53 19.659Z"/>
-            </mask>
-            <path d="M95.7234 48.8271L96.071 48.207C96.1332 48.0963 102.447 38.501 105.574 30.033C105.373 29.9546 105.132 29.8456 104.875 29.6984C103.834 29.1029 102.169 27.6509 102.709 24.6184C103.176 21.9887 105.51 20.4618 108.517 20.8186C108.904 20.864 110.993 21.873 110.243 21.4435C112.151 22.5354 112.648 24.2445 112.076 26.4002C111.272 29.431 108.877 30.2414 107.8 30.3833C107.712 32.7564 108.082 34.2954 108.853 34.7366C109.086 34.8696 109.362 34.9107 109.698 34.8619C111.712 34.5685 114.618 31.2945 117.699 25.8578C116.828 25.2489 115.529 23.9036 116.037 21.4918C116.286 20.3069 116.902 19.6314 118.058 19.0881C119.312 18.4987 120.799 18.5058 121.847 19.1056C122.455 19.4535 123.034 19.7023 123.223 20.3477C123.708 22.0051 123.503 23.6622 122.675 24.7801C122.189 25.4361 121.264 26.2097 119.571 26.3302C119.241 30.3258 117.797 39.4518 121.326 41.4719C121.856 41.7754 122.467 41.9219 123.142 41.9073C124.984 41.8674 131.714 40.0433 143.535 30.227C142.787 29.4648 142.082 28.3827 142.212 27.0785C142.358 25.609 143.102 24.4308 144.351 23.6483C145.211 23.1105 146.627 22.6278 148.496 23.382C149.932 23.9612 151.035 24.7511 151.357 26.1492C151.696 27.6183 151.021 28.9976 150.468 29.8655C149.49 31.4004 148.457 32.1441 146.665 31.8526C145.614 37.5419 143.07 53.7736 147.656 56.3989C147.895 56.5353 148.154 56.6341 148.426 56.6919C153.318 57.7338 159.213 53.762 162.473 51.125C162.075 50.1461 161.686 48.3034 163.316 46.5966C164.669 45.1815 166.441 45.0922 167.962 45.9628C168.982 46.5473 169.645 47.6217 169.779 48.9107C169.941 50.4674 169.351 51.7746 168.03 52.669C166.845 53.4714 165.459 53.5585 164.197 52.9184C159.361 62.5833 158.502 65.2545 158.53 65.7467C159.714 65.4398 162.852 63.3329 166.3 60.6158C165.962 59.6456 165.597 57.8782 166.796 56.6585C167.995 55.4378 169.672 55.3264 170.907 56.0331C171.431 56.333 172.087 56.9701 172.241 58.3005C172.425 59.9063 171.946 61.1866 170.774 61.9896C169.795 62.6597 168.598 62.6832 167.484 62.0555C162.179 68.8448 158.904 74.8128 155.163 82.0066L154.867 82.5771L154.42 82.1384C154.284 82.0043 140.587 68.6228 123.572 58.8822C113.601 53.1737 104.463 49.8174 96.4132 48.9051L95.7234 48.8271ZM124.048 58.0527C139.439 66.8636 152.128 78.6332 154.632 81.0177C158.419 73.85 163.783 65.7926 166.803 61.4052C164.102 63.5312 160.698 65.9978 159.094 66.3034C158.832 66.3533 158.651 66.2928 158.534 66.2231C157.971 65.9004 156.937 65.2837 163.593 52.0487L163.836 51.5668L164.272 51.8565C165.336 52.5627 166.522 52.562 167.524 51.8833C168.55 51.1886 169.132 49.9615 169.007 48.7572C168.902 47.7547 168.419 46.9584 167.644 46.515C166.498 45.8589 165.026 46.1531 163.98 47.2473C162.604 48.6874 163.069 50.2352 163.469 51.0299L163.641 51.3718L163.34 51.6192C160.017 54.3561 153.689 59.4962 148.267 58.3411C147.902 58.2635 147.555 58.1314 147.236 57.9486C142.311 55.13 144.225 39.7194 145.836 31.2138L145.931 30.7152L146.414 30.83C148.484 31.3226 149.365 30.4435 149.954 29.5187C150.383 28.8454 150.72 27.578 150.445 26.387C150.188 25.2744 149.457 24.4605 148.289 23.9883C147.094 23.5062 145.953 23.5712 144.986 24.1759C143.984 24.8036 143.26 25.9711 143.143 27.1501C143.03 28.2869 143.849 29.2611 144.556 29.8783L144.972 30.2409L144.538 30.6039C139.431 34.8796 129.259 42.4938 123.579 42.6166C122.736 42.6349 121.966 42.4479 121.29 42.0612C117.374 39.8195 118.226 31.0062 118.657 26.0514C114.391 33.6613 111.492 35.5562 109.808 35.8011C109.268 35.8797 108.787 35.8005 108.377 35.5658C107.212 34.8989 106.71 33.0034 106.886 29.9324L106.912 29.4771L107.362 29.4735C107.494 29.4726 110.624 29.4122 111.441 26.3298C112.031 24.1063 110.857 22.8964 109.767 22.2728C109.238 21.97 108.692 21.7975 108.386 21.7609C105.874 21.4629 104.007 22.6414 103.63 24.7637C103.214 27.1044 104.336 28.2881 105.351 28.8691C105.881 29.1729 106.329 29.2779 106.334 29.2791L106.885 29.406L106.644 29.9338C103.754 36.2129 98.5972 45.5742 97.2248 48.0448C105.229 49.0789 114.249 52.4437 124.048 58.0527ZM167.412 60.8606L167.638 61.0215C168.556 61.6755 169.493 61.734 170.262 61.2071C171.126 60.6156 171.611 59.3899 171.469 58.1577C171.381 57.3985 171.085 56.87 170.588 56.5856C169.735 56.097 168.327 56.4263 167.449 57.3192C166.499 58.2867 167.024 59.9171 167.294 60.5732L167.412 60.8606ZM121.53 19.659C120.745 19.2098 119.564 19.2147 118.592 19.6717C117.719 20.082 117.137 20.7908 116.952 21.6682C116.513 23.7513 117.75 24.8079 118.526 25.2521L118.789 25.3992L119.151 25.3981C120.422 25.3937 121.357 24.9983 121.932 24.2233C122.579 23.3496 122.726 22.0099 122.325 20.639C122.203 20.2206 121.935 19.8911 121.53 19.659Z" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="1.0585" mask="url(#path-4-inside-1_1788_124666)"/>
-            <defs>
-            <linearGradient id="paint0_linear_1788_124666" x1="142.012" y1="40.5962" x2="125.07" y2="65.4939" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#FD7981"/>
-            <stop offset="1" stop-color="#FFE694"/>
-            </linearGradient>
-            </defs>
-        </svg>
-        <svg width="39" height="148" viewBox="0 0 39 148" fill="none" xmlns="http://www.w3.org/2000/svg" class="third_svg">
-            <ellipse cx="109.98" cy="77.4387" rx="109.98" ry="70.5614" fill="#FFC6D4"/>
-            <path d="M111.02 1C141.227 1 168.529 8.8578 188.247 21.5088C207.977 34.1669 220 51.5331 220 70.5615C220 89.5899 207.977 106.956 188.247 119.614C168.529 132.265 141.227 140.123 111.02 140.123C80.8118 140.123 53.5105 132.265 33.792 119.614C14.0626 106.956 2.03913 89.5899 2.03906 70.5615C2.03906 51.5331 14.0625 34.1669 33.792 21.5088C53.5105 8.8578 80.8117 1 111.02 1Z" fill="#FFC6D4" stroke="#2C2C2C" stroke-width="2"/>
-        </svg>
+    <div class="all_header">
+        <div style="margin-top: 0px; margin-left: -70px; float: left">
+            <svg width="260" height="63" viewBox="0 0 260 63" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="125.347" cy="123.959" rx="125.347" ry="123.959" transform="matrix(1 0 0 -1 0 50.02)" fill="#FD7981"/>
+                <path d="M259.25 -61.8576C259.25 -129.896 203.474 -185.067 134.653 -185.067C65.8317 -185.067 10.0555 -129.896 10.0555 -61.8576C10.0555 6.18108 65.8317 61.3516 134.653 61.3516C203.474 61.3516 259.25 6.18108 259.25 -61.8576Z" stroke="#2C2C2C" stroke-width="1.5"/>
+            </svg>
+        </div>
+
+        <div class="header">
+            <svg width="137" height="99" viewBox="0 0 137 99" fill="none" xmlns="http://www.w3.org/2000/svg" class="doe_icon">
+                <!-- SVG код остаётся без изменений -->
+            </svg>
+            <div style="width: -webkit-fill-available; display:flex; flex-direction: column; align-items: center;">
+                <h1 style="height:50px;">Glossary</h1>
+                <h1 class="extra_header_name">Easy Access to Common Terms</h1>
+            </div>
+        </div>
     </div>
 
-    <div class="all_content">
+    <div class="main_content">
         <div class="nav_pc">
             {% include 'videos/nav_pc.html' %}
         </div>
-        <div class="main_content">
-            <h1>Cheat Sheet</h1>
-            <h3>Easy Access to Common Terms</h3>
-            <svg width="343" height="288" viewBox="0 0 530 353" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <rect width="530" height="353" fill="url(#pattern0_2005_66233)"/>
-                <defs>
-                <pattern id="pattern0_2005_66233" patternContentUnits="objectBoundingBox" width="1" height="1">
-                <use xlink:href="#image0_2005_66233" transform="matrix(0.00396451 0 0 0.00595238 -0.0946765 0)"/>
-                </pattern>
-                <image id="image0_2005_66233" width="300" height="168" preserveAspectRatio="none" xlink:href="data:image/jpeg;base64,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7wrNyYfAzzSvUEHlOvp+kTgYbDffGT8e2aMvFpV2h/Sucia0ySV9DypzbbSi+JtRjjyVCSZu6u2pK1RcrpkJYs3J9TZjuHy/dHmecVbpM3ciA+O3P5iZy9dxWy05difaeweXhOLjZbf7s7+SZ8NzifEjZaznvOcDsA7gPKSHovxoo6uuGIUo9R7LqyMEefLkfjIGbZko1JU5BmnJxlUdSqcn3Z6Rr+jtOoJs01yYPPqbnVLKz4ZbCsPMfATUp6I7Dm66pFHhYjufYqEkn4SN6fpE49YK3mw5/EYMzP0mbHoogPjtyf8A7ZmT8HIX6p/C3vHpKddqq0VDt20V56utvX1D97EeZAyewAYkOv1pstLk5JYknxJM0dbxN7DuZiT4kzVS/BzNOHjdF99IXl2ye6psDV/wa/z1yKV6na3bMuo6R2OjIdvpBVLBFDMBjGWxnuHwnGNvOMOBpPsLyJ+HqXC+JG5Beh/WKQC477qxyD47yOw+WD4xxPXNZodU7Hm19JJ8ytpnn/CeMvQ62I2GHZ/sR3jynT4t0utuqNJWtULByK60TcwBAyQPM/GZa4VLIuq+bLFmXUjmsbmZptMtr5MwNPYlaRkbKSkRJkRERAEREAREQBERAEREAREQBERAKgy8NMcrmAZleX9bNfMbpHqd2ZzbLS8xbpTMdRsy7o3zFmMzuhsy75QtMeYzGhsv3SoaY8xmNAyh43zFmVzGhsyFpbulmYzGgX7o3SzMZjQMm6C0x5jMaGy4mWykTpwREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREA//Z"/>
-                </defs>
-            </svg>
+
+        <div class="glossary_content">
+            <div class="search_filter_div">
+                    <div class="search_container">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://.w3.org/2000/svg">
+                            <path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z" fill="#1D1B20"/>
+                        </svg>
+                        <input type="text" placeholder="Search" class="search_field">
+                        <svg class="reset_search" width="15" height="15" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.09758 4.44626L8.78202 0.761819C8.85483 0.676796 8.89288 0.567429 8.88856 0.455573C8.88424 0.343717 8.83787 0.23761 8.75871 0.158457C8.67956 0.0793041 8.57346 0.0329339 8.4616 0.0286134C8.34974 0.0242929 8.24038 0.0623402 8.15535 0.135152L4.47091 3.8196L0.786464 0.130707C0.702773 0.0470169 0.589265 0 0.470908 0C0.352552 0 0.239043 0.0470169 0.155353 0.130707C0.0716621 0.214398 0.0246452 0.327907 0.0246452 0.446263C0.0246452 0.564619 0.0716621 0.678128 0.155353 0.761819L3.84424 4.44626L0.155353 8.13071C0.108827 8.17055 0.0710406 8.21958 0.0443636 8.27472C0.0176866 8.32986 0.00269542 8.38992 0.000331196 8.45113C-0.00203302 8.51234 0.00828052 8.57337 0.0306248 8.63041C0.052969 8.68744 0.0868616 8.73924 0.130175 8.78255C0.173488 8.82587 0.225287 8.85976 0.28232 8.8821C0.339354 8.90445 0.40039 8.91476 0.461599 8.9124C0.522807 8.91003 0.582866 8.89504 0.638006 8.86836C0.693146 8.84169 0.742176 8.8039 0.782019 8.75737L4.47091 5.07293L8.15535 8.75737C8.24038 8.83019 8.34974 8.86823 8.4616 8.86391C8.57346 8.85959 8.67956 8.81322 8.75871 8.73407C8.83787 8.65492 8.88424 8.54881 8.88856 8.43695C8.89288 8.3251 8.85483 8.21573 8.78202 8.13071L5.09758 4.44626Z" fill="black"/>
+                        </svg>
+                    </div>
+                    <div class="filter">
+                        <div style="display:flex;">
+                            <p>Viewed</p>
+                            <svg class="reset_filter" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="align-self: center; margin-top:-5px">
+                                <path d="M5.09758 4.44626L8.78202 0.761819C8.85483 0.676796 8.89288 0.567429 8.88856 0.455573C8.88424 0.343717 8.83787 0.23761 8.75871 0.158457C8.67956 0.0793041 8.57346 0.0329339 8.4616 0.0286134C8.34974 0.0242929 8.24038 0.0623402 8.15535 0.135152L4.47091 3.8196L0.786464 0.130707C0.702773 0.0470169 0.589265 0 0.470908 0C0.352552 0 0.239043 0.0470169 0.155353 0.130707C0.0716621 0.214398 0.0246452 0.327907 0.0246452 0.446263C0.0246452 0.564619 0.0716621 0.678128 0.155353 0.761819L3.84424 4.44626L0.155353 8.13071C0.108827 8.17055 0.0710406 8.21958 0.0443636 8.27472C0.0176866 8.32986 0.00269542 8.38992 0.000331196 8.45113C-0.00203302 8.51234 0.00828052 8.57337 0.0306248 8.63041C0.052969 8.68744 0.0868616 8.73924 0.130175 8.78255C0.173488 8.82587 0.225287 8.85976 0.28232 8.8821C0.339354 8.90445 0.40039 8.91476 0.461599 8.9124C0.522807 8.91003 0.582866 8.89504 0.638006 8.86836C0.693146 8.84169 0.742176 8.8039 0.782019 8.75737L4.47091 5.07293L8.15535 8.75737C8.24038 8.83019 8.34974 8.86823 8.4616 8.86391C8.57346 8.85959 8.67956 8.81322 8.75871 8.73407C8.83787 8.65492 8.88424 8.54881 8.88856 8.43695C8.89288 8.3251 8.85483 8.21573 8.78202 8.13071L5.09758 4.44626Z" fill="gray" stroke="gray" stroke-width="1"/>
+                            </svg>
+                        </div>
+                        <div class="filter_variants">
+                            <p class="selectable">Alphabetically</p>
+                            <p class="selectable">By Category</p>
+                        </div>
+                    </div>
+                </div>
+            <div class="all_containers">
+                {% for item in items %}
+                    <div class="container" data-category="{{ item.category }}">
+                        <div class="card-inner">
+                            <div class="card-front" style="background: {{ item.color }};">
+                                <p>{{ item.term }}</p>
+                            </div>
+                            <div class="card-back" style="background: {{ item.color }};">
+                                <p>{{ item.explanation }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
+    </div>
+
+    <div class="nav_pannel">
+        {% include 'videos/nav.html' %}
     </div>
 </div>
 
-    <div id="nav_pannel">
-        {% include 'videos/nav.html' %}
-    </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    /* ------------------------------
+       Переменные
+    ------------------------------ */
+    const filters = document.querySelectorAll('.filter_variants p.selectable');
+    const containersWrapper = document.querySelector('.all_containers');
+    const originalOrder = Array.from(containersWrapper.children);
+    const resetFilterButton = document.querySelector(".reset_filter");
+    const searchInput = document.querySelector(".search_field");
+    const resetSearchButton = document.querySelector(".reset_search");
+
+    /* ------------------------------
+       Функция для переворота карточек
+    ------------------------------ */
+    function attachCardFlipListeners() {
+        document.querySelectorAll(".container").forEach(card => {
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+        });
+
+        document.querySelectorAll(".container").forEach(card => {
+            card.addEventListener("click", function() {
+                const inner = this.querySelector(".card-inner");
+                if (inner) inner.classList.toggle("flipped");
+            });
+        });
+    }
+
+    function attachCardFlipListenersV2() {
+        containersWrapper.addEventListener('click', function(event) {
+            const container = event.target.closest('.container');
+            if (container) {
+                const inner = container.querySelector('.card-inner');
+                if (inner) inner.classList.toggle('flipped');
+            }
+        });
+    }
+
+    /* ------------------------------
+       Центрирование текста на обратной стороне
+    ------------------------------ */
+    function adjustBackText() {
+        document.querySelectorAll(".card-back p").forEach(p => {
+            const parentHeight = p.parentElement.clientHeight;
+            const scrollHeight = p.scrollHeight;
+
+            if (scrollHeight > parentHeight) {
+                p.style.display = "block";
+                p.style.justifyContent = "";
+                p.style.alignItems = "";
+            } else {
+                p.style.display = "flex";
+                p.style.justifyContent = "center";
+                p.style.alignItems = "center";
+                p.style.flexDirection = "column";
+            }
+        });
+    }
+
+    /* ------------------------------
+       Сортировка A–Z
+    ------------------------------ */
+    function sortAlphabetically() {
+        const cards = Array.from(originalOrder);
+        cards.sort((a, b) => {
+            const aText = a.querySelector(".card-front p").textContent.trim().toLowerCase();
+            const bText = b.querySelector(".card-front p").textContent.trim().toLowerCase();
+            return aText.localeCompare(bText);
+        });
+
+        containersWrapper.innerHTML = "";
+        cards.forEach(c => containersWrapper.appendChild(c.cloneNode(true)));
+
+        adjustBackText();
+        attachCardFlipListeners();
+    }
+
+    /* ------------------------------
+       Сортировка по категориям
+    ------------------------------ */
+    function sortByCategory() {
+        const cards = Array.from(originalOrder);
+        const groups = {};
+
+        cards.forEach(card => {
+            const cat = card.dataset.category || "Uncategorized";
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(card.cloneNode(true));
+        });
+
+        containersWrapper.innerHTML = "";
+
+        Object.keys(groups).sort().forEach(category => {
+            const categorySection = document.createElement("div");
+            categorySection.className = "category-section";
+
+            const categoryHeader = document.createElement("div");
+            categoryHeader.className = "category-header";
+
+            const categoryLabel = document.createElement("div");
+            categoryLabel.className = "category-label";
+            categoryLabel.textContent = category;
+
+            categoryHeader.appendChild(categoryLabel);
+            categorySection.appendChild(categoryHeader);
+
+            const cardsWrapper = document.createElement("div");
+            cardsWrapper.className = "category-cards-wrapper";
+
+            groups[category].forEach(card => {
+                cardsWrapper.appendChild(card);
+            });
+
+            categorySection.appendChild(cardsWrapper);
+            containersWrapper.appendChild(categorySection);
+        });
+
+        adjustBackText();
+        attachCardFlipListeners();
+    }
+
+    /* ------------------------------
+       Восстановление исходного порядка
+    ------------------------------ */
+    function restoreOriginalOrder() {
+        containersWrapper.innerHTML = "";
+        originalOrder.forEach(card => {
+            containersWrapper.appendChild(card.cloneNode(true));
+        });
+
+        adjustBackText();
+        attachCardFlipListeners();
+    }
+
+    /* ------------------------------
+       Поиск по термину
+    ------------------------------ */
+    function filterByTerm(query) {
+        query = query.trim().toLowerCase();
+        if (!query) {
+            restoreOriginalOrder();
+            return;
+        }
+        const cards = containersWrapper.querySelectorAll(".container");
+        cards.forEach(card => {
+            const term = card.querySelector(".card-front p").textContent.toLowerCase();
+            card.style.display = term.includes(query) ? "flex" : "none";
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            filterByTerm(searchInput.value);
+        });
+    }
+
+    if (resetSearchButton) {
+        resetSearchButton.addEventListener("click", () => {
+            searchInput.value = "";
+            restoreOriginalOrder();
+            searchInput.focus();
+        });
+    }
+
+    /* ------------------------------
+       Инициализация обработчиков
+    ------------------------------ */
+    function initEventListeners() {
+        filters.forEach(f => {
+            f.addEventListener("click", () => {
+                filters.forEach(x => x.classList.remove("active"));
+                f.classList.add("active");
+
+                const mode = f.textContent.trim();
+                if (mode === "Alphabetically") {
+                    sortAlphabetically();
+                } else if (mode === "By Category") {
+                    sortByCategory();
+                }
+            });
+        });
+
+        if (resetFilterButton) {
+            resetFilterButton.addEventListener("click", () => {
+                filters.forEach(f => f.classList.remove("active"));
+                restoreOriginalOrder();
+            });
+        }
+    }
+
+    /* ------------------------------
+       Инициализация при загрузке
+    ------------------------------ */
+    function init() {
+        attachCardFlipListeners();
+        adjustBackText();
+        initEventListeners();
+        filters.forEach(f => f.classList.remove("active"));
+        restoreOriginalOrder();
+    }
+
+    init();
+});
+</script>
 
 </body>
 </html>

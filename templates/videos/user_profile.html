@@ -689,7 +689,6 @@
                         </div>
                     </div>
                     <div class="user_info">
-
                         <div class="profile_icon">
                             {% if user.profile_picture %}
                                 <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
@@ -782,6 +781,7 @@
                         <div class="two_buttons">
                             <button id="redeemBtn">Redeem Points</button>
                             <button id="referFriendBtn" class="refer-friend-btn">Refer a Friend</button>
+                            <a href="{% url 'signout' %}" style="display:flex; justify-content: center;">Sign Out</a>
                         </div>
                     </div>
 

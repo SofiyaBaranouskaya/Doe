@@ -10,22 +10,29 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('accounts/login/', views.login_view, name='login'),
+    path('signout/', views.signout, name='signout'),
+
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
     path('signup_complete/', views.signup_complete, name='signup_complete'),
     path('profile/', views.profile_view, name='profile'),
     path('profile/save/', views.save_profile_steps, name='save_profile_steps'),
     path('profile_finished/', views.profile_end, name='profile_end'),
-    path('auth/', include('social_django.urls', namespace='social')),  # для авторизации через Google
-    path('social-auth/', include('social_django.urls', namespace='social')),
+
+    path('auth/', include('social_django.urls', namespace='social')),  # оставить с namespace
+    path('social-auth/', include('social_django.urls')),  # убрать namespace
     path('redeem-reward/', views.redeem_reward, name='redeem_reward'),
     path('custom-redirect/', views.redirect_view, name='custom_redirect'),
 
-    path('events_page/', views.events_page, name='events_page'),
+    path('events/', views.events_page, name='events_page'),
+    path('saved/', views.saved_page, name='saved_page'),
     path('simulator/', views.simulator_page, name='simulator_page'),
     path('glossary/', views.glossary_page, name='glossary_page'),
+    path('hot_takes/', views.hot_takes_page, name='hot_takes_page'),
+    path('favourites/', views.favourites_page, name='favourites_page'),
 
     path('profile_page/', views.user_profile, name='user_profile'),
     path('change_profile_data/', views.user_profile_change, name='user_profile_change'),
