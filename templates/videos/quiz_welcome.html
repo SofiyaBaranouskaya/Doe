@@ -171,7 +171,7 @@
 
             .header {
                 margin-left: 80px;
-                margin-top: -65px;
+                margin-top: -50px;
             }
 
             span {
@@ -271,7 +271,11 @@
                 <h1>Quiz</h1>
             </div>
             <div class="header">
-                <h3>{{ quiz.title }}</h3>
+                {% if quiz.duration %}
+                    <h3>{{ quiz.title }} ~ {{ quiz.duration }} min</h3>
+                {% else %}
+                    <h3>{{ quiz.title }}</h3>
+                {% endif %}
 
                 <span class="points">
                     <svg class="svg_points" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

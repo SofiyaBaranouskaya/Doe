@@ -269,7 +269,11 @@
                 <h1>Fun fact</h1>
             </div>
             <div class="header">
-                <h3>{{ fun_fact.title }}</h3>
+                {% if fun_fact.duration %}
+                    <h3>{{ fun_fact.title }} ~ {{ fun_fact.duration }} min</h3>
+                {% else %}
+                    <h3>{{ fun_fact.title }}</h3>
+                {% endif %}
 
                 <span class="points">
                     <svg class="svg_points" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -820,28 +820,28 @@
                         </div>
                         <form id="redeemForm" method="post" action="{% url 'redeem_reward' %}">
                         {% csrf_token %}
-                        <div class="points_container">
-                            {% for reward in rewards %}
-                            <div class="reward-item">
-                                <input type="radio"
-                                       id="reward_{{ reward.id }}"
-                                       name="selected_reward"
-                                       value="{{ reward.id }}"
-                                       required
-                                       {% if user.points_count < reward.points_needed %}disabled{% endif %}>
-                                <label for="reward_{{ reward.id }}">
-                                    <div class="reward-header">
-                                        <span class="reward-title">{{ reward.title }}</span>
-                                        <span class="reward-points">{{ reward.points_needed }}pts</span>
-                                        {% if user.points_count < reward.points_needed %}
-                                        <span class="not-enough-points"></span>
-                                        {% endif %}
-                                    </div>
-                                    <p class="reward-description">{{ reward.description }}</p>
-                                </label>
-                            </div>
-                            {% endfor %}
-                        </div>
+<!--                        <div class="points_container">-->
+<!--                            {% for reward in rewards %}-->
+<!--                            <div class="reward-item">-->
+<!--                                <input type="radio"-->
+<!--                                       id="reward_{{ reward.id }}"-->
+<!--                                       name="selected_reward"-->
+<!--                                       value="{{ reward.id }}"-->
+<!--                                       required-->
+<!--                                       {% if user.points_count < reward.points_needed %}disabled{% endif %}>-->
+<!--                                <label for="reward_{{ reward.id }}">-->
+<!--                                    <div class="reward-header">-->
+<!--                                        <span class="reward-title">{{ reward.title }}</span>-->
+<!--                                        <span class="reward-points">{{ reward.points_needed }}pts</span>-->
+<!--                                        {% if user.points_count < reward.points_needed %}-->
+<!--                                        <span class="not-enough-points"></span>-->
+<!--                                        {% endif %}-->
+<!--                                    </div>-->
+<!--                                    <p class="reward-description">{{ reward.description }}</p>-->
+<!--                                </label>-->
+<!--                            </div>-->
+<!--                            {% endfor %}-->
+<!--                        </div>-->
 
                         <button type="button" class="redeem_button" onclick="confirmRedeem()">Redeem Points</button>
                     </form>

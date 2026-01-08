@@ -1,6 +1,6 @@
 from django.urls import path, include
 from apps.users import views
-from apps.users.views import get_objects
+from apps.users.views import get_objects, toggle_like
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('auth/', include('social_django.urls', namespace='social')),  # оставить с namespace
     path('social-auth/', include('social_django.urls')),  # убрать namespace
-    path('redeem-reward/', views.redeem_reward, name='redeem_reward'),
+    # path('redeem-reward/', views.redeem_reward, name='redeem_reward'),
     path('custom-redirect/', views.redirect_view, name='custom_redirect'),
 
     path('events/', views.events_page, name='events_page'),
@@ -50,6 +50,7 @@ urlpatterns = [
     path('new_ventures/', views.seventh_page, name='seventh_page'),
     path('rel_money/', views.eighth_page, name='eighth_page'),
     path('get_objects/', get_objects, name='get_objects'),
+    path('toggle-like/<str:model>/<int:object_id>/', views.toggle_like, name='toggle_like'),
 
     path('video/<int:video_id>/', views.video_detail, name='video_detail'),
     path('fun_fact/<int:fun_fact_id>/', views.fun_fact_detail, name='fun_fact_detail'),

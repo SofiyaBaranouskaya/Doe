@@ -79,14 +79,14 @@ class Invitation(models.Model):
     def __str__(self):
         return f"{self.inviter.email} invited {self.invitee_email}"
 
-class UserReward(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_rewards')
-    reward = models.ForeignKey('Regards', on_delete=models.CASCADE)
-    redeemed_at = models.DateTimeField(auto_now_add=True)
-    points_spent = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.user.username} — {self.reward.title}"
+# class UserReward(models.Model):
+#     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_rewards')
+#     reward = models.ForeignKey('Rewards', on_delete=models.CASCADE)
+#     redeemed_at = models.DateTimeField(auto_now_add=True)
+#     points_spent = models.PositiveIntegerField()
+#
+#     def __str__(self):
+#         return f"{self.user.username} — {self.reward.title}"
 
 class Schools(models.Model):
     name = models.CharField(max_length=70)
@@ -196,7 +196,7 @@ class Video(models.Model):
     )
     poster_base64 = models.TextField(blank=True, null=True)
     duration = models.CharField(max_length=20)
-    points = models.PositiveIntegerField()
+    points = models.PositiveIntegerField(default=50)
 
     def __str__(self):
         return self.title
@@ -269,12 +269,13 @@ class Video(models.Model):
 class FunFact(models.Model):
     title = models.CharField(max_length=255)
     fact_description = models.TextField()
-    points = models.PositiveIntegerField()
+    points = models.PositiveIntegerField(default=25)
     photo = models.ImageField(
         upload_to='photos/',
         storage=SupabaseStorage(bucket_name='photos'),
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'webp'])]
     )
+    duration = models.CharField(max_length=20, blank=True, null=True)
 
     photo_base64 = models.TextField(blank=True, null=True)
 
@@ -321,7 +322,8 @@ class ChitChat(models.Model):
         help_text="Fill the title",
         default="Would you rather?"
     )
-    points = models.PositiveIntegerField(default='0')
+    points = models.PositiveIntegerField(default=100)
+    duration = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         verbose_name = "Chit Chat"
@@ -410,11 +412,12 @@ class Challenge(models.Model):
     title = models.CharField(max_length=255, verbose_name="Title")
     picture = models.FileField(upload_to='challenges/', storage=SupabaseStorage(bucket_name='challenges'), verbose_name="Picture")
     instructions = models.TextField(verbose_name="Instructions")
-    points = models.IntegerField(verbose_name="Points")
+    points = models.IntegerField(verbose_name="Points", default=100)
     button_add_name = models.CharField(max_length=50, verbose_name="Button add name")
     button_view_name = models.CharField(max_length=50, verbose_name="Button view name")
     picture_base64 = models.TextField(blank=True, null=True)
     min_answers_required = models.PositiveIntegerField(default=1, verbose_name="Minimum number of answers required")
+    duration = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -584,6 +587,7 @@ class ChallengeUserAnswer(models.Model):
 
 class Quiz(models.Model):
     title = models.CharField(max_length=150)
+    duration = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         verbose_name = "Quizzes"
@@ -642,6 +646,7 @@ class QuizQuestion(models.Model):
         return "-"
     image_preview.short_description = "Preview"
 
+
 class QuizUserChoice(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
@@ -666,15 +671,36 @@ class QuizAnswer(models.Model):
         return f"Answer for {self.question.text} by {self.quiz_user_choice.user.username}"
 
 
+class Favourites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    created_at = models.DateTimeField(auto_now_add=True)
+    poster_base64 = models.TextField(
+        blank=True,
+        null=True,
+        editable=False,
+        verbose_name="Poster Base64"
+    )
 
-class Regards(models.Model):
+    class Meta:
+        unique_together = ('user', 'content_type', 'object_id')
+
+    def save(self, *args, **kwargs):
+        # Если объект — видео, берём Base64 постер
+        if isinstance(self.content_object, Video) and getattr(self.content_object, 'poster_base64', None):
+            self.poster_base64 = self.content_object.poster_base64
+        else:
+            self.poster_base64 = None
+
+        super().save(*args, **kwargs)
+
+
+class Rewards(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=255)
     points_needed = models.PositiveIntegerField()
-
-    class Meta:
-        verbose_name = "Rewards"
-        verbose_name_plural = "Rewards"
 
     def __str__(self):
         return self.title

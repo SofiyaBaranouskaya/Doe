@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
 from .models import Video, FunFact, Content, Challenge, ChitChat, ChitChatOption, ChitChatUserChoice, \
     ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeUserAttempt, Schools, UserSchool, Quiz, \
-    QuizUserChoice, QuizAnswer, QuizQuestion, Regards, UserReward, Invitation, Glossary
+    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites
 from django.contrib.auth import authenticate, login, get_backends, logout
 from django.contrib import messages
 from django.db.models import Q
@@ -64,8 +64,93 @@ def saved_page(request):
 def hot_takes_page(request):
     return render(request, 'videos/hot_takes_page.html')
 
+
 def favourites_page(request):
-    return render(request, 'videos/favourites_page.html')
+    if not request.user.is_authenticated:
+        return render(request, 'videos/favourites_page.html', {'contents': []})
+
+    from collections import defaultdict
+
+    # Получаем все лайки пользователя
+    favourites = Favourites.objects.filter(user=request.user)
+    if not favourites:
+        return render(request, 'videos/favourites_page.html', {'contents': []})
+
+    # Группируем по типам контента
+    objects_by_type = defaultdict(list)
+    for fav in favourites:
+        objects_by_type[fav.content_type.model].append(fav.object_id)
+
+    # Загружаем объекты каждого типа
+    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
+    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
+    challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
+    chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
+    quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+
+    filtered_contents = []
+
+    for fav in favourites:
+        model = fav.content_type.model
+        obj = None
+
+        if model == 'video':
+            obj = videos.get(fav.object_id)
+        elif model == 'funfact':
+            obj = funfacts.get(fav.object_id)
+        elif model == 'challenge':
+            obj = challenges.get(fav.object_id)
+        elif model == 'chitchat':
+            obj = chitchats.get(fav.object_id)
+        elif model == 'quiz':
+            obj = quizzes.get(fav.object_id)
+
+        if not obj or not getattr(obj, 'title', None):
+            continue
+
+        # Создаём временный объект для шаблона
+        class ContentLike:
+            def __init__(self):
+                self.content_type = fav.content_type
+                self.object_id = fav.object_id
+                self.is_liked = True
+                self.value = {}
+                self.quiz = None
+                self.poster_base64 = None  # для видео
+
+        content = ContentLike()
+
+        # Заполняем данные для видео
+        if model == 'video':
+            content.value = {
+                'title': obj.title,
+                'duration': getattr(obj, 'duration', ''),
+                'points': getattr(obj, 'points', 0)
+            }
+            content.poster_base64 = getattr(obj, 'poster_base64', None)
+
+        # Заполняем данные для викторины
+        elif model == 'quiz':
+            total_points = sum(q.points for q in obj.questions.all())
+            content.value = {
+                'title': obj.title,
+                'points': total_points
+            }
+            content.quiz = obj
+            content.quiz.total_points = total_points
+
+        # Остальные типы контента
+        else:
+            content.value = {
+                'title': obj.title,
+                'points': getattr(obj, 'points', 0)
+            }
+
+        filtered_contents.append(content)
+
+    return render(request, 'videos/favourites_page.html', {'contents': filtered_contents})
+
+
 
 def google_oauth2_complete(request):
     """
@@ -99,7 +184,7 @@ def redirect_view(request):
 
 def user_profile(request):
     user = request.user
-    rewards = Regards.objects.all()
+    # rewards = Rewards.objects.all()
     interests_list = []
     hobbies_list = []
 
@@ -116,14 +201,14 @@ def user_profile(request):
         'interests_list': interests_list,
         'hobbies_list': hobbies_list,
         'completed_count': completed_count,
-        'rewards': rewards,
+        # 'rewards': rewards,
         'user_profile_picture_base64': user.get_profile_picture_base64(),
     })
 
 
 def user_profile_change(request):
     user = request.user
-    rewards = Regards.objects.all()
+    # rewards = Rewards.objects.all()
     interests_list = []
     hobbies_list = []
     schools = Schools.objects.all().order_by('name')
@@ -143,7 +228,7 @@ def user_profile_change(request):
         'interests_list': interests_list,
         'hobbies_json': json.dumps(hobbies_list),
         'completed_count': completed_count,
-        'rewards': rewards,
+        # 'rewards': rewards,
         'schools': schools,
         'user_schools': user_schools,
     })
@@ -200,7 +285,7 @@ def redeem_reward(request):
                 'error': 'Please select a reward'
             })
 
-        reward = get_object_or_404(Regards, id=reward_id)
+        # reward = get_object_or_404(Rewards, id=reward_id)
         user = request.user
 
         if user.points_count < reward.points_needed:
@@ -576,7 +661,33 @@ def render_page(request, page_name, template_name):
                 content.quiz.total_points = sum(q.points for q in obj.questions.all())
 
         if obj and getattr(obj, 'title', None):
+            content.obj = obj
             filtered_contents.append(content)
+
+    if not request.user.is_authenticated:
+        for c in filtered_contents:
+            c.is_liked = False
+        return render(request, template_name, {'contents': filtered_contents})
+
+    from collections import defaultdict
+    ct_to_ids = defaultdict(list)
+
+    for c in filtered_contents:
+        ct_to_ids[c.content_type_id].append(c.object_id)
+
+    # получаем лайки пользователя разом
+    likes = Favourites.objects.filter(
+        user=request.user,
+        content_type_id__in=ct_to_ids.keys(),
+        object_id__in=[oid for ids in ct_to_ids.values() for oid in ids]
+    )
+
+    liked_set = {(l.content_type_id, l.object_id) for l in likes}
+
+    # помечаем объекты
+    for c in filtered_contents:
+        c.is_liked = (c.content_type_id, c.object_id) in liked_set
+
 
     return render(request, template_name, {'contents': filtered_contents})
 
@@ -604,10 +715,32 @@ def seventh_page(request):
 def eighth_page(request):
     return render_page(request, 'rel_money', 'videos/pages/eighth_page.html')
 
+
+def toggle_like(request, model, object_id):
+    try:
+        ct = ContentType.objects.get(model=model)
+    except ContentType.DoesNotExist:
+        return JsonResponse({"error": "invalid_model"}, status=400)
+
+    model_class = ct.model_class()
+    if not model_class.objects.filter(pk=object_id).exists():
+        return JsonResponse({"error": "object_not_found"}, status=404)
+
+    fav, created = Favourites.objects.get_or_create(
+        user=request.user,
+        content_type=ct,
+        object_id=object_id
+    )
+
+    if not created:
+        fav.delete()
+        return JsonResponse({"liked": False})
+
+    return JsonResponse({"liked": True})
+
 def signout(request):
     logout(request)
     return redirect('login')
-
 
 def get_objects(request):
     content_type_id = request.GET.get('content_type')

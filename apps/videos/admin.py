@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
 from apps.users.forms import ContentAdminForm
 import nested_admin
 from django import forms
@@ -12,7 +13,7 @@ from apps.users.models import (
     ChitChat, ChitChatOption, ChitChatUserChoice,
     Challenge, ChallengeElement, ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeDisplaySettings,
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
-    QuizUserChoice, QuizAnswer, Regards, UserReward, Invitation, Glossary)
+    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards)
 from import_export.admin import ExportMixin
 from import_export import resources, fields
 from django.contrib.admin import SimpleListFilter
@@ -55,30 +56,30 @@ class QuizUserChoiceResource(resources.ModelResource):
 class UserSchoolInline(admin.TabularInline):
     model = UserSchool
     extra = 1
+#
+# class UserRewardInline(admin.TabularInline):
+#     model = UserReward
+#     extra = 0
+#     readonly_fields = ('redeemed_at',)
+#     fields = ('reward', 'points_spent', 'redeemed_at')
 
-class UserRewardInline(admin.TabularInline):
-    model = UserReward
-    extra = 0
-    readonly_fields = ('redeemed_at',)
-    fields = ('reward', 'points_spent', 'redeemed_at')
-
-class RewardFilter(admin.SimpleListFilter):
-    title = _('Reward')
-    parameter_name = 'reward'
-
-    def lookups(self, request, model_admin):
-        rewards = set(
-            UserReward.objects.values_list('reward__id', 'reward__title')
-        )
-        return sorted(
-            [r for r in rewards if r[1] is not None],
-            key=lambda x: x[1]
-        )
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(user_rewards__reward__id=self.value()).distinct()
-        return queryset
+# class RewardFilter(admin.SimpleListFilter):
+#     title = _('Reward')
+#     parameter_name = 'reward'
+#
+#     def lookups(self, request, model_admin):
+#         rewards = set(
+#             UserReward.objects.values_list('reward__id', 'reward__title')
+#         )
+#         return sorted(
+#             [r for r in rewards if r[1] is not None],
+#             key=lambda x: x[1]
+#         )
+#
+#     def queryset(self, request, queryset):
+#         if self.value():
+#             return queryset.filter(user_rewards__reward__id=self.value()).distinct()
+#         return queryset
 
 class SchoolFilter(admin.SimpleListFilter):
     title = _('School')
@@ -119,13 +120,14 @@ class UserAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = UserResource
     list_display = ('username', 'email', 'points_count')
     search_fields = ('username', 'email')
-    inlines = [UserSchoolInline, UserRewardInline]
+    # inlines = [UserSchoolInline, UserRewardInline]
+    inlines = [UserSchoolInline]
     exclude = ('groups', 'user_permissions')
     filter_horizontal = ('completed_content',)
     list_filter = (
         'is_active',
         'date_joined',
-        RewardFilter,
+        # RewardFilter,
         SchoolFilter,
         SchoolCodeFilter,
     )
@@ -457,8 +459,8 @@ class QuizUserChoiceAdmin(ExportAdminMixin):
     inlines = [QuizAnswerInline]
     list_filter = ('submitted_at', 'quiz')
 
-@admin.register(Regards)
-class RegardsAdmin(ExportAdminMixin):
+@admin.register(Rewards)
+class RewardsAdmin(ExportAdminMixin):
     list_display = ('title', 'points_needed')
     search_fields = ('title', 'points_needed')
     list_filter = ('points_needed',)
@@ -495,3 +497,98 @@ class GlossaryAdmin(admin.ModelAdmin):
         )
 
     color_display.short_description = "Color"
+
+
+from django.db.models import Q
+
+class ContentPageFilter(SimpleListFilter):
+    title = 'Page'
+    parameter_name = 'page'
+
+    def lookups(self, request, model_admin):
+        return Content.PAGE_CHOICES
+
+    def queryset(self, request, queryset):
+        if self.value():
+            fav_ids = Content.objects.filter(
+                page=self.value()
+            ).values_list("object_id", "content_type_id")
+
+            q = Q()
+            for object_id, ctype_id in fav_ids:
+                q |= Q(object_id=object_id, content_type_id=ctype_id)
+
+            return queryset.filter(q)
+
+        return queryset
+
+
+@admin.register(Favourites)
+class FavouritesAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'safe_linked_object',
+        'content_page',
+        'content_type',
+        'created_at',
+        'poster_preview'
+    )
+    readonly_fields = (
+        'safe_linked_object',
+        'content_page',
+        'poster_preview',
+        'created_at',
+    )
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'user',
+                'content_type',
+                'object_id',
+                'safe_linked_object',
+                'content_page',
+                'poster_preview',
+            )
+        }),
+    )
+
+    def poster_preview(self, obj):
+        poster = getattr(obj, 'poster_base64', None)
+        if poster:
+            return format_html(
+                '<img src="data:image/jpeg;base64,{}" style="max-height:50px; max-width:80px;" />',
+                poster
+            )
+        return "-"
+    poster_preview.short_description = "Poster"
+
+    @admin.display(description="Linked Object")
+    def safe_linked_object(self, obj):
+        if not obj.content_type:
+            return "-"
+        try:
+            model_class = obj.content_type.model_class()
+            related_obj = model_class.objects.get(pk=obj.object_id)
+            url = reverse(
+                f'admin:{related_obj._meta.app_label}_{related_obj._meta.model_name}_change',
+                args=[obj.object_id]
+            )
+            return format_html('<a href="{}">{}</a>', url, str(related_obj))
+        except Exception:
+            return "-"
+
+    @admin.display(description="Page")
+    def content_page(self, obj):
+        try:
+            content = Content.objects.get(
+                content_type=obj.content_type,
+                object_id=obj.object_id
+            )
+            return content.get_page_display() if hasattr(content, "get_page_display") else content.page
+        except Content.DoesNotExist:
+            return "-"
+
+
+
+

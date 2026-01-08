@@ -96,12 +96,34 @@
             background-size: cover;
             background-position: center;
             cursor: pointer;
+            position: relative;
         }
 
         .content-info {
             padding: 0px 5px;
             background: white;
             align-items: center;
+        }
+
+        .heart-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 35px;
+            height: 35px;
+            padding: 4px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heart-btn svg {
+            width: 18px;
+            height: 18px;
         }
 
         .meta-line {
@@ -402,6 +424,33 @@
                     {% endif %}
                     onclick="location.href='{% if content.content_type.model == 'video' %}{% url 'video_detail' content.object_id %}{% elif content.content_type.model == 'funfact' %}{% url 'fun_fact_detail' content.object_id %}{% elif content.content_type.model == 'challenge' %}{% url 'challenge_detail' content.object_id %}{% elif content.content_type.model == 'chitchat' %}{% url 'chitchat_detail' content.object_id %}{% elif content.content_type.model == 'quiz' %}{% url 'quiz_detail_welcome' content.object_id %}{% endif %}'">
 
+                    <button class="heart-btn"
+                            data-model="{{ content.content_type.model }}"
+                            data-object-id="{{ content.object_id }}"
+                            aria-pressed="{{ content.is_liked|yesno:'true,false' }}">
+
+                        {% if content.is_liked %}
+                            <!-- красное -->
+                            <svg class="heart-svg heart-filled" viewBox="0 0 31 31">
+                                <path d="M15.5 26.2L13.9 24.8C8.1 19.7 4.25 16.2 4.25 11.9C4.25
+                                    8.4 7 5.75 10.45 5.75C12.38 5.75 14.23 6.65 15.5 8.1C16.77
+                                    6.65 18.62 5.75 20.55 5.75C24 5.75 26.75 8.4 26.75
+                                    11.9C26.75 16.2 22.9 19.7 17.1 24.85L15.5 26.2Z"
+                                    fill="#FD7981" stroke="#FD7981"/>
+                            </svg>
+                        {% else %}
+                            <!-- контур -->
+                            <svg class="heart-svg heart-outline" viewBox="0 0 31 31">
+                                <path d="M15.5 26.2L13.9 24.8C8.1 19.7 4.25 16.2 4.25
+                                    11.9C4.25 8.4 7 5.75 10.45 5.75C12.38 5.75 14.23 6.65
+                                    15.5 8.1C16.77 6.65 18.62 5.75 20.55 5.75C24 5.75
+                                    26.75 8.4 26.75 11.9C26.75 16.2 22.9 19.7 17.1
+                                    24.85L15.5 26.2Z"
+                                    fill="none" stroke="#1C1B1F" stroke-width="2"/>
+                            </svg>
+                        {% endif %}
+                    </button>
+
                     {% if content.content_type.model == 'video' %}
                         <svg class="play_icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4.69897 0.383455C2.61707 -0.697825 0 0.636152 0 2.77862V21.2214C0 23.3638 2.61712 24.6978 4.69897 23.6165L22.4532 14.3952C24.5156 13.324 24.5156 10.676 22.4532 9.60484L4.69897 0.383455Z" fill="white"/>
@@ -456,6 +505,111 @@
     <div class="nav_pannel">
         {% include 'videos/nav.html' %}
     </div>
+
+<script>
+(function() {
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Используем capture phase для перехвата события РАНЬШЕ inline onclick
+    document.addEventListener("click", function(e) {
+        const btn = e.target.closest(".heart-btn");
+        if (!btn) return;
+
+        // Останавливаем ВСЕ дальнейшие обработчики
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        e.stopPropagation();
+
+        const model = btn.dataset.model;
+        const objectId = btn.dataset.objectId;
+
+        if (!model || !objectId) return;
+
+        // Сохраняем текущее состояние
+        const currentlyLiked = btn.getAttribute("aria-pressed") === "true";
+        const originalState = currentlyLiked;
+
+        // Оптимистично меняем перед запросом
+        setHeart(btn, !currentlyLiked);
+
+        // Отправляем запрос
+        fetch(`/toggle-like/${model}/${objectId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "X-Requested-With": "XMLHttpRequest",
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Убедимся, что data.liked - это boolean
+            if (typeof data.liked === 'boolean') {
+                setHeart(btn, data.liked);
+            } else {
+                // Если сервер вернул что-то странное, откатываем
+                setHeart(btn, originalState);
+                console.error("Некорректный ответ от сервера:", data);
+            }
+        })
+        .catch(err => {
+            // При ошибке откатываем к исходному состоянию
+            setHeart(btn, originalState);
+            console.error("Network error:", err);
+        });
+
+        return false;
+    }, true); // true = используем capture phase
+
+    function setHeart(btn, liked) {
+        // Устанавливаем атрибут
+        btn.setAttribute("aria-pressed", liked ? "true" : "false");
+
+        // Меняем SVG
+        if (liked) {
+            btn.innerHTML = `
+                <svg class="heart-svg heart-filled" viewBox="0 0 31 31">
+                    <path d="M15.5 26.2L13.9 24.8C8.1 19.7 4.25 16.2
+                        4.25 11.9C4.25 8.4 7 5.75 10.45 5.75C12.38
+                        5.75 14.23 6.65 15.5 8.1C16.77 6.65 18.62
+                        5.75 20.55 5.75C24 5.75 26.75 8.4 26.75
+                        11.9C26.75 16.2 22.9 19.7 17.1 24.85L15.5
+                        26.2Z" fill="#FD7981" stroke="#FD7981"/>
+                </svg>`;
+        } else {
+            btn.innerHTML = `
+                <svg class="heart-svg heart-outline" viewBox="0 0 31 31">
+                    <path d="M15.5 26.2L13.9 24.8C8.1 19.7 4.25 16.2
+                        4.25 11.9C4.25 8.4 7 5.75 10.45 5.75C12.38
+                        5.75 14.23 6.65 15.5 8.1C16.77 6.65 18.62
+                        5.75 20.55 5.75C24 5.75 26.75 8.4 26.75
+                        11.9C26.75 16.2 22.9 19.7 17.1 24.85L15.5
+                        26.2Z" fill="none" stroke="#1C1B1F" stroke-width="2"/>
+                </svg>`;
+        }
+    }
+
+})();
+</script>
 
 </body>
 </html>
