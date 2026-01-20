@@ -13,7 +13,7 @@ from apps.users.models import (
     ChitChat, ChitChatOption, ChitChatUserChoice,
     Challenge, ChallengeElement, ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeDisplaySettings,
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
-    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards, UserReward)
+    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards, UserReward, Page)
 from import_export.admin import ExportMixin
 from import_export import resources, fields
 from django.contrib.admin import SimpleListFilter
@@ -159,6 +159,13 @@ class SpecificContentTypeFilter(SimpleListFilter):
         if self.value():
             return queryset.filter(content_type_id=self.value())
         return queryset
+
+
+@admin.register(Page)
+class PageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+
 
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):

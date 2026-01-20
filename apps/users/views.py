@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
 from .models import Video, FunFact, Content, Challenge, ChitChat, ChitChatOption, ChitChatUserChoice, \
     ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeUserAttempt, Schools, UserSchool, Quiz, \
-    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites, UserReward, Rewards
+    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites, UserReward, Rewards, Page
 from django.contrib.auth import authenticate, login, get_backends, logout
 from django.contrib import messages
 from django.db.models import Q
@@ -624,21 +624,28 @@ def generate_initial_avatar(user):
 #         messages.warning(request, "This Google-account is already connected with another doe account. Plase, log in.")
 #     return redirect('login')
 
+
 def home_view(request):
-    progress_data = {
-        'money_talks': {'completed': 10, 'total': 100},
-        'reach_girl': {'completed': 30, 'total': 100},
-        'you_do_you': {'completed': 12, 'total': 100},
-        'levers': {'completed': 13, 'total': 100},
-        'portfolio': {'completed': 10, 'total': 100},
-    }
-    return render(request, 'videos/home_page.html')
+    pages = Page.objects.all()
+    return render(request, 'videos/home_page.html', {
+        'pages': pages
+    })
+
+# def home_view(request):
+#     progress_data = {
+#         'money_talks': {'completed': 10, 'total': 100},
+#         'reach_girl': {'completed': 30, 'total': 100},
+#         'you_do_you': {'completed': 12, 'total': 100},
+#         'levers': {'completed': 13, 'total': 100},
+#         'portfolio': {'completed': 10, 'total': 100},
+#     }
+#     return render(request, 'videos/home_page.html')
 
 
 def welcome_video(request):
     return render(request, 'videos/welcome_video.html')
 
-def render_page(request, page_name, template_name):
+def render_page(request, page_name, template_name, extra_context=None):
     content_types = ContentType.objects.filter(
         model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
     )
@@ -661,6 +668,7 @@ def render_page(request, page_name, template_name):
     quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
 
     filtered_contents = []
+
     for content in contents:
         obj = None
         model = content.content_type.model
@@ -676,25 +684,39 @@ def render_page(request, page_name, template_name):
         elif model == 'quiz':
             obj = quizzes.get(content.object_id)
             if obj:
-                content.quiz = obj
-                content.quiz.total_points = sum(q.points for q in obj.questions.all())
+                # считаем баллы квиза
+                obj.total_points = sum(q.points for q in obj.questions.all())
 
-        if obj and getattr(obj, 'title', None):
-            content.obj = obj
-            filtered_contents.append(content)
+        if not obj or not getattr(obj, 'title', None):
+            continue
 
+        # единая точка доступа для шаблона
+        content.obj = obj
+
+        content.duration = getattr(obj, 'duration', None)
+
+        content.points = getattr(obj, 'points', None)
+        if model == 'quiz':
+            content.points = obj.total_points
+
+        filtered_contents.append(content)
+
+    # если пользователь не авторизован
     if not request.user.is_authenticated:
         for c in filtered_contents:
             c.is_liked = False
-        return render(request, template_name, {'contents': filtered_contents})
+        context = {'contents': filtered_contents}
+        if extra_context:
+            context.update(extra_context)
+        return render(request, template_name, context)
 
+    # лайки пользователя
     from collections import defaultdict
     ct_to_ids = defaultdict(list)
 
     for c in filtered_contents:
         ct_to_ids[c.content_type_id].append(c.object_id)
 
-    # получаем лайки пользователя разом
     likes = Favourites.objects.filter(
         user=request.user,
         content_type_id__in=ct_to_ids.keys(),
@@ -703,36 +725,56 @@ def render_page(request, page_name, template_name):
 
     liked_set = {(l.content_type_id, l.object_id) for l in likes}
 
-    # помечаем объекты
     for c in filtered_contents:
         c.is_liked = (c.content_type_id, c.object_id) in liked_set
 
+    context = {'contents': filtered_contents}
+    if extra_context:
+        context.update(extra_context)
 
-    return render(request, template_name, {'contents': filtered_contents})
+    return render(request, template_name, context)
 
-def first_page(request):
-    return render_page(request, 'things_first', 'videos/pages/first_page.html')
 
-def second_page(request):
-    return render_page(request, 'levers', 'videos/pages/second_page.html')
+def dynamic_page(request, slug):
+    page = get_object_or_404(Page, slug=slug, is_active=True)
 
-def third_page(request):
-    return render_page(request, 'power_portfolio', 'videos/pages/third_page.html')
+    contents = Content.objects.filter(
+        page=page
+    ).select_related("content_type")
 
-def forth_page(request):
-    return render_page(request, 'playbook', 'videos/pages/forth_page.html')
+    return render(
+        request,
+        "videos/pages/page.html",
+        {
+            "page": page,
+            "contents": contents
+        }
+    )
 
-def fifth_page(request):
-    return render_page(request, 'capital_cash', 'videos/pages/fifth_page.html')
 
-def sixth_page(request):
-    return render_page(request, 'money_sports', 'videos/pages/sixth_page.html')
-
-def seventh_page(request):
-    return render_page(request, 'new_ventures', 'videos/pages/seventh_page.html')
-
-def eighth_page(request):
-    return render_page(request, 'rel_money', 'videos/pages/eighth_page.html')
+# def first_page(request):
+#     return render_page(request, 'things_first', 'videos/pages/first_page.html')
+#
+# def second_page(request):
+#     return render_page(request, 'levers', 'videos/pages/second_page.html')
+#
+# def third_page(request):
+#     return render_page(request, 'power_portfolio', 'videos/pages/third_page.html')
+#
+# def forth_page(request):
+#     return render_page(request, 'playbook', 'videos/pages/forth_page.html')
+#
+# def fifth_page(request):
+#     return render_page(request, 'capital_cash', 'videos/pages/fifth_page.html')
+#
+# def sixth_page(request):
+#     return render_page(request, 'money_sports', 'videos/pages/sixth_page.html')
+#
+# def seventh_page(request):
+#     return render_page(request, 'new_ventures', 'videos/pages/seventh_page.html')
+#
+# def eighth_page(request):
+#     return render_page(request, 'rel_money', 'videos/pages/eighth_page.html')
 
 
 def toggle_like(request, model, object_id):

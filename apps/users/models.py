@@ -11,6 +11,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 from django.utils.html import format_html
+from django.utils.text import slugify
 
 from apps.users.storage_backends import StorjVideoStorage
 from utils.supabase_storage import SupabaseStorage
@@ -115,27 +116,68 @@ class UserSchool(models.Model):
         return f"{self.user.username} - {self.school or self.other_school_name} ({self.graduation_year})"
 
 
-class Content(models.Model):
-    PAGE_CHOICES = [
-        ('things_first', "First Moves"),
-        ('levers', "The Levers"),
-        ('power_portfolio', "Power Portfolio"),
-        ('playbook', "The Playbook (IRL How-To's)"),
-        ('capital_cash', "Capital Beyond Cash"),
-        ('money_sports', "Money & Sports"),
-        ('new_ventures', "New Ventures"),
-        ('rel_money', "Relationships & Money"),
-    ]
 
-    page = models.CharField(
-        max_length=50,
-        choices=PAGE_CHOICES,
-        default='things_first',
-        verbose_name='Page'
+
+class Page(models.Model):
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True)
+
+    slug = models.SlugField(
+        unique=True,
+        editable=False
     )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField(null=True)
+    page_key = models.CharField(
+        max_length=50,
+        unique=True,
+        editable=False
+    )
+
+    theme_color = models.CharField(
+        max_length=20,
+        default="#FD7981"
+    )
+
+    icon_svg = models.TextField(blank=True)
+
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("order",)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        if not self.page_key:
+            self.page_key = slugify(self.title).replace("-", "_")
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+
+class Content(models.Model):
+    page = models.ForeignKey(
+        Page,
+        on_delete=models.CASCADE,
+        related_name="contents"
+    )
+
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        verbose_name='Content type'
+    )
+
+    object_id = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
     value = GenericForeignKey('content_type', 'object_id')
 
     order = models.PositiveIntegerField(
@@ -149,8 +191,14 @@ class Content(models.Model):
         null=True,
         editable=False,
         verbose_name='Poster url',
-        help_text='Filled automatically'
+        help_text='Filled automatically for video content'
     )
+
+    class Meta:
+        ordering = ['page', 'order']
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
 
     def __str__(self):
         if self.value:
@@ -159,15 +207,17 @@ class Content(models.Model):
         return f'Content #{self.pk}'
 
     def save(self, *args, **kwargs):
-        # Автоматически назначаем следующий order для новой записи на этой странице
+        # автоматически проставляем order внутри страницы
         if not self.order:
-            last_order = Content.objects.filter(page=self.page).aggregate(
+            last_order = Content.objects.filter(
+                page=self.page
+            ).aggregate(
                 models.Max('order')
             )['order__max'] or 0
             self.order = last_order + 1
 
-        # Если контент — видео, сохраняем poster_base64
-        if hasattr(self, 'value') and self.value and isinstance(self.value, Video):
+        # если контент — видео, сохраняем постер
+        if self.value and isinstance(self.value, Video):
             self.poster_base64 = getattr(self.value, 'poster_base64', None)
 
         super().save(*args, **kwargs)
