@@ -13,7 +13,7 @@ from apps.users.models import (
     ChitChat, ChitChatOption, ChitChatUserChoice,
     Challenge, ChallengeElement, ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeDisplaySettings,
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
-    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards)
+    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards, UserReward)
 from import_export.admin import ExportMixin
 from import_export import resources, fields
 from django.contrib.admin import SimpleListFilter
@@ -56,30 +56,30 @@ class QuizUserChoiceResource(resources.ModelResource):
 class UserSchoolInline(admin.TabularInline):
     model = UserSchool
     extra = 1
-#
-# class UserRewardInline(admin.TabularInline):
-#     model = UserReward
-#     extra = 0
-#     readonly_fields = ('redeemed_at',)
-#     fields = ('reward', 'points_spent', 'redeemed_at')
 
-# class RewardFilter(admin.SimpleListFilter):
-#     title = _('Reward')
-#     parameter_name = 'reward'
-#
-#     def lookups(self, request, model_admin):
-#         rewards = set(
-#             UserReward.objects.values_list('reward__id', 'reward__title')
-#         )
-#         return sorted(
-#             [r for r in rewards if r[1] is not None],
-#             key=lambda x: x[1]
-#         )
-#
-#     def queryset(self, request, queryset):
-#         if self.value():
-#             return queryset.filter(user_rewards__reward__id=self.value()).distinct()
-#         return queryset
+class UserRewardInline(admin.TabularInline):
+    model = UserReward
+    extra = 0
+    readonly_fields = ('redeemed_at',)
+    fields = ('reward', 'points_spent', 'redeemed_at')
+
+class RewardFilter(admin.SimpleListFilter):
+    title = _('Reward')
+    parameter_name = 'reward'
+
+    def lookups(self, request, model_admin):
+        rewards = set(
+            UserReward.objects.values_list('reward__id', 'reward__title')
+        )
+        return sorted(
+            [r for r in rewards if r[1] is not None],
+            key=lambda x: x[1]
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(user_rewards__reward__id=self.value()).distinct()
+        return queryset
 
 class SchoolFilter(admin.SimpleListFilter):
     title = _('School')
@@ -120,14 +120,13 @@ class UserAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = UserResource
     list_display = ('username', 'email', 'points_count')
     search_fields = ('username', 'email')
-    # inlines = [UserSchoolInline, UserRewardInline]
-    inlines = [UserSchoolInline]
+    inlines = [UserSchoolInline, UserRewardInline]
     exclude = ('groups', 'user_permissions')
     filter_horizontal = ('completed_content',)
     list_filter = (
         'is_active',
         'date_joined',
-        # RewardFilter,
+        RewardFilter,
         SchoolFilter,
         SchoolCodeFilter,
     )

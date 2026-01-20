@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('auth/', include('social_django.urls', namespace='social')),  # оставить с namespace
     path('social-auth/', include('social_django.urls')),  # убрать namespace
-    # path('redeem-reward/', views.redeem_reward, name='redeem_reward'),
+    path('redeem-reward/', views.redeem_reward, name='redeem_reward'),
     path('custom-redirect/', views.redirect_view, name='custom_redirect'),
 
     path('events/', views.events_page, name='events_page'),

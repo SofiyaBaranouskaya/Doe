@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
 from .models import Video, FunFact, Content, Challenge, ChitChat, ChitChatOption, ChitChatUserChoice, \
     ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeUserAttempt, Schools, UserSchool, Quiz, \
-    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites
+    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites, UserReward, Rewards
 from django.contrib.auth import authenticate, login, get_backends, logout
 from django.contrib import messages
 from django.db.models import Q
@@ -184,7 +184,7 @@ def redirect_view(request):
 
 def user_profile(request):
     user = request.user
-    # rewards = Rewards.objects.all()
+    rewards = Rewards.objects.all()
     interests_list = []
     hobbies_list = []
 
@@ -201,7 +201,7 @@ def user_profile(request):
         'interests_list': interests_list,
         'hobbies_list': hobbies_list,
         'completed_count': completed_count,
-        # 'rewards': rewards,
+        'rewards': rewards,
         'user_profile_picture_base64': user.get_profile_picture_base64(),
     })
 
@@ -249,26 +249,45 @@ def send_invite(request):
         return JsonResponse({'error': 'Unauthorized'}, status=401)
 
     data = json.loads(request.body)
-    name = data.get('name')
     email = data.get('email')
-    phone = data.get('phone')
 
     sender_email = request.user.email
     if not sender_email:
         return JsonResponse({'error': 'User email not found'}, status=400)
 
+    # не приглашали ли уже
+    if Invitation.objects.filter(
+        inviter=request.user,
+        invitee_email=email
+    ).exists():
+        return JsonResponse(
+            {'message': 'Invitation already sent'},
+            status=200
+        )
+
     try:
+        # СОЗДАЁМ ЗАПИСЬ В БД
+        invitation = Invitation.objects.create(
+            inviter=request.user,
+            invitee_email=email,
+        )
+
         base_url = request.build_absolute_uri('/')
 
+        # ОТПРАВЛЯЕМ ПИСЬМО
         send_mail(
             subject="You're invited!",
-            message=f"Hi {name},\n\n{request.user.first_name} has invited you to join Doe platform!\nJoin us here: {base_url}",
+            message=(
+                f"{request.user.first_name} invited you to join Doe!\n\n"
+                f"Join us here: {base_url}"
+            ),
             from_email=sender_email,
             recipient_list=[email],
             fail_silently=False,
         )
 
         return JsonResponse({'message': 'Invitation sent successfully!'})
+
     except Exception as e:
         print(e)
         return JsonResponse({'error': 'Failed to send email.'}, status=500)
@@ -285,7 +304,7 @@ def redeem_reward(request):
                 'error': 'Please select a reward'
             })
 
-        # reward = get_object_or_404(Rewards, id=reward_id)
+        reward = get_object_or_404(Rewards, id=reward_id)
         user = request.user
 
         if user.points_count < reward.points_needed:

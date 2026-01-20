@@ -79,14 +79,14 @@ class Invitation(models.Model):
     def __str__(self):
         return f"{self.inviter.email} invited {self.invitee_email}"
 
-# class UserReward(models.Model):
-#     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_rewards')
-#     reward = models.ForeignKey('Rewards', on_delete=models.CASCADE)
-#     redeemed_at = models.DateTimeField(auto_now_add=True)
-#     points_spent = models.PositiveIntegerField()
-#
-#     def __str__(self):
-#         return f"{self.user.username} — {self.reward.title}"
+class UserReward(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_rewards')
+    reward = models.ForeignKey('Rewards', on_delete=models.CASCADE)
+    redeemed_at = models.DateTimeField(auto_now_add=True)
+    points_spent = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.user.username} — {self.reward.title}"
 
 class Schools(models.Model):
     name = models.CharField(max_length=70)
