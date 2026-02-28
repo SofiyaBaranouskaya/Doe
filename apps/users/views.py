@@ -69,24 +69,27 @@ def favourites_page(request):
     if not request.user.is_authenticated:
         return render(request, 'videos/favourites_page.html', {'contents': []})
 
-    from collections import defaultdict
+    # Все лайки пользователя
+    favourites = Favourites.objects.filter(user=request.user).select_related('content_type')
 
-    # Получаем все лайки пользователя
-    favourites = Favourites.objects.filter(user=request.user)
-    if not favourites:
+    if not favourites.exists():
         return render(request, 'videos/favourites_page.html', {'contents': []})
 
-    # Группируем по типам контента
+    # Группируем id по типу контента
     objects_by_type = defaultdict(list)
-    for fav in favourites:
-        objects_by_type[fav.content_type.model].append(fav.object_id)
+    ct_by_model = {}  # чтобы потом быстро получить ContentType
 
-    # Загружаем объекты каждого типа
-    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
-    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
+    for fav in favourites:
+        model_name = fav.content_type.model
+        objects_by_type[model_name].append(fav.object_id)
+        ct_by_model[model_name] = fav.content_type
+
+    # Загружаем объекты одним запросом на тип
+    videos    = Video.objects.in_bulk(objects_by_type.get('video', []))
+    funfacts  = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
     challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
     chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
-    quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+    quizzes   = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
 
     filtered_contents = []
 
@@ -108,48 +111,42 @@ def favourites_page(request):
         if not obj or not getattr(obj, 'title', None):
             continue
 
-        # Создаём временный объект для шаблона
-        class ContentLike:
-            def __init__(self):
-                self.content_type = fav.content_type
-                self.object_id = fav.object_id
-                self.is_liked = True
-                self.value = {}
-                self.quiz = None
-                self.poster_base64 = None  # для видео
+        # Создаём объект, максимально похожий на то, что ожидает шаблон
+        class FakeContent:
+            pass
 
-        content = ContentLike()
+        content = FakeContent()
 
-        # Заполняем данные для видео
-        if model == 'video':
-            content.value = {
-                'title': obj.title,
-                'duration': getattr(obj, 'duration', ''),
-                'points': getattr(obj, 'points', 0)
-            }
-            content.poster_base64 = getattr(obj, 'poster_base64', None)
+        content.content_type     = fav.content_type           # важно!
+        content.object_id        = fav.object_id
+        content.is_liked         = True                       # на странице избранного всегда True
+        content.value            = obj                        # ← основной объект модели
+        content.quiz             = None
+        content.poster_base64    = getattr(obj, 'poster_base64', None) if model == 'video' else None
 
-        # Заполняем данные для викторины
-        elif model == 'quiz':
+        # duration и points — как в основной логике
+        content.duration = getattr(obj, 'duration', None)
+        content.points   = getattr(obj, 'points', None)
+
+        if model == 'quiz':
             total_points = sum(q.points for q in obj.questions.all())
-            content.value = {
-                'title': obj.title,
-                'points': total_points
-            }
+            content.points = total_points
             content.quiz = obj
-            content.quiz.total_points = total_points
+            content.quiz.total_points = total_points   # для шаблона {{ content.quiz.total_points }}
 
-        # Остальные типы контента
-        else:
-            content.value = {
-                'title': obj.title,
-                'points': getattr(obj, 'points', 0)
-            }
+        # Для совместимости с условиями вида content.value.duration / content.value.points
+        # (хотя теперь можно использовать content.duration и content.points напрямую)
+        content.value = obj
 
         filtered_contents.append(content)
 
-    return render(request, 'videos/favourites_page.html', {'contents': filtered_contents})
+    context = {
+        'contents': filtered_contents,
+        # если в шаблоне используется page.title или другие поля — можно добавить заглушку
+        'page': type('Page', (), {'title': 'Favourites', 'subtitle': 'Избранное'})(),
+    }
 
+    return render(request, 'videos/favourites_page.html', context)
 
 
 def google_oauth2_complete(request):
@@ -188,13 +185,35 @@ def user_profile(request):
     interests_list = []
     hobbies_list = []
 
-    if user.interests:
-        interests_list = [i.strip() for i in user.interests.split(',') if i.strip()]
+    # Получаем Industry/Field
+    if user.industry:
+        interests_list = [i.strip() for i in user.industry.split(';;') if i.strip()]
 
-    if user.hobbies:
-        hobbies_list = [h.strip() for h in user.hobbies.split(',') if h.strip()]
+    # Получаем Who Are You Today
+    if user.you_today:
+        hobbies_list = [h.strip() for h in user.you_today.split(';;') if h.strip()]
 
     completed_count = user.completed_content.count()
+
+    # Форматируем дату регистрации
+    from django.utils import timezone
+    import calendar
+
+    # Получаем месяц и год регистрации
+    month_number = user.date_joined.month
+    year = user.date_joined.year
+
+    # Преобразуем номер месяца в название сезона
+    if 3 <= month_number <= 5:
+        season = "Spring"
+    elif 6 <= month_number <= 8:
+        season = "Summer"
+    elif 9 <= month_number <= 11:
+        season = "Fall"
+    else:  # 12, 1, 2
+        season = "Winter"
+
+    formatted_date = f"Doe Member since {season} {year}"
 
     return render(request, 'videos/user_profile.html', {
         'user': user,
@@ -203,8 +222,8 @@ def user_profile(request):
         'completed_count': completed_count,
         'rewards': rewards,
         'user_profile_picture_base64': user.get_profile_picture_base64(),
+        'member_since': formatted_date,  # Добавляем в контекст
     })
-
 
 def user_profile_change(request):
     user = request.user
@@ -445,6 +464,259 @@ def profile_view(request):
     return render(request, 'users/profile.html', {'schools': schools})
 
 
+@login_required
+def about_me_view(request):
+    user = request.user
+
+    # Проверяем, есть ли параметр next в URL (режим редактирования)
+    edit_mode = 'next' in request.GET
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Для POST тоже проверяем
+        edit_mode = 'next' in request.POST
+        next_url = request.POST.get('next')
+
+        # --- BASIC FIELDS ---
+        first_name = request.POST.get('first_name')
+        if first_name is not None:
+            user.first_name = first_name.strip()
+
+        last_name = request.POST.get('last_name')
+        if last_name is not None:
+            user.last_name = last_name.strip()
+
+        curr_city = request.POST.get('curr_city')
+        if curr_city is not None:
+            user.curr_city = curr_city.strip()
+
+        hometown = request.POST.get('hometown')
+        if hometown is not None:
+            user.hometown = hometown.strip()
+
+        # --- DATE OF BIRTH ---
+        dob = request.POST.get('dob')
+        if dob:
+            try:
+                user.date_of_birth = datetime.strptime(dob, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
+        # --- AVATAR ---
+        if request.FILES.get('avatar'):
+            user.profile_picture = request.FILES['avatar']
+
+        user.save()
+
+        # --- SCHOOLS ---
+        UserSchool.objects.filter(user=user).delete()
+
+        index = 0
+        while f'schools[{index}][school_id]' in request.POST:
+
+            school_id = request.POST.get(f'schools[{index}][school_id]')
+            grad_year = request.POST.get(f'schools[{index}][grad_year]')
+            other_name = request.POST.get(f'schools[{index}][other_name]', '').strip()
+
+            if school_id and grad_year:
+
+                if school_id == '0' and other_name:
+                    UserSchool.objects.create(
+                        user=user,
+                        school=None,
+                        graduation_year=grad_year,
+                        other_school_name=other_name
+                    )
+
+                else:
+                    try:
+                        school = Schools.objects.get(id=school_id)
+                        UserSchool.objects.create(
+                            user=user,
+                            school=school,
+                            graduation_year=grad_year
+                        )
+                    except Schools.DoesNotExist:
+                        pass
+
+            index += 1
+
+        # ВОЗВРАЩАЕМСЯ В ЗАВИСИМОСТИ ОТ РЕЖИМА
+        if edit_mode and next_url:
+            return redirect(next_url)
+        else:
+            return redirect('profile_your_next_move')
+
+    # ---------- GET REQUEST ----------
+    return render(request, 'users/profile/about_me.html', {
+        'user': user,
+        'schools': Schools.objects.all(),
+        'user_schools': UserSchool.objects.filter(user=user),
+        'edit_mode': edit_mode,
+        'next': next_url if edit_mode else None,
+    })
+
+
+@login_required
+def your_next_move_view(request):
+    user = request.user
+
+    # Проверяем, есть ли параметр next в URL (режим редактирования)
+    edit_mode = 'next' in request.GET
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Для POST тоже проверяем
+        edit_mode = 'next' in request.POST
+        next_url = request.POST.get('next')
+
+        raw = request.POST.get('chosenHobbies', '[]')
+        try:
+            values = json.loads(raw)
+        except json.JSONDecodeError:
+            values = []
+
+        user.next_move = ';; '.join([v.strip() for v in values if v.strip()])
+        user.save()
+
+        # Возвращаемся в зависимости от режима
+        if edit_mode and next_url:
+            return redirect(next_url)
+        else:
+            return redirect('profile_current_vibe')
+
+    current = []
+    if user.next_move:
+        current = [v.strip() for v in user.next_move.split(';;') if v.strip()]
+
+    return render(request, 'users/profile/your_next_move.html', {
+        'current_next_move': current,
+        'edit_mode': edit_mode,
+        'next': next_url if edit_mode else None,
+    })
+
+
+@login_required
+def current_vibe_view(request):
+    user = request.user
+
+    # Проверяем, есть ли параметр next в URL (режим редактирования)
+    edit_mode = 'next' in request.GET
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Для POST тоже проверяем
+        edit_mode = 'next' in request.POST
+        next_url = request.POST.get('next')
+
+        user.current_vibe = request.POST.get('vibe', '').strip()
+        user.save()
+
+        # Возвращаемся в зависимости от режима
+        if edit_mode and next_url:
+            return redirect(next_url)
+        else:
+            return redirect('profile_industry_field')
+
+    return render(request, 'users/profile/current_vibe.html', {
+        'current_vibe': user.current_vibe,
+        'edit_mode': edit_mode,
+        'next': next_url if edit_mode else None,
+    })
+
+
+@login_required
+def industry_field_view(request):
+    user = request.user
+
+    # Проверяем, есть ли параметр next в URL (режим редактирования)
+    edit_mode = 'next' in request.GET
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Для POST тоже проверяем
+        edit_mode = 'next' in request.POST
+        next_url = request.POST.get('next')
+
+        raw = request.POST.get('chosenHobbies', '[]')
+
+        try:
+            values = json.loads(raw)
+        except:
+            values = []
+
+        # очистка и удаление дублей
+        clean_values = []
+        for v in values:
+            v = v.strip()
+            if v and v not in clean_values:
+                clean_values.append(v)
+
+        # сохранение через ;;
+        user.industry = ';; '.join(clean_values)
+        user.save()
+
+        # Возвращаемся в зависимости от режима
+        if edit_mode and next_url:
+            return redirect(next_url)
+        else:
+            return redirect('profile_who_are_you_today')
+
+    # восстановление
+    current = []
+    if user.industry:
+        current = [
+            v.strip()
+            for v in user.industry.split(';;')
+            if v.strip()
+        ]
+
+    return render(request, 'users/profile/industry_field.html', {
+        'current_industries': current,
+        'edit_mode': edit_mode,
+        'next': next_url if edit_mode else None,
+    })
+
+
+@login_required
+def who_are_you_today_view(request):
+    user = request.user
+
+    # Проверяем, есть ли параметр next в URL (режим редактирования)
+    edit_mode = 'next' in request.GET
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Для POST тоже проверяем
+        edit_mode = 'next' in request.POST
+        next_url = request.POST.get('next')
+
+        raw = request.POST.get('who_are_you_tags', '[]')
+        try:
+            values = json.loads(raw)
+        except:
+            values = []
+
+        user.you_today = ';; '.join([v.strip() for v in values if v.strip()])
+        user.save()
+
+        # Возвращаемся в зависимости от режима
+        if edit_mode and next_url:
+            return redirect(next_url)
+        else:
+            return redirect('home')  # или другой финальный шаг
+
+    current = []
+    if user.you_today:
+        current = [v.strip() for v in user.you_today.split(';;') if v.strip()]
+
+    return render(request, 'users/profile/who_are_you_today.html', {
+        'current_tags': current,
+        'edit_mode': edit_mode,
+        'next': next_url if edit_mode else None,
+    })
+
+
 def parse_school_data(post_data):
     schools_data = defaultdict(dict)
     for key, value in post_data.items():
@@ -645,14 +917,112 @@ def home_view(request):
 def welcome_video(request):
     return render(request, 'videos/welcome_video.html')
 
-def render_page(request, page_name, template_name, extra_context=None):
+# def render_page(request, page_name, template_name, extra_context=None):
+#     content_types = ContentType.objects.filter(
+#         model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
+#     )
+#
+#     contents = Content.objects.filter(
+#         content_type__in=content_types,
+#         page=page_name
+#     ).select_related('content_type').order_by('order')
+#
+#     from collections import defaultdict
+#     objects_by_type = defaultdict(list)
+#
+#     for content in contents:
+#         objects_by_type[content.content_type.model].append(content.object_id)
+#
+#     videos = Video.objects.in_bulk(objects_by_type.get('video', []))
+#     funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
+#     challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
+#     chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
+#     quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+#
+#     filtered_contents = []
+#
+#     for content in contents:
+#         obj = None
+#         model = content.content_type.model
+#
+#         if model == 'video':
+#             obj = videos.get(content.object_id)
+#         elif model == 'funfact':
+#             obj = funfacts.get(content.object_id)
+#         elif model == 'challenge':
+#             obj = challenges.get(content.object_id)
+#         elif model == 'chitchat':
+#             obj = chitchats.get(content.object_id)
+#         elif model == 'quiz':
+#             obj = quizzes.get(content.object_id)
+#             if obj:
+#                 # считаем баллы квиза
+#                 obj.total_points = sum(q.points for q in obj.questions.all())
+#
+#         if not obj or not getattr(obj, 'title', None):
+#             continue
+#
+#         # единая точка доступа для шаблона
+#         content.obj = obj
+#
+#         content.duration = getattr(obj, 'duration', None)
+#
+#         content.points = getattr(obj, 'points', None)
+#         if model == 'quiz':
+#             content.points = obj.total_points
+#
+#         filtered_contents.append(content)
+#
+#     # если пользователь не авторизован
+#     if not request.user.is_authenticated:
+#         for c in filtered_contents:
+#             c.is_liked = False
+#         context = {'contents': filtered_contents}
+#         if extra_context:
+#             context.update(extra_context)
+#         return render(request, template_name, context)
+#
+#     # лайки пользователя
+#     from collections import defaultdict
+#     ct_to_ids = defaultdict(list)
+#
+#     for c in filtered_contents:
+#         ct_to_ids[c.content_type_id].append(c.object_id)
+#
+#     likes = Favourites.objects.filter(
+#         user=request.user,
+#         content_type_id__in=ct_to_ids.keys(),
+#         object_id__in=[oid for ids in ct_to_ids.values() for oid in ids]
+#     )
+#
+#     liked_set = {(l.content_type_id, l.object_id) for l in likes}
+#     print("1--------------------------", liked_set)
+#
+#     for c in filtered_contents:
+#         c.is_liked = (c.content_type_id, c.object_id) in liked_set
+#
+#     print("2--------------------------", liked_set)
+#
+#     context = {'contents': filtered_contents}
+#     if extra_context:
+#         context.update(extra_context)
+#
+#     print("3--------------------------", liked_set)
+#
+#     return render(request, template_name, context)
+
+
+def dynamic_page(request, slug):
+    page = get_object_or_404(Page, slug=slug, is_active=True)
+
+    # Используем ту же логику, что и в render_page
     content_types = ContentType.objects.filter(
         model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
     )
 
     contents = Content.objects.filter(
         content_type__in=content_types,
-        page=page_name
+        page=page
     ).select_related('content_type').order_by('order')
 
     from collections import defaultdict
@@ -683,9 +1053,9 @@ def render_page(request, page_name, template_name, extra_context=None):
             obj = chitchats.get(content.object_id)
         elif model == 'quiz':
             obj = quizzes.get(content.object_id)
-            if obj:
-                # считаем баллы квиза
-                obj.total_points = sum(q.points for q in obj.questions.all())
+            if obj and obj.title:
+                content.quiz = obj
+                content.quiz.total_points = sum(q.points for q in obj.questions.all())
 
         if not obj or not getattr(obj, 'title', None):
             continue
@@ -705,13 +1075,13 @@ def render_page(request, page_name, template_name, extra_context=None):
     if not request.user.is_authenticated:
         for c in filtered_contents:
             c.is_liked = False
-        context = {'contents': filtered_contents}
-        if extra_context:
-            context.update(extra_context)
-        return render(request, template_name, context)
+        context = {
+            'page': page,
+            'contents': filtered_contents
+        }
+        return render(request, "videos/pages/page.html", context)
 
     # лайки пользователя
-    from collections import defaultdict
     ct_to_ids = defaultdict(list)
 
     for c in filtered_contents:
@@ -728,28 +1098,12 @@ def render_page(request, page_name, template_name, extra_context=None):
     for c in filtered_contents:
         c.is_liked = (c.content_type_id, c.object_id) in liked_set
 
-    context = {'contents': filtered_contents}
-    if extra_context:
-        context.update(extra_context)
+    context = {
+        'page': page,
+        'contents': filtered_contents
+    }
 
-    return render(request, template_name, context)
-
-
-def dynamic_page(request, slug):
-    page = get_object_or_404(Page, slug=slug, is_active=True)
-
-    contents = Content.objects.filter(
-        page=page
-    ).select_related("content_type")
-
-    return render(
-        request,
-        "videos/pages/page.html",
-        {
-            "page": page,
-            "contents": contents
-        }
-    )
+    return render(request, "videos/pages/page.html", context)
 
 
 # def first_page(request):
@@ -1476,7 +1830,7 @@ def submit_challenge_in_add(request, challenge_id):
         })
 
     except Exception as e:
-        print(f"Ошибка при сохранении ответа: {str(e)}")
+        print(f"Error while saving the answer: {str(e)}")
         return JsonResponse({
             'status': 'error',
             'message': str(e),

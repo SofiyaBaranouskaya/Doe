@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Profile Setup</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #FFF1EE;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .panel {
+           margin: 0px 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 660px;
+            padding: 10px;
+            margin: auto;
+        }
+
+        .text {
+            max-width: 470px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+        }
+
+        .line_svg {
+            display: flex;
+            margin: auto;
+            max-width: 718px;
+            align-items: center;
+            padding: 0px 30px;
+        }
+
+        .up_part {
+            position: absolute;
+            left: 10px;
+            top: 0px;
+        }
+
+        .legend {
+            display:flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 660px;
+            margin: 40px auto 0px auto;
+            padding-left: 30px;
+        }
+
+        .profile_line, .profile_line2 {
+            display:flex;
+            flex-direction: row;
+        }
+
+        .profile_line2 p {
+            color: #6A6A6A;
+        }
+
+        button {
+            background-color: unset;
+            border: unset;
+            padding: 0px !important;
+        }
+
+        button#addSchoolBtn {
+            text-align: left;
+        }
+
+        h2 {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            height: 26px;
+            margin: 0px 7px 0px 0px;
+        }
+
+        p {
+            width: 100%;
+            text-align: center;
+            margin: 0px;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .step {
+            display: none;
+            max-width: 475px;
+        }
+
+        .step.active {
+            display: block;
+            display: flex;
+            flex-direction: column;
+            margin: auto;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .input_block {
+            margin-bottom: 20px;
+        }
+
+        input, select {
+          font-family: 'Poppins', sans-serif;
+          height: 50px;
+          width: 100%;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          background-color: #FFF1EE;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+        }
+
+        select option {
+            padding: 10px;
+            color: #333;
+        }
+
+        textarea {
+          font-family: 'Poppins', sans-serif;
+          width: 100%;
+          height: 120px;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          resize: vertical;
+        }
+
+        input:focus, textarea:focus, select:focus {
+          outline: none;
+          border-color: #FFC6D4;
+        }
+
+        label {
+            margin: 5px;
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+
+        .buttons button {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 100%;
+            max-width: 300px;
+            height: 50px;
+            border: none;
+            border-radius: 92px;
+            background-color: #66B498;
+            color: white;
+            margin: 20px auto 20px auto;
+        }
+
+        .avatar-upload {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .upload-button {
+            width: 137px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #FD7981;
+            color: white;
+            border: none;
+            border-radius: 100px;
+        }
+
+        .avatar-preview {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid #ddd;
+        }
+
+        #avatar-preview {
+          width: 90px;
+          height: 90px;
+          object-fit: cover;
+        }
+
+        .chosen_card {
+            font-size: 14px;
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .remove-interest {
+            margin-left: 5px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .remove-interest:hover {
+            color: #f00;
+        }
+
+        #otherInterestBlock {
+            margin-top: 10px;
+        }
+
+        #otherInterestInput {
+            width: 88%;
+        }
+
+        #addOtherInterests {
+            background: none;
+            border: none;
+            padding: 12px !important;
+            margin: 0px;
+        }
+
+        .interests-grid {
+            width: 100%;
+            margin: auto;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .grid-item {
+            width: fit-content;
+            padding: 12px 20px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .grid-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .grid-item.selected {
+            background-color: #66B498;
+            color: white;
+        }
+
+        .grid-item.selected::after {
+            content: "×";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: white;
+            color: #66B498;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 1px solid #66B498;
+        }
+
+        .other-input {
+            margin-top: 20px;
+            width: 88%;
+        }
+
+        .add-other-btn {
+            margin: 20px auto 0px auto;
+        }
+
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-tag {
+            background-color: #66B498;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .selected-tag .remove-tag {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .highlight-error {
+            outline: 1px solid #FFC6D4;
+        }
+
+        .second_svg {
+            display: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        @media (min-width: 1080px) {
+            .first_svg {
+                width: 250px;
+                height: auto;
+            }
+
+            .second_svg {
+                display: block;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+            }
+
+            #profile-form {
+                margin-top: -90px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="header">
+            <svg width="145" height="134" viewBox="0 0 145 134" fill="none" xmlns="http://www.w3.org/2000/svg" class="first_svg">
+                <ellipse cx="36.494" cy="22.5812" rx="100.494" ry="110.447" fill="#FD7981"/>
+                <path d="M43.9546 -97.8806C98.9766 -97.8806 143.699 -48.8356 143.699 11.8167C143.699 72.4688 98.9765 121.514 43.9546 121.514C-11.0674 121.514 -55.7895 72.4689 -55.7896 11.8167C-55.7896 -48.8356 -11.0674 -97.8806 43.9546 -97.8806Z" stroke="#2C2C2C" stroke-width="1.5"/>
+            </svg>
+        </div>
+
+        <form id="profile-form" method="post"  enctype="multipart/form-data" action="{% url 'profile_current_vibe' %}">
+            {% csrf_token %}
+
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="panel">
+                <div class="text">
+                    <div class="up_part">
+                        <button type="button" id="prev" class="hidden">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <mask id="mask0_1106_8550" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                                <rect width="24" height="24" fill="#D9D9D9"/>
+                                </mask>
+                                <g mask="url(#mask0_1106_8550)">
+                                <path d="M10 22L0 12L10 2L11.775 3.775L3.55 12L11.775 20.225L10 22Z" fill="#FFE37F"/>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                    <p>3 of 5</p>
+                </div>
+                <div class="line_svg">
+                    {% if not edit_mode %}
+                        <a href="{% url 'profile_your_next_move' %}">
+                            <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="padding: 0px 5px">
+                                <path d="M10 20L0 10L10 0L11.775 1.775L3.55 10L11.775 18.225L10 20Z" fill="#444444"/>
+                            </svg>
+                        </a>
+                    {% endif %}
+                    <svg width="100%" height="7" viewBox="0 0 340 7" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100%" height="6.8" rx="3.4" fill="#D9D9D9"/>
+                        <rect id="progress-fill" width="60%" height="7" rx="3.5" fill="#FFE37F"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="legend">
+                <div class="profile_line">
+                    <h2>Your Current Finance Knowledge Vibe</h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 5.99994L18 8.99994M13 19.9999H21M5 15.9999L4 19.9999L8 18.9999L19.586 7.41394C19.9609 7.03889 20.1716 6.53027 20.1716 5.99994C20.1716 5.46961 19.9609 4.961 19.586 4.58594L19.414 4.41394C19.0389 4.039 18.5303 3.82837 18 3.82837C17.4697 3.82837 16.9611 4.039 16.586 4.41394L5 15.9999Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="profile_line2">
+                    <p>Be honest here - one question, no judgment</p>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="input_block">
+                    <label>Your Current Knowledge Finance Vibe</label>
+                    <select name="vibe" class="vibe-select" required>
+                        <option value="">Chose one...</option>
+
+                        <option value="Total Newbie" {% if current_vibe == "Total Newbie" %}selected{% endif %}>Total Newbie</option>
+                        <option value="Budget Queen" {% if current_vibe == "Budget Queen" %}selected{% endif %}>Budget Queen</option>
+                        <option value="Index Fund Girl" {% if current_vibe == "Index Fund Girl" %}selected{% endif %}>Index Fund Girl</option>
+                        <option value="Crypto Tourist" {% if current_vibe == "Crypto Tourist" %}selected{% endif %}>Crypto Tourist</option>
+                        <option value="Options Degenerate" {% if current_vibe == "Options Degenerate" %}selected{% endif %}>Options Degenerate</option>
+                        <option value="Dividend Chaser" {% if current_vibe == "Dividend Chaser" %}selected{% endif %}>Dividend Chaser</option>
+                        <option value="Debt Slayer" {% if current_vibe == "Debt Slayer" %}selected{% endif %}>Debt Slayer</option>
+                        <option value="Side Hustle Queen" {% if current_vibe == "Side Hustle Queen" %}selected{% endif %}>Side Hustle Queen</option>
+                        <option value="FIRE Curious" {% if current_vibe == "FIRE Curious" %}selected{% endif %}>FIRE Curious</option>
+                        <option value="YOLO Investor" {% if current_vibe == "YOLO Investor" %}selected{% endif %}>YOLO Investor</option>
+                        <option value="Wsb Survivor" {% if current_vibe == "Wsb Survivor" %}selected{% endif %}>Wsb Survivor</option>
+                        <option value="Robinhood Addict" {% if current_vibe == "Robinhood Addict" %}selected{% endif %}>Robinhood Addict</option>
+                        <option value="Other" {% if current_vibe == "Other" %}selected{% endif %}>Other</option>
+                    </select>
+
+                </div>
+            </div>
+            <div class="buttons">
+                {% if edit_mode %}
+                    <button type="submit" id="save">Save</button>
+                {% else %}
+                    <button type="submit" id="next">Next</button>
+                {% endif %}
+            </div>
+        </form>
+
+        <svg width="250" height="278" viewBox="0 0 347 278" fill="none" xmlns="http://www.w3.org/2000/svg" class="second_svg">
+            <ellipse cx="226.112" cy="214.758" rx="226.112" ry="195.685" fill="#FD7981"/>
+            <path d="M242.898 0.75C367.467 0.75 468.26 88.1232 468.26 195.685C468.26 303.246 367.468 390.62 242.898 390.62C118.329 390.62 17.5371 303.246 17.5371 195.685C17.5373 88.1233 118.33 0.7501 242.898 0.75Z" stroke="#2C2C2C" stroke-width="1.5"/>
+        </svg>
+
+    </div>
+
+    <script>
+
+    </script>
+
+</body>
+</html>

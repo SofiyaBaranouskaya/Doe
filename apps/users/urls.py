@@ -19,6 +19,11 @@ urlpatterns = [
 
     path('signup_complete/', views.signup_complete, name='signup_complete'),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/about_me/', views.about_me_view, name='profile_about_me'),
+    path('profile/your_next_move/', views.your_next_move_view, name='profile_your_next_move'),
+    path('profile/current_vibe/', views.current_vibe_view, name='profile_current_vibe'),
+    path('profile/industry_field/', views.industry_field_view, name='profile_industry_field'),
+    path('profile/who_are_you_today/', views.who_are_you_today_view, name='profile_who_are_you_today'),
     path('profile/save/', views.save_profile_steps, name='save_profile_steps'),
     path('profile_finished/', views.profile_end, name='profile_end'),
 

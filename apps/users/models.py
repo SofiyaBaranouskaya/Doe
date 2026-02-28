@@ -31,15 +31,12 @@ class User(AbstractUser):
     points_count = models.IntegerField(default=0)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    focus_of_study = models.CharField(max_length=255, blank=True, null=True)
-    interests = models.CharField(max_length=255, blank=True, null=True)
-    hobbies = models.CharField(max_length=255, blank=True, null=True)
-    languages = models.CharField(max_length=70, blank=True, null=True)
-    motivation = models.CharField(max_length=255, blank=True, null=True)
-    cities = models.CharField(max_length=150, blank=True, null=True)
-    current_focus = models.TextField(blank=True, null=True)
-    favorite_media = models.TextField(blank=True, null=True)
-    level = models.CharField(max_length=20, blank=True, null=True, default='Trailblazer')
+    curr_city = models.CharField(max_length=70, blank=True, null=True)
+    hometown = models.CharField(max_length=70, blank=True, null=True)
+    current_vibe = models.CharField(max_length=255, blank=True, null=True)
+    next_move = models.CharField(max_length=255, blank=True, null=True)
+    industry = models.CharField(max_length=255, blank=True, null=True)
+    you_today = models.CharField(max_length=255, blank=True, null=True)
 
     completed_content = models.ManyToManyField(
         'Content',

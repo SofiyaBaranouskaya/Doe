@@ -67,7 +67,7 @@
 
         .header_upper_part{
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
         }
 
@@ -171,32 +171,59 @@
             margin: 20px 10px;
         }
 
-        .lists{
-            max-height: 232px;
-            border-radius: 25px;
-            border: 2px solid #FD7981;
-            margin: 10px;
-            padding: 10px;
-        }
+.lists_content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 20px;
+}
 
-        .lists_content {
-             max-height: 232px;
-             overflow-y: auto;
-        }
+.list {
+    display: flex;
+    flex-wrap: wrap; /* Ключевое свойство для переноса */
+    gap: 10px; /* Расстояние между чипсами */
+    margin-top: 10px;
+}
 
-        .chip {
-            display: inline-block;
-            background-color: #ff7f87;
-            color: white;
-            padding: 8px 12px;
-            margin: 4px;
-            border-radius: 20px;
-            font-weight: bold;
-            align-content: center;
-        }
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: #FF6F6C;
+    border-radius: 20px;
+    font-size: 14px;
+    color: white;
+    white-space: nowrap; /* Запрещает перенос текста внутри чипса */
+}
+
+.interests_hobbies, .goal {
+    width: 100%;
+}
+
+.buttons {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.two_buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Адаптивность для кнопок на мобильных */
+@media (max-width: 480px) {
+    .two_buttons button {
+        width: 100%;
+    }
+}
 
         .status {
-            margin-top: 20px;
+            border-radius: 25px;
+            border: 2px solid #FD7981;
+            padding: 10px;
+            margin: 20px;
+            width: auto;
         }
 
         .interests_hobbies {
@@ -293,6 +320,29 @@
         .redeem_button {
             background-color: #91E1C4;
             color: black;
+        }
+
+        #redeemBtn{
+            min-width: 150px;
+            width: 60%;
+            background-color: #FF6F6C;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        #referFriendBtn{
+            min-width: 150px;
+            width: 60%;
+            background-color: #FFDADA;
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF6F6C;
+        }
+
+        .edit_svg {
+            width: 15px;
+            height: 15px;
         }
 
         .close {
@@ -457,6 +507,126 @@
             display: none;
         }
 
+
+/* Edit Profile Modal */
+.edit-modal-content {
+    max-width: 834px !important;
+    max-height: 440px !important;
+    overflow: hidden;
+}
+
+.edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+}
+
+.edit-modal-header h2 {
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin: auto;
+    color: #2C2C2C;
+}
+
+.edit-close {
+    position: static !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-menu {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    border: 1.5px solid #FD7981;
+    border-radius: 25px;
+    padding: 20px;
+    margin: auto;
+}
+
+.edit-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    text-decoration: none;
+    color: #2C2C2C;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.edit-menu-item:last-child {
+    border-bottom: none;
+}
+
+.edit-menu-item:hover {
+    background-color: #FFF1EE;
+}
+
+.edit-menu-item span {
+    margin-left: 20px;
+    height: fit-content;
+}
+
+.edit-menu-item svg {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.edit-menu-item:hover svg {
+    opacity: 1;
+}
+
+/* Адаптация существующих модальных окон */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 50px auto;
+    border-radius: 24px;
+    max-width: 500px;
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+
+    .edit-modal-content {
+        max-width: 100% !important;
+    }
+}
+
+
         @media (min-width: 904px) {
             h1 {
                 font-size: 64px;
@@ -473,7 +643,7 @@
 
             .main_content {
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
             }
 
             .nav_pannel {
@@ -511,11 +681,15 @@
 
             .pc_main {
                 z-index: 1;
-                margin-top: -150px;
+                margin: -150px auto;
             }
 
             .status {
-                margin-top: -40px;
+                width: 30%;
+                border-radius: 25px;
+                border: 2px solid #FD7981;
+                padding: 10px;
+                margin: auto;
             }
 
             .pc_status {
@@ -541,19 +715,18 @@
             }
 
             .edit_svg {
-                width: 40px;
-                height: 40px;
+                width: 30px;
+                height: 30px;
+                margin: -10px 0px 0px 10px;
             }
 
             .lists {
-                width: 65%;
-                max-height: 328px;
-                padding: 25px 28px;
-                align-self: flex-start;
+                width: 50%;
             }
 
             .lists_content {
                  max-height: 328px;
+                 width: fit-content;
             }
 
             .activity_name h2 {
@@ -562,8 +735,14 @@
 
             .buttons {
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: space-between;
+                margin-top: 20px;
+            }
+
+            .header_upper_part{
+                margin-left: -250px;
             }
 
             .modal-content {
@@ -592,8 +771,8 @@
             }
 
             .two_buttons {
-                width: 30%;
                 min-width: 208px;
+                display: flex;
             }
 
             .heat {
@@ -672,21 +851,15 @@
             <div class="pc_main">
                 <div class="header">
                     <div class="header_upper_part">
-                        <div style="display:flex; align-items: center;">
+                        <div style="display:flex; align-items: center; margin: auto">
                             <h1>Profile</h1>
-                            <a href="{% url 'user_profile_change' %}">
-                                <svg class="edit_svg" width="24" height="24" style="margin-bottom: -5px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 20H21" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M16.5 3.49998C16.8978 3.10216 17.4374 2.87866 18 2.87866C18.2786 2.87866 18.5544 2.93353 18.8118 3.04014C19.0692 3.14674 19.303 3.303 19.5 3.49998C19.697 3.69697 19.8532 3.93082 19.9598 4.18819C20.0665 4.44556 20.1213 4.72141 20.1213 4.99998C20.1213 5.27856 20.0665 5.55441 19.9598 5.81178C19.8532 6.06915 19.697 6.303 19.5 6.49998L7 19L3 20L4 16L16.5 3.49998Z" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </a>
                         </div>
-                        <div class="search_container">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z" fill="#1D1B20"/>
-                            </svg>
-                            <input type="text" placeholder="Search" class="search_field">
-                        </div>
+<!--                        <div class="search_container">-->
+<!--                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                <path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z" fill="#1D1B20"/>-->
+<!--                            </svg>-->
+<!--                            <input type="text" placeholder="Search" class="search_field">-->
+<!--                        </div>-->
                     </div>
                     <div class="user_info">
                         <div class="profile_icon">
@@ -704,14 +877,26 @@
                             </div>
                             <div class="town"></div>
                         </div>
+                        <a href="{% url 'user_profile_change' %}">
+                            <svg class="edit_svg" width="24" height="24" style="margin-bottom: -5px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 20H21" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16.5 3.49998C16.8978 3.10216 17.4374 2.87866 18 2.87866C18.2786 2.87866 18.5544 2.93353 18.8118 3.04014C19.0692 3.14674 19.303 3.303 19.5 3.49998C19.697 3.69697 19.8532 3.93082 19.9598 4.18819C20.0665 4.44556 20.1213 4.72141 20.1213 4.99998C20.1213 5.27856 20.0665 5.55441 19.9598 5.81178C19.8532 6.06915 19.697 6.303 19.5 6.49998L7 19L3 20L4 16L16.5 3.49998Z" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
                 <div class="main_content">
                     <div class="pc_status">
                         <div class="lists">
                             <div class="lists_content">
+                                <div class="goal">
+                                    <h4>About</h4>
+                                    <p style="margin-left: 35px; padding: 5px;">{{ user.curr_city |default:'Not set yet' }}</p>
+                                    <p style="margin-left: 35px; padding: 5px;">{{ user.current_vibe |default:'Not set yet' }}</p>
+                                    <p style="margin-left: 35px; padding: 5px;">{{ member_since }}</p>
+                                </div>
                                 <div class="interests_hobbies">
-                                    <h4>Interests & Aspirations</h4>
+                                    <h4>Industry & Field</h4>
                                     <div class="list">
                                         {% for interest in interests_list %}
                                             <span class="chip">{{ interest }}</span>
@@ -719,22 +904,27 @@
                                     </div>
                                 </div>
                                 <div class="interests_hobbies">
-                                    <h4>Hobbies & Skills</h4>
+                                    <h4>Who are you today?</h4>
                                     <div class="list">
                                         {% for hobby in hobbies_list %}
                                             <span class="chip">{{ hobby }}</span>
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <div class="goal">
-                                    <h4>Current Goal / Project</h4>
-                                    <p style="margin-left: 10px;">"{{ user.focus_of_study }}"</p>
-                                </div>
                             </div>
+
+                        <div class="buttons">
+                            <div class="two_buttons">
+                                <button id="redeemBtn">Redeem Points</button>
+                                <button id="referFriendBtn" class="refer-friend-btn">Refer a Friend</button>
+                            </div>
+                            <a href="{% url 'signout' %}" style="display:flex; justify-content: center;">Sign Out</a>
+                        </div>
+
                         </div>
                         <div class="status">
-                            <h2>Status</h2>
-                            <p style="margin-left: 19px; margin-bottom: 20px; ">Level: {{ user.level }}</p>
+                            <h2>Doe status:</h2>
+<!--                            <p style="margin-left: 19px; margin-bottom: 20px; ">Level: {{ user.level }}</p>-->
 
                             <div class="activity_container">
                                 <svg width="58" height="50" viewBox="0 0 58 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -767,21 +957,10 @@
                                     </svg>
                                 </div>
                                 <div class="activity_name">
-                                    <p>Connections</p>
+                                    <p>Events</p>
                                     <h2 style="margin: 0px;">0</h2>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="buttons">
-                        <div class="redeem_btn">
-                            <button class="inactive">CONNECT!</button>
-                        </div>
-                        <div class="two_buttons">
-                            <button id="redeemBtn">Redeem Points</button>
-                            <button id="referFriendBtn" class="refer-friend-btn">Refer a Friend</button>
-                            <a href="{% url 'signout' %}" style="display:flex; justify-content: center;">Sign Out</a>
                         </div>
                     </div>
 
@@ -882,6 +1061,57 @@
                 </div>
             </div>
 
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content edit-modal-content">
+        <div class="edit-modal-header">
+            <h2>Edit Profile</h2>
+            <span class="close edit-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.9403 12L18.467 6.47329C18.5762 6.34576 18.6333 6.18171 18.6268 6.01393C18.6203 5.84614 18.5507 5.68698 18.432 5.56825C18.3133 5.44952 18.1541 5.37997 17.9863 5.37349C17.8186 5.36701 17.6545 5.42408 17.527 5.53329L12.0003 11.06L6.47364 5.52663C6.34811 5.40109 6.17784 5.33057 6.00031 5.33057C5.82277 5.33057 5.65251 5.40109 5.52697 5.52663C5.40144 5.65216 5.33091 5.82243 5.33091 5.99996C5.33091 6.1775 5.40144 6.34776 5.52697 6.47329L11.0603 12L5.52697 17.5266C5.45719 17.5864 5.40051 17.6599 5.36049 17.7426C5.32048 17.8254 5.29799 17.9154 5.29444 18.0073C5.2909 18.0991 5.30637 18.1906 5.33988 18.2762C5.3734 18.3617 5.42424 18.4394 5.48921 18.5044C5.55418 18.5694 5.63188 18.6202 5.71743 18.6537C5.80298 18.6872 5.89453 18.7027 5.98634 18.6992C6.07816 18.6956 6.16824 18.6731 6.25095 18.6331C6.33366 18.5931 6.40721 18.5364 6.46697 18.4666L12.0003 12.94L17.527 18.4666C17.6545 18.5758 17.8186 18.6329 17.9863 18.6264C18.1541 18.62 18.3133 18.5504 18.432 18.4317C18.5507 18.3129 18.6203 18.1538 18.6268 17.986C18.6333 17.8182 18.5762 17.6542 18.467 17.5266L12.9403 12Z" fill="black"/>
+                </svg>
+            </span>
+        </div>
+
+        <div class="edit-menu">
+            <a href="{% url 'profile_about_me' %}?next={% url 'user_profile' %}" class="edit-menu-item">
+                <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.6478 2.43065L13.3978 5.00877M8.81445 14.4619H16.1478M1.48112 11.0244L0.564453 14.4619L4.23112 13.6025L14.8516 3.6458C15.1953 3.32349 15.3884 2.8864 15.3884 2.43065C15.3884 1.9749 15.1953 1.53781 14.8516 1.21549L14.694 1.06768C14.3502 0.745464 13.8839 0.564453 13.3978 0.564453C12.9117 0.564453 12.4454 0.745464 12.1016 1.06768L1.48112 11.0244Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>About Me</span>
+            </a>
+
+            <a href="{% url 'profile_your_next_move' %}?next={% url 'user_profile' %}" class="edit-menu-item">
+                <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.6478 2.43065L13.3978 5.00877M8.81445 14.4619H16.1478M1.48112 11.0244L0.564453 14.4619L4.23112 13.6025L14.8516 3.6458C15.1953 3.32349 15.3884 2.8864 15.3884 2.43065C15.3884 1.9749 15.1953 1.53781 14.8516 1.21549L14.694 1.06768C14.3502 0.745464 13.8839 0.564453 13.3978 0.564453C12.9117 0.564453 12.4454 0.745464 12.1016 1.06768L1.48112 11.0244Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Your Next Move</span>
+            </a>
+
+            <a href="{% url 'profile_current_vibe' %}?next={% url 'user_profile' %}" class="edit-menu-item">
+                <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.6478 2.43065L13.3978 5.00877M8.81445 14.4619H16.1478M1.48112 11.0244L0.564453 14.4619L4.23112 13.6025L14.8516 3.6458C15.1953 3.32349 15.3884 2.8864 15.3884 2.43065C15.3884 1.9749 15.1953 1.53781 14.8516 1.21549L14.694 1.06768C14.3502 0.745464 13.8839 0.564453 13.3978 0.564453C12.9117 0.564453 12.4454 0.745464 12.1016 1.06768L1.48112 11.0244Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Current Financial Vibe</span>
+            </a>
+
+            <a href="{% url 'profile_industry_field' %}?next={% url 'user_profile' %}" class="edit-menu-item">
+                <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.6478 2.43065L13.3978 5.00877M8.81445 14.4619H16.1478M1.48112 11.0244L0.564453 14.4619L4.23112 13.6025L14.8516 3.6458C15.1953 3.32349 15.3884 2.8864 15.3884 2.43065C15.3884 1.9749 15.1953 1.53781 14.8516 1.21549L14.694 1.06768C14.3502 0.745464 13.8839 0.564453 13.3978 0.564453C12.9117 0.564453 12.4454 0.745464 12.1016 1.06768L1.48112 11.0244Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Industry Field</span>
+            </a>
+
+            <a href="{% url 'profile_who_are_you_today' %}?next={% url 'user_profile' %}" class="edit-menu-item">
+                <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.6478 2.43065L13.3978 5.00877M8.81445 14.4619H16.1478M1.48112 11.0244L0.564453 14.4619L4.23112 13.6025L14.8516 3.6458C15.1953 3.32349 15.3884 2.8864 15.3884 2.43065C15.3884 1.9749 15.1953 1.53781 14.8516 1.21549L14.694 1.06768C14.3502 0.745464 13.8839 0.564453 13.3978 0.564453C12.9117 0.564453 12.4454 0.745464 12.1016 1.06768L1.48112 11.0244Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Who Are You Today</span>
+            </a>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 
@@ -974,6 +1204,36 @@ document.querySelector('.send-invitation-btn').addEventListener('click', async (
                 modal.style.display = "none";
             }
         }
+
+        const editModal = document.getElementById("editProfileModal");
+        const editBtn = document.querySelector(".edit_svg").parentElement; // Кликаем по ссылке вокруг SVG
+        const editClose = editModal.querySelector(".edit-close");
+
+        // Убираем стандартное поведение ссылки при клике на иконку
+        editBtn.addEventListener("click", function(e) {
+            e.preventDefault(); // Предотвращаем переход по ссылке
+            editModal.style.display = "block";
+        });
+
+        // Закрытие по крестику
+        editClose.onclick = function() {
+            editModal.style.display = "none";
+        }
+
+        // Закрытие по клику вне модального окна
+        window.addEventListener("click", function(event) {
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+        });
+
+        // Предотвращаем закрытие при клике на пункты меню
+        document.querySelectorAll('.edit-menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Модальное окно закроется автоматически при переходе на другую страницу
+                // Ничего дополнительно делать не нужно
+            });
+        });
 
         function showMessageModal(message, isSuccess = true, options = {}) {
             const modal = document.getElementById('messageModal');

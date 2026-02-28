@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Profile Setup</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .panel {
+           margin: 0px 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 930px;
+            padding: 10px;
+            margin: auto;
+        }
+
+        .text {
+            max-width: 470px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+        }
+
+        .line_svg {
+            display: flex;
+            margin: auto;
+            max-width: 718px;
+            align-items: center;
+            padding: 0px 30px;
+        }
+
+        .up_part {
+            position: absolute;
+            left: 10px;
+            top: 0px;
+        }
+
+        .legend {
+            display:flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 660px;
+            margin: 40px auto 0px auto;
+            padding-left: 30px;
+        }
+
+        .profile_line, .profile_line2 {
+            display:flex;
+            flex-direction: row;
+        }
+
+        .profile_line2 p {
+            color: #6A6A6A;
+        }
+
+        button {
+            background-color: unset;
+            border: unset;
+            padding: 0px !important;
+        }
+
+        button#addSchoolBtn {
+            text-align: left;
+        }
+
+        h2 {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            height: 26px;
+            margin: 0px 7px 0px 0px;
+        }
+
+        p {
+            width: 100%;
+            text-align: center;
+            margin: 0px;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .step {
+            display: none;
+            max-width: 475px;
+        }
+
+        .step.active {
+            display: block;
+            display: flex;
+            flex-direction: column;
+            margin: auto;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .input_block {
+            margin-bottom: 20px;
+        }
+
+        input, select {
+          font-family: 'Poppins', sans-serif;
+          height: 50px;
+          width: 100%;
+          color: #333;
+          font-size: 14px;
+          border-radius: 20px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+        }
+
+        select option {
+            padding: 10px;
+            color: #333;
+        }
+
+        textarea {
+          font-family: 'Poppins', sans-serif;
+          width: 100%;
+          height: 120px;
+          color: #333;
+          font-size: 14px;
+          border-radius: 30px;
+          border: 1.5px solid #E0E0E0;
+          padding: 12px 20px;
+          box-sizing: border-box;
+          resize: vertical;
+        }
+
+        input:focus, textarea:focus, select:focus {
+          outline: none;
+          border-color: #FFC6D4;
+        }
+
+        label {
+            margin: 5px;
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+
+        .buttons button {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            width: 100%;
+            max-width: 300px;
+            height: 50px;
+            border: none;
+            border-radius: 92px;
+            background-color: #66B498;
+            color: white;
+            margin: 20px auto 20px auto;
+        }
+
+        .avatar-upload {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .upload-button {
+            width: 137px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #646464;
+            color: white;
+            border: none;
+            border-radius: 100px;
+        }
+
+        .avatar-preview {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid #ddd;
+        }
+
+        #avatar-preview {
+          width: 90px;
+          height: 90px;
+          object-fit: cover;
+        }
+
+        .chosen_card {
+            font-size: 14px;
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .remove-interest {
+            margin-left: 5px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .remove-interest:hover {
+            color: #f00;
+        }
+
+        #otherInterestBlock {
+            margin-top: 10px;
+        }
+
+        #otherInterestInput {
+            width: 88%;
+        }
+
+        #addOtherInterests {
+            background: none;
+            border: none;
+            padding: 12px !important;
+            margin: 0px;
+        }
+
+        .interests-grid {
+            width: 100%;
+            margin: auto;
+        }
+
+
+        .grid-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, 170px);
+          gap: 12px;
+          justify-content: center;
+          padding: 0 10px;
+          margin: 0 auto;
+        }
+
+        .grid-item {
+            width: 170px;
+            align-content: center;
+            box-sizing: border-box;
+            padding: 12px 20px;
+            text-align: center;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: black;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .grid-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .grid-item.selected {
+            background-color: #FD7A7996;
+            color: black;
+        }
+
+        .grid-item.selected::after {
+            content: "×";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: white;
+            color: #FD7A7996;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 1px solid #FD7A7996;
+        }
+
+        .other-input {
+            width: 88%;
+        }
+
+        .add-other-btn {
+        }
+
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-tag {
+            background-color: #FD7A7996;
+            color: black;
+            padding: 12px 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .selected-tag .remove-tag {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .highlight-error {
+            outline: 1px solid #FFC6D4;
+        }
+
+        .second_svg {
+            display: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        @media (min-width: 1080px) {
+            .first_svg {
+                width: 250px;
+                height: auto;
+            }
+
+            .second_svg {
+                display: block;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+            }
+
+            #profile-form {
+                margin-top: -90px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="header">
+            <svg width="145" height="134" viewBox="0 0 145 134" fill="none" xmlns="http://www.w3.org/2000/svg" class="first_svg">
+                <ellipse cx="36.494" cy="22.5812" rx="100.494" ry="110.447" fill="#FFE37F"/>
+                <path d="M43.9546 -97.8806C98.9766 -97.8806 143.699 -48.8356 143.699 11.8167C143.699 72.4688 98.9765 121.514 43.9546 121.514C-11.0674 121.514 -55.7895 72.4689 -55.7896 11.8167C-55.7896 -48.8356 -11.0674 -97.8806 43.9546 -97.8806Z" stroke="#2C2C2C" stroke-width="1.5"/>
+            </svg>
+        </div>
+
+        <form id="profile-form" method="post" enctype="multipart/form-data" action="{% url 'profile_industry_field' %}">
+            {% csrf_token %}
+
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="panel">
+                <div class="text">
+                    <div class="up_part">
+                        <button type="button" id="prev" class="hidden">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <mask id="mask0_1106_8550" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                                    <rect width="24" height="24" fill="#D9D9D9"/>
+                                </mask>
+                                <g mask="url(#mask0_1106_8550)">
+                                    <path d="M10 22L0 12L10 2L11.775 3.775L3.55 12L11.775 20.225L10 22Z" fill="#1C1B1F"/>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                    <p>4 of 5</p>
+                </div>
+                <div class="line_svg">
+                    {% if not edit_mode %}
+                        <a href="{% url 'profile_current_vibe' %}">
+                            <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="padding: 0px 5px">
+                                <path d="M10 20L0 10L10 0L11.775 1.775L3.55 10L11.775 18.225L10 20Z" fill="#444444"/>
+                            </svg>
+                        </a>
+                    {% endif %}
+                    <svg width="100%" height="7" viewBox="0 0 340 7" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100%" height="6.8" rx="3.4" fill="#D9D9D9"/>
+                        <rect id="progress-fill" width="80%" height="7" rx="3.5" fill="#FFE37F"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="profile_line">
+                    <h2>Industry / Field</h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 5.99994L18 8.99994M13 19.9999H21M5 15.9999L4 19.9999L8 18.9999L19.586 7.41394C19.9609 7.03889 20.1716 6.53027 20.1716 5.99994C20.1716 5.46961 19.9609 4.961 19.586 4.58594L19.414 4.41394C19.0389 4.039 18.5303 3.82837 18 3.82837C17.4697 3.82837 16.9611 4.039 16.586 4.41394L5 15.9999Z" stroke="#2C2C2C" stroke-width="1.12871" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="profile_line2">
+                    <p>Choose up to 2 that fit what you’re studying or working in</p>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="interests-grid">
+                    <div class="grid-container">
+                        <!-- Исправлены опечатки в data-value -->
+                        <div class="grid-item" data-value="Arts & Design" tabindex="0">Arts & Design</div>
+                        <div class="grid-item" data-value="Business">Business</div>
+                        <div class="grid-item" data-value="Communications & PR">Communications & PR</div>
+                        <div class="grid-item" data-value="Computer Science & Technology">Computer Science & Technology</div>
+
+                        <div class="grid-item" data-value="Consulting">Consulting</div>
+                        <div class="grid-item" data-value="Data Science & Analytics">Data Science & Analytics</div>
+                        <div class="grid-item" data-value="Education">Education</div>
+                        <div class="grid-item" data-value="Engineering">Engineering</div>
+
+                        <div class="grid-item" data-value="Environmental / Sustainability">Environmental / Sustainability</div>
+                        <div class="grid-item" data-value="Finance or Accounting">Finance or Accounting</div>
+                        <div class="grid-item" data-value="Healthcare">Healthcare</div>
+                        <div class="grid-item" data-value="Hospitality / Tourism">Hospitality / Tourism</div>
+
+                        <div class="grid-item" data-value="International Relations">International Relations</div>
+                        <div class="grid-item" data-value="Journalism">Journalism</div>
+                        <div class="grid-item" data-value="Law or Public Policy">Law or Public Policy</div>
+                        <div class="grid-item" data-value="Marketing or Advertising">Marketing or Advertising</div>
+
+                        <div class="grid-item" data-value="Media & Entertainment">Media & Entertainment</div>
+                        <div class="grid-item" data-value="Non-Profit / Social Impact">Non-Profit / Social Impact</div>
+                        <div class="grid-item" data-value="Psychology or Behavioral Science">Psychology or Behavioral Science</div>
+                        <div class="grid-item" data-value="Science & Research">Science & Research</div>
+
+                        <div class="grid-item" data-value="Sports & Athletics">Sports & Athletics</div>
+                        <div class="grid-item" data-value="Startups and Entrepreneurship">Startups and Entrepreneurship</div>
+                        <div class="grid-item" data-value="Writing / Literature">Writing / Literature</div>
+
+                        <!-- Вот этот блок и делает поле Other видимым при клике -->
+                        <div class="grid-item other-item" data-value="Other">Other</div>
+
+                        <!-- Контейнер для выбранных тегов (был нужен, но отсутствовал в HTML) -->
+                        <div class="selected-items" style="max-width: 480px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;"></div>
+
+                    </div>
+
+                    <!-- Поле для ввода кастомного значения -->
+                    <div class="other-input-container" style="display: none; margin: 24px auto 0; max-width: 340px;">
+                        <input type="text" placeholder="Specify other industry / field" class="other-input" style="max-width: 320px;">
+                        <button type="button" class="add-other-btn" style="background: none; border: none; cursor: pointer;">
+                            <svg width="16" height="16" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9824 0.675739C11.2996 0.942157 11.3407 1.41525 11.0743 1.73241L4.77429 9.23241C4.63466 9.39863 4.42986 9.4962 4.21281 9.49991C3.99576 9.50361 3.78776 9.4131 3.64254 9.25174L0.942536 6.25174C0.665442 5.94386 0.6904 5.46964 0.998283 5.19255C1.30617 4.91545 1.78038 4.94041 2.05748 5.24829L4.18049 7.60719L9.92573 0.767623C10.1921 0.450458 10.6652 0.40932 10.9824 0.675739Z" fill="#66B498"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                {% if edit_mode %}
+                    <button type="submit" id="submit">Save</button>
+                {% else %}
+                    <button type="submit" id="next">Next</button>
+                    <button type="submit" id="submit" class="hidden">Save</button>
+                {% endif %}
+            </div>
+
+            <input type="hidden" name="chosenHobbies" id="chosenHobbies" value="">
+
+        </form>
+
+        <svg width="347" height="278" viewBox="0 0 347 278" fill="none" xmlns="http://www.w3.org/2000/svg" class="second_svg">
+            <ellipse cx="226.112" cy="214.758" rx="226.112" ry="195.685" fill="#FFE37F"/>
+            <path d="M242.898 0.75C367.467 0.75 468.26 88.1232 468.26 195.685C468.26 303.246 367.468 390.62 242.898 390.62C118.329 390.62 17.5371 303.246 17.5371 195.685C17.5373 88.1233 118.33 0.7501 242.898 0.75Z" stroke="#2C2C2C" stroke-width="1.5"/>
+        </svg>
+
+    </div>
+
+    {{ current_industries|json_script:"savedIndustries" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ==== INDUSTRY / FIELD GRID ====
+
+    const gridItems = document.querySelectorAll('.grid-item');
+    const otherItem = document.querySelector('.other-item');
+    const otherInputContainer = document.querySelector('.other-input-container');
+    const otherInput = document.querySelector('.other-input');
+    const addOtherBtn = document.querySelector('.add-other-btn');
+    const selectedItemsContainer = document.querySelector('.selected-items');
+    const hiddenInput = document.getElementById('chosenHobbies');
+
+    // Создаём сообщение об ошибке (один раз)
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'error-message';
+    errorMessage.style.color = '#e74c3c';
+    errorMessage.style.fontSize = '14px';
+    errorMessage.style.marginTop = '12px';
+    errorMessage.style.textAlign = 'center';
+    errorMessage.style.display = 'none';
+    errorMessage.textContent = 'You can select up to 2 only';
+    const legend = document.querySelector('.legend');
+    if (legend) legend.appendChild(errorMessage);
+
+    let selectedItems = [];
+    const MAX_SELECTED = 2;
+
+    // Восстановление из Django json_script
+    const savedData = document.getElementById('savedIndustries');
+
+    // Восстановление из Django json_script
+    if (savedData) {
+        try {
+            const savedValues = JSON.parse(savedData.textContent) || [];
+            selectedItems = []; // начисто
+
+            savedValues.forEach(value => {
+                const el = document.querySelector(`.grid-item[data-value="${CSS.escape(value)}"]`);
+                if (el) {
+                    el.classList.add('selected');  // стандартные значения — только подсветка
+                    selectedItems.push(value);     // добавляем в массив, но не как тег Other
+                } else {
+                    // кастомное значение — показываем как тег Other
+                    addSelectedTag(value, false);
+                }
+            });
+
+            updateHiddenField();
+        } catch {
+            selectedItems = [];
+        }
+    }
+
+    // Обновляем состояние курсора и подсветки при изменении выбора
+    function updateLimitVisuals() {
+        const isMax = selectedItems.length >= MAX_SELECTED;
+        gridItems.forEach(item => {
+            if (!item.classList.contains('selected') && item.dataset.value !== 'Other') {
+                item.style.cursor = isMax ? 'not-allowed' : 'pointer';
+                item.classList.toggle('limit-reached', isMax);
+            }
+        });
+    }
+
+    // Показать сообщение об ошибке
+    function showLimitMessage() {
+        errorMessage.style.display = 'block';
+        setTimeout(() => { errorMessage.style.display = 'none'; }, 3000);
+    }
+
+    // Обработчик клика по карточкам
+    gridItems.forEach(item => {
+        item.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-tag')) return;
+
+            const value = this.dataset.value;
+
+            if (value === 'Other') {
+                const isVisible = otherInputContainer.style.display !== 'none';
+                otherInputContainer.style.display = isVisible ? 'none' : 'flex';
+                this.classList.toggle('selected', !isVisible);
+                if (!isVisible) otherInput?.focus();
+                return;
+            }
+
+            toggleSelection(this, value);
+        });
+    });
+
+    // Добавление кастомного значения
+    if (addOtherBtn) {
+        addOtherBtn.addEventListener('click', function(e) {
+            e.preventDefault();  // ← важно! предотвращает submit формы
+
+            const val = otherInput?.value.trim();
+            if (!val) return;
+
+            if (selectedItems.length >= MAX_SELECTED) {
+                showLimitMessage();
+                gridItems.forEach(el => {
+                    if (!el.classList.contains('selected')) {
+                        el.classList.add('highlight-error');
+                    }
+                });
+                setTimeout(() => {
+                    gridItems.forEach(el => el.classList.remove('highlight-error'));
+                }, 2000);
+                return;
+            }
+
+            addSelectedTag(val);
+            otherInput.value = '';
+            otherInputContainer.style.display = 'none';
+            if (otherItem) otherItem.classList.remove('selected');
+        });
+
+        otherInput?.addEventListener('keypress', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addOtherBtn.click();
+            }
+        });
+    }
+
+    function toggleSelection(element, value) {
+        const idx = selectedItems.indexOf(value);
+
+        if (idx === -1) {
+            // Пытаемся добавить
+            if (selectedItems.length >= MAX_SELECTED) {
+                showLimitMessage();
+                gridItems.forEach(el => {
+                    if (!el.classList.contains('selected')) {
+                        el.classList.add('highlight-error');
+                    }
+                });
+                setTimeout(() => gridItems.forEach(el => el.classList.remove('highlight-error')), 2000);
+                return;
+            }
+
+            selectedItems.push(value);
+            if (element) element.classList.add('selected');
+
+            // Создаём тег только если это кастомное значение (Other)
+            if (!document.querySelector(`.grid-item[data-value="${CSS.escape(value)}"]`)) {
+                addSelectedTag(value, false);
+            }
+
+        } else {
+            selectedItems.splice(idx, 1);
+            if (element) element.classList.remove('selected');
+
+            // Удаляем тег, если он есть
+            removeSelectedTag(value);
+        }
+
+        updateHiddenField();
+        updateLimitVisuals();
+    }
+
+    function addSelectedTag(value, update = true) {
+
+        if (!value) return;
+
+        // если тега уже нет в DOM — создаём его
+        if (!document.querySelector(
+            `.selected-tag[data-value="${CSS.escape(value)}"]`
+        )) {
+
+            const tag = document.createElement('div');
+            tag.className = 'selected-tag';
+            tag.dataset.value = value;
+            tag.innerHTML = `${value} <span class="remove-tag">×</span>`;
+
+            tag.querySelector('.remove-tag').onclick = (e) => {
+                e.stopPropagation();
+                removeSelectedTag(value);
+
+                const gridEl = document.querySelector(
+                    `.grid-item[data-value="${CSS.escape(value)}"]`
+                );
+                if (gridEl) gridEl.classList.remove('selected');
+            };
+
+            selectedItemsContainer.appendChild(tag);
+        }
+
+        // добавляем в массив ТОЛЬКО если его там ещё нет
+        if (!selectedItems.includes(value)) {
+            selectedItems.push(value);
+        }
+
+        if (update) updateHiddenField();
+        updateLimitVisuals();
+    }
+
+    function removeSelectedTag(value) {
+        selectedItems = selectedItems.filter(v => v !== value);
+        const tag = document.querySelector(`.selected-tag[data-value="${CSS.escape(value)}"]`);
+        if (tag) tag.remove();
+        updateHiddenField();
+        updateLimitVisuals();
+    }
+
+    function updateHiddenField() {
+        if (hiddenInput) {
+            hiddenInput.value = JSON.stringify(selectedItems);
+        }
+    }
+
+    // Инициализация визуального состояния
+    updateLimitVisuals();
+
+    // Обновление перед отправкой
+    document.querySelector('#profile-form')?.addEventListener('submit', updateHiddenField);
+});
+</script>
+
+</body>
+</html>
