@@ -99,10 +99,9 @@
         }
 
         .task_condition {
-          height: 38px;
           display: flex;
+          flex-direction: column;
           justify-content: space-between;
-          align-items: center;
           margin: 20px 16px;
         }
 
@@ -111,7 +110,7 @@
           height: 36px;
           display: flex;
           align-items: center;
-          margin-right: 0px;
+          margin-top: 80px;
         }
 
         .send button {
@@ -439,7 +438,7 @@
                 <input type="hidden" name="chit_chat_id" value="{{ chit_chat.id }}">
 
                 <div class="task_condition">
-                    <div style="margin: -40px 0px 0px 0px;">
+                    <div style="height: fit-content;">
                         <p>Choose ONE in each pair. <br> For now - would you rather . . .</p>
                     </div>
                     <div class="send">

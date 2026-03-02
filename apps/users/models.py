@@ -183,6 +183,12 @@ class Content(models.Model):
         help_text='Order of display on the page'
     )
 
+    always_available = models.BooleanField(
+        default=False,
+        verbose_name='Always available',
+        help_text='If checked, this content is available regardless of order'
+    )
+
     poster_base64 = models.TextField(
         blank=True,
         null=True,
@@ -218,6 +224,44 @@ class Content(models.Model):
             self.poster_base64 = getattr(self.value, 'poster_base64', None)
 
         super().save(*args, **kwargs)
+
+    def is_available_for_user(self, user, completed_ids=None):
+        """
+        Проверяет, доступен ли контент пользователю.
+        completed_ids — опционально, set с ID пройденного контента (для оптимизации)
+        """
+        # Правило 1: всегда доступен по флагу
+        if self.always_available:
+            return True
+
+        # Получаем все контенты на этой странице, отсортированные по order
+        page_contents = Content.objects.filter(
+            page=self.page
+        ).order_by('order')
+
+        # Если это первый элемент — доступен
+        first_content = page_contents.first()
+        if first_content and self.pk == first_content.pk:
+            return True
+
+        # Если не передали completed_ids — загружаем
+        if completed_ids is None:
+            completed_ids = set(user.completed_content.values_list('pk', flat=True))
+
+        # Правило 3: проверяем, все ли предыдущие элементы пройдены
+        for prev in page_contents:
+            if prev.order >= self.order:
+                break  # Достигли текущего элемента
+
+            # Пропускаем элементы, которые всегда доступны
+            if prev.always_available:
+                continue
+
+            # Если предыдущий элемент НЕ пройден — текущий заблокирован
+            if prev.pk not in completed_ids:
+                return False
+
+        return True
 
     @property
     def poster_base64_display(self):

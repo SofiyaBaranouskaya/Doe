@@ -415,16 +415,17 @@
         <div class="all_content">
         {% for content in contents %}
             <div class="content-element">
-                <div class="content-box
-                    {% if content.content_type.model == 'video' %}video
-                    {% elif content.content_type.model == 'funfact' %}fun-fact
-                    {% elif content.content_type.model == 'challenge' %}challenge
-                    {% elif content.content_type.model == 'chitchat' %}chit-chat
-                    {% elif content.content_type.model == 'quiz' %}quiz{% endif %}"
-                    {% if content.content_type.model == 'video' and content.poster_base64 %}
-                        style="background-image: url('data:image/jpeg;base64,{{ content.poster_base64 }}')"
-                    {% endif %}
-                    onclick="location.href='{% if content.content_type.model == 'video' %}{% url 'video_detail' content.object_id %}{% elif content.content_type.model == 'funfact' %}{% url 'fun_fact_detail' content.object_id %}{% elif content.content_type.model == 'challenge' %}{% url 'challenge_detail' content.object_id %}{% elif content.content_type.model == 'chitchat' %}{% url 'chitchat_detail' content.object_id %}{% elif content.content_type.model == 'quiz' %}{% url 'quiz_detail_welcome' content.object_id %}{% endif %}'">
+            <div class="content-box
+                {% if content.content_type.model == 'video' %}video
+                {% elif content.content_type.model == 'funfact' %}fun-fact
+                {% elif content.content_type.model == 'challenge' %}challenge
+                {% elif content.content_type.model == 'chitchat' %}chit-chat
+                {% elif content.content_type.model == 'quiz' %}quiz{% endif %}"
+                {% if content.content_type.model == 'video' and content.poster_base64 %}
+                    style="background-image: url('data:image/jpeg;base64,{{ content.poster_base64 }}')"
+                {% endif %}
+                data-available="{{ content.is_available|yesno:'true,false' }}"
+                onclick="location.href='{% if content.content_type.model == 'video' %}{% url 'video_detail' content.object_id %}{% elif content.content_type.model == 'funfact' %}{% url 'fun_fact_detail' content.object_id %}{% elif content.content_type.model == 'challenge' %}{% url 'challenge_detail' content.object_id %}{% elif content.content_type.model == 'chitchat' %}{% url 'chitchat_detail' content.object_id %}{% elif content.content_type.model == 'quiz' %}{% url 'quiz_detail_welcome' content.object_id %}{% endif %}'">
 
                     <button class="heart-btn"
                             data-model="{{ content.content_type.model }}"
@@ -600,7 +601,31 @@
         }
     }
 
+// 🔒 Обработка заблокированного контента при загрузке страницы
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.content-box[data-available="false"]').forEach(function(box) {
+        // Делаем полупрозрачным
+        box.style.opacity = '0.5';
+        box.style.cursor = 'not-allowed';
+
+        // Отключаем клик по самому блоку (но оставляем работу лайка, если нужно)
+        box.addEventListener('click', function(e) {
+            // Если клик был по кнопке лайка — пропускаем
+            if (e.target.closest('.heart-btn')) {
+                return;
+            }
+            // Иначе блокируем переход
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+    });
+});
+
+
 })();
+
+
 </script>
 
 </body>

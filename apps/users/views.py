@@ -1015,7 +1015,6 @@ def welcome_video(request):
 def dynamic_page(request, slug):
     page = get_object_or_404(Page, slug=slug, is_active=True)
 
-    # Используем ту же логику, что и в render_page
     content_types = ContentType.objects.filter(
         model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
     )
@@ -1060,16 +1059,23 @@ def dynamic_page(request, slug):
         if not obj or not getattr(obj, 'title', None):
             continue
 
-        # единая точка доступа для шаблона
         content.obj = obj
-
         content.duration = getattr(obj, 'duration', None)
-
         content.points = getattr(obj, 'points', None)
         if model == 'quiz':
             content.points = obj.total_points
 
         filtered_contents.append(content)
+
+    # 🔒 ВЫЧИСЛЯЕМ is_available ДЛЯ ВСЕХ (включая неавторизованных)
+    if request.user.is_authenticated:
+        # Предзагружаем completed_content для производительности
+        completed_ids = set(request.user.completed_content.values_list('pk', flat=True))
+        for c in filtered_contents:
+            c.is_available = c.is_available_for_user(request.user, completed_ids=completed_ids)
+    else:
+        for c in filtered_contents:
+            c.is_available = False  # Или True, если хотите показывать всё неавторизованным
 
     # если пользователь не авторизован
     if not request.user.is_authenticated:
@@ -1083,7 +1089,6 @@ def dynamic_page(request, slug):
 
     # лайки пользователя
     ct_to_ids = defaultdict(list)
-
     for c in filtered_contents:
         ct_to_ids[c.content_type_id].append(c.object_id)
 
@@ -1203,11 +1208,11 @@ def fun_fact_detail(request, fun_fact_id):
 
     points_added = 0
     added_to_completed = False
+    page_slug = None  # ← Добавляем переменную для slug страницы
 
     if request.user.is_authenticated:
         content_type = ContentType.objects.get_for_model(FunFact)
 
-        # Пытаемся получить контент или создаём, если не найден
         content = Content.objects.filter(
             content_type=content_type,
             object_id=fun_fact.id
@@ -1218,8 +1223,11 @@ def fun_fact_detail(request, fun_fact_id):
                 content_type=content_type,
                 object_id=fun_fact.id,
                 title=fun_fact.title,
-                # добавь здесь обязательные поля, если есть
             )
+
+        # 🔑 Получаем slug страницы из content.page
+        if content and content.page:
+            page_slug = content.page.slug
 
         # Проверяем, просмотрен ли уже
         if not request.user.completed_content.filter(pk=content.pk).exists():
@@ -1232,8 +1240,10 @@ def fun_fact_detail(request, fun_fact_id):
     return render(request, 'videos/fun_fact.html', {
         'fun_fact': fun_fact,
         'points_added': points_added,
-        'added_to_completed': added_to_completed
+        'added_to_completed': added_to_completed,
+        'page_slug': page_slug,  # ← Передаём slug в шаблон
     })
+
 
 def chitchat_detail(request, pk):
     chitchat = get_object_or_404(ChitChat, pk=pk)
@@ -1400,10 +1410,6 @@ def chitchat_submit(request, pk):
         return JsonResponse({'success': False, 'error': 'Server error'}, status=500)
 
 
-from django.contrib.contenttypes.models import ContentType
-from apps.users.models import Content  # Убедитесь, что импортировали вашу модель Content
-
-
 def challenge_detail(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
 
@@ -1417,6 +1423,7 @@ def challenge_detail(request, challenge_id):
     # Берем последнюю запись или None, если нет записей
     content = contents.first() if contents.exists() else None
     content_page = content.page if content else None
+    page_slug = content_page.slug if content_page else None
 
     # Проверяем, есть ли у пользователя ответы на этот челлендж
     user_choices = ChallengeUserChoice.objects.filter(user=request.user, challenge=challenge)
@@ -1425,7 +1432,8 @@ def challenge_detail(request, challenge_id):
     return render(request, 'videos/challenge_welcome.html', {
         'challenge': challenge,
         'has_answers': has_answers,  # Передаем информацию о наличии ответов
-        'content_page': content_page  # Добавляем страницу в контекст
+        'content_page': content_page,  # Добавляем страницу в контекст
+        'page_slug': page_slug,
     })
 
 
@@ -1463,6 +1471,7 @@ def challenge_add_content(request, pk):
     # Берем последнюю запись или None, если нет записей
     content = contents.first() if contents.exists() else None
     content_page = content.page if content else None
+    page_slug = content_page.slug if content_page else None
 
     elements_with_options = []
     for element in challenge.elements.filter(show_after_confirm=False):
@@ -1481,7 +1490,8 @@ def challenge_add_content(request, pk):
     return render(request, 'videos/challenge_add_content.html', {
         'challenge': challenge,
         'elements_with_options': elements_with_options,
-        'content_page': content_page
+        'content_page': content_page,
+        'page_slug': page_slug,
     })
 
 
@@ -1500,6 +1510,7 @@ def challenge_view_content(request, pk):
     ).order_by('-id')
     content = contents.first() if contents.exists() else None
     content_page = content.page if content else None
+    page_slug = content_page.slug if content_page else None
 
     # Остальной код представления остается без изменений
     user_choices = ChallengeUserChoice.objects.filter(
@@ -1607,7 +1618,8 @@ def challenge_view_content(request, pk):
         'min_answers_required': challenge.min_answers_required,
         'is_submit_active': is_submit_active,
         'elements_to_show_after_confirm': elements_to_show_after_confirm,
-        'content_page': content_page  # Добавляем страницу в контекст
+        'content_page': content_page,
+        'page_slug': page_slug,
     })
 
 @require_POST
@@ -2077,15 +2089,39 @@ def save_attempts_status(request):
 
 def quiz_detail(request, pk):
     quiz = get_object_or_404(Quiz, pk=pk)
-    return render(request, 'videos/quiz.html', {'quiz': quiz})
+
+    content_type = ContentType.objects.get_for_model(Quiz)
+    content = Content.objects.filter(
+        object_id=quiz.pk,
+        content_type=content_type
+    ).first()
+    page_slug = content.page.slug if content and content.page else None
+
+    total_points = sum(q.points for q in quiz.questions.all())
+
+    return render(request, 'videos/quiz.html', {
+        'quiz': quiz,
+        'total_points': total_points,
+        'page_slug': page_slug,  # ← Добавляем
+    })
 
 
 def quiz_detail_welcome(request, pk):
     quiz = get_object_or_404(Quiz, pk=pk)
+
+    content_type = ContentType.objects.get_for_model(Quiz)
+    content = Content.objects.filter(
+        object_id=quiz.pk,
+        content_type=content_type
+    ).first()
+    page_slug = content.page.slug if content and content.page else None
+
     total_points = sum(q.points for q in quiz.questions.all())
+
     return render(request, 'videos/quiz_welcome.html', {
         'quiz': quiz,
         'total_points': total_points,
+        'page_slug': page_slug,  # ← Добавляем
     })
 
 
@@ -2125,7 +2161,8 @@ def quiz_results(request, pk):
 
     # Берем последнюю запись или None, если нет записей
     content = contents.first() if contents.exists() else None
-    content_page = content.page if content else None
+    page_slug = content.page.slug if content and content.page else None
+    content_page = content.page if content and content.page else None
 
     try:
         user_choice = QuizUserChoice.objects.get(user=request.user, quiz=quiz)
@@ -2162,7 +2199,8 @@ def quiz_results(request, pk):
             'incorrect_count': incorrect_count,
             'points_awarded_already': points_awarded_already,
             'added_to_completed': not points_awarded_already,
-            'content_page': content_page  # Добавляем страницу в контекст
+            'content_page': content_page,  # Добавляем страницу в контекст
+            'page_slug': page_slug,
         })
     except QuizUserChoice.DoesNotExist:
         return redirect('quiz_detail', pk=pk)
@@ -2209,7 +2247,8 @@ def quiz_question_review(request, question_id, index):
         content_type=content_type
     ).order_by('-id')
     content = contents.first() if contents.exists() else None
-    content_page = content.page if content else None
+    page_slug = content.page.slug if content and content.page else None
+    content_page = content.page if content and content.page else None
 
     question_ids = request.session.get('incorrect_question_ids', [])
     quiz_id = request.session.get('quiz_id_for_review')
@@ -2237,7 +2276,8 @@ def quiz_question_review(request, question_id, index):
         'quiz_id': quiz_id,
         'prev_question_id': prev_question_id,
         'next_question_id': next_question_id,
-        'content_page': content_page  # Добавляем страницу в контекст
+        'content_page': content_page,  # Добавляем страницу в контекст
+        'page_slug': page_slug,
     })
 
 
@@ -2293,6 +2333,15 @@ def submit_answer(request):
 
                 except (ValueError, IndexError):
                     continue
+
+            content_type = ContentType.objects.get_for_model(Quiz)
+            content = Content.objects.filter(
+                object_id=quiz.pk,
+                content_type=content_type
+            ).first()
+
+            if content:
+                request.user.completed_content.add(content)
 
             # Очищаем localStorage после успешной отправки
             return JsonResponse({
