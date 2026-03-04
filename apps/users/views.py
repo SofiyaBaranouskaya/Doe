@@ -898,7 +898,7 @@ def generate_initial_avatar(user):
 
 
 def home_view(request):
-    pages = Page.objects.all()
+    pages = Page.objects.filter(is_active=True).order_by('order')
     return render(request, 'videos/home_page.html', {
         'pages': pages
     })
