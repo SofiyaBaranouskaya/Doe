@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'apps.videos.apps.VideosConfig',
     'apps.users',
     'apps.simulator',
+    'apps.aichat',
 ]
 
 MIDDLEWARE = [
@@ -275,3 +276,12 @@ LOGGING = {
         },
     },
 }
+
+
+# OpenRouter settings
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
+SITE_NAME = os.getenv('SITE_NAME', 'Investment Platform')
+
+# Для работы с сессиями (если нужно хранить историю дольше)
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # или 'cache'

@@ -19,11 +19,11 @@ class FundAdmin(admin.ModelAdmin):
 
     def total_invested_display(self, obj):
         return f'{float(obj.total_invested):.2f}'
-    total_invested_display.short_description = 'Вложено'
+    total_invested_display.short_description = 'Invested'
 
     def assets_count(self, obj):
         return obj.assets.count()
-    assets_count.short_description = 'Активов'
+    assets_count.short_description = 'Assets'
 
 
 @admin.register(FundAsset)
@@ -37,4 +37,4 @@ class FundAssetAdmin(admin.ModelAdmin):
         pct = obj.pnl_percent
         sign = '+' if pct >= 0 else ''
         return f'{sign}{pct:.2f}%'
-    pnl_display.short_description = 'П/У'
+    pnl_display.short_description = 'P/E'

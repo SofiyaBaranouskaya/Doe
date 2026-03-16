@@ -12,15 +12,15 @@ ASSET_COLORS = [
 
 class Fund(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='funds')
-    name = models.CharField(max_length=100, verbose_name='Название фонда')
-    description = models.TextField(blank=True, verbose_name='Описание')
-    total_amount = models.DecimalField(max_digits=14, decimal_places=2, verbose_name='Общая сумма')
+    name = models.CharField(max_length=100, verbose_name='Fund name')
+    description = models.TextField(blank=True, verbose_name='Description')
+    total_amount = models.DecimalField(max_digits=14, decimal_places=2, verbose_name='General amount')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Фонд'
-        verbose_name_plural = 'Фонды'
+        verbose_name = 'Funds'
+        verbose_name_plural = 'Funds'
         ordering = ['-created_at']
 
     def __str__(self):
@@ -37,10 +37,10 @@ class Fund(models.Model):
 
 class FundAsset(models.Model):
     fund = models.ForeignKey(Fund, on_delete=models.CASCADE, related_name='assets')
-    ticker = models.CharField(max_length=20, verbose_name='Тикер')
-    name = models.CharField(max_length=200, verbose_name='Название')
-    asset_type = models.CharField(max_length=20, default='stock', verbose_name='Тип')
-    amount = models.DecimalField(max_digits=14, decimal_places=2, verbose_name='Сумма вложения')
+    ticker = models.CharField(max_length=20, verbose_name='Ticker')
+    name = models.CharField(max_length=200, verbose_name='Name')
+    asset_type = models.CharField(max_length=20, default='stock', verbose_name='Type')
+    amount = models.DecimalField(max_digits=14, decimal_places=2, verbose_name='Investment amount')
     color = models.CharField(max_length=10, default='#6EE7B7')
     added_at = models.DateTimeField(auto_now_add=True)
 
@@ -50,8 +50,8 @@ class FundAsset(models.Model):
     last_price_update = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name = 'Актив фонда'
-        verbose_name_plural = 'Активы фонда'
+        verbose_name = 'Fund asset'
+        verbose_name_plural = 'Fund asset'
         ordering = ['added_at']
 
     def __str__(self):

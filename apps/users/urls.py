@@ -100,5 +100,6 @@ urlpatterns = [
     path('quiz/<int:quiz_id>/incorrect_question/<int:index>/', views.get_incorrect_question, name='get_incorrect_question'),
 
     path('simulator/', include('apps.simulator.urls', namespace='simulator')),
+    path('aichat/', include('apps.aichat.urls', namespace='aichat')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
