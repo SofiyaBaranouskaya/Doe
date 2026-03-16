@@ -43,6 +43,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'django_prometheus',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,9 +60,12 @@ INSTALLED_APPS = [
     # local apps
     'apps.videos.apps.VideosConfig',
     'apps.users',
+    'apps.simulator',
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'apps.users.middleware.UserActivityMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -71,8 +75,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
+# PROMETHEUS_METRIC_NAMESPACE = 'doe'
 ROOT_URLCONF = 'config.urls'
 
 AUTH_USER_MODEL = 'users.User'
@@ -109,7 +115,7 @@ if os.getenv('DATABASE_URL'):
             ssl_require=True
         )
     }
-elif env.bool("POSTGRES", default=False):
+elif env.bool("POSTGRES", default=True):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Fund</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --accent:        #FD7981;
+            --accent-dark:   #f5658c;
+            --text:          #1E293B;
+            --text-muted:    #6b6b88;
+            --text-light:    #9ca3af;
+            --bg:            #ffffff;
+            --bg-card:       #ffffff;
+            --border:        rgba(226, 232, 240, 0.6);
+            --up:            #10b981;
+            --down:          #ef4444;
+            --neutral:       #6b7280;
+            --shadow-sm:     0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md:     0 6px 16px rgba(0,0,0,0.08);
+            --radius:        16px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .wrap {
+            padding: 16px 12px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 16px;
+            transition: color 0.15s;
+        }
+
+        .back-link:hover { color: var(--accent); }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        .card-title {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: clamp(24px, 7vw, 36px);
+            font-weight: 700;
+            margin: 0 0 8px;
+            line-height: 1.1;
+        }
+
+        .card-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .error {
+            color: var(--down);
+            font-size: 13.5px;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            background: rgba(239,68,68,0.08);
+            border-radius: 12px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14.5px;
+            outline: none;
+            transition: all 0.15s;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(253,121,129,0.15);
+        }
+
+        .field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .hint {
+            font-size: 12.5px;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 14px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ────────────────────────────────────────────── */
+        /* Десктопные улучшения                           */
+        /* ────────────────────────────────────────────── */
+
+        @media (min-width: 790px) {
+            .wrap { padding: 32px 40px; }
+            .card {
+                padding: 32px;
+                max-width: 580px;
+            }
+            .card-title { font-size: clamp(32px, 5vw, 48px); }
+            .card-sub { font-size: 15.5px; margin-bottom: 32px; }
+            .field label { font-size: 15px; }
+            .field input, .field textarea { font-size: 15px; padding: 14px 16px; }
+            .hint { font-size: 13.5px; }
+            .btn-submit { font-size: 15.5px; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+    <a href="{% url 'simulator:fund_list' %}" class="back-link">← Back to Funds</a>
+
+    <div class="card">
+        <div class="card-title">New Fund</div>
+        <div class="card-sub">Set a name and total size — then allocate it across assets</div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="field">
+                <label>Fund Name</label>
+                <input type="text" name="name" placeholder="e.g. Tech 2025" required maxlength="100" value="{{ request.POST.name|default:'' }}">
+            </div>
+
+            <div class="field">
+                <label>Total Size ($)</label>
+                <input type="number" name="total_amount" placeholder="5000" min="1" step="any" required value="{{ request.POST.total_amount|default:'' }}">
+                <div class="hint">You will distribute this amount across assets in the fund</div>
+            </div>
+
+            <div class="field">
+                <label>Description (optional)</label>
+                <textarea name="description" placeholder="Brief strategy description...">{{ request.POST.description|default:'' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Create Fund →</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

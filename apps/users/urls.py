@@ -7,6 +7,14 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.onboarding_view3, name='onboarding3'),
+
+
+    path('', include('django_prometheus.urls')),
+    # Кастомные эндпоинты для отслеживания
+    path('api/track/start/<int:content_id>/', views.track_content_start, name='track_content_start'),
+    path('api/track/complete/<int:content_id>/', views.track_content_complete, name='track_content_complete'),
+
+
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('accounts/login/', views.login_view, name='login'),
@@ -34,7 +42,6 @@ urlpatterns = [
 
     path('events/', views.events_page, name='events_page'),
     path('saved/', views.saved_page, name='saved_page'),
-    path('simulator/', views.simulator_page, name='simulator_page'),
     path('glossary/', views.glossary_page, name='glossary_page'),
     path('hot_takes/', views.hot_takes_page, name='hot_takes_page'),
     path('favourites/', views.favourites_page, name='favourites_page'),
@@ -91,5 +98,7 @@ urlpatterns = [
     path('quiz/review/start/', views.start_incorrect_review, name='start_incorrect_review'),
     path('quiz/review/<int:question_id>/<int:index>/', views.quiz_question_review, name='quiz_question_review'),
     path('quiz/<int:quiz_id>/incorrect_question/<int:index>/', views.get_incorrect_question, name='get_incorrect_question'),
+
+    path('simulator/', include('apps.simulator.urls', namespace='simulator')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

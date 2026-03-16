@@ -15,6 +15,8 @@ from django.views.decorators.http import require_POST
 from .forms import RegistrationForm
 from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
+
+from .metrics import user_actions
 from .models import Video, FunFact, Content, Challenge, ChitChat, ChitChatOption, ChitChatUserChoice, \
     ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeUserAttempt, Schools, UserSchool, Quiz, \
     QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites, UserReward, Rewards, Page
@@ -1182,17 +1184,30 @@ def video_detail(request, video_id):
 
     points_added = 0
     if request.user.is_authenticated:
-        # Получаем или создаём связанный объект Content
+        # Получаем тип контента для видео
         content_type = ContentType.objects.get_for_model(Video)
-        content, created = Content.objects.get_or_create(
+
+        # ИСПРАВЛЕНИЕ: Используем filter().first() вместо get_or_create
+        # чтобы избежать MultipleObjectsReturned
+        content = Content.objects.filter(
             content_type=content_type,
-            object_id=video.id,
-            defaults={'title': video.title}  # обязательные поля Content
-        )
+            object_id=video.id
+        ).first()
+
+        # Если контент не найден, создаем новый
+        if not content:
+            content = Content.objects.create(
+                content_type=content_type,
+                object_id=video.id,
+                # Добавьте другие необходимые поля, например:
+                # page - если нужно привязать к странице
+            )
+            # Если нужно установить title, сделайте это отдельно
+            # или добавьте в create, если поле существует
 
         # Если видео ещё не просмотрено
         if not request.user.completed_content.filter(pk=content.pk).exists():
-            points_added = video.points  # предполагаем, что у модели Video есть поле points
+            points_added = video.points
             request.user.points_count += points_added
             request.user.completed_content.add(content)
             request.user.save()
@@ -1201,7 +1216,6 @@ def video_detail(request, video_id):
         'video': video,
         'points_added': points_added
     })
-
 
 def fun_fact_detail(request, fun_fact_id):
     fun_fact = get_object_or_404(FunFact, id=fun_fact_id)
@@ -2353,3 +2367,47 @@ def submit_answer(request):
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+
+
+# METRICS --------------------------------------------------------------------------------------------------------------
+
+@login_required
+@csrf_exempt
+def track_content_start(request, content_id):
+    """API endpoint для отслеживания начала контента"""
+    try:
+        content = Content.objects.get(id=content_id)
+        content.track_start(request.user)
+
+        # Дополнительная метрика для действий пользователя
+        user_actions.labels(
+            user_id=request.user.id,
+            action_type='start',
+            content_type=content.content_type.model
+        ).inc()
+
+        return JsonResponse({'status': 'success'})
+    except Content.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Content not found'}, status=404)
+
+
+@login_required
+@csrf_exempt
+def track_content_complete(request, content_id):
+    """API endpoint для отслеживания завершения контента"""
+    try:
+        content = Content.objects.get(id=content_id)
+        content.track_complete(request.user)
+
+        user_actions.labels(
+            user_id=request.user.id,
+            action_type='complete',
+            content_type=content.content_type.model
+        ).inc()
+
+        return JsonResponse({'status': 'success'})
+    except Content.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Content not found'}, status=404)

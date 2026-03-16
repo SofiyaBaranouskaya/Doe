@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Funds</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+        --accent:        #FD7981;
+        --accent-dark:   #f5658c;
+        --text:          #1E293B;
+        --text-muted:    #6b6b88;
+        --text-light:    #9ca3af;
+        --bg:            #ffffff;
+        --bg-card:       #ffffff;
+        --border:        rgba(226, 232, 240, 0.6);
+        --up:            #10b981;
+        --down:          #ef4444;
+        --neutral:       #6b7280;
+        --shadow-sm:     0 2px 8px rgba(0,0,0,0.06);
+        --shadow-md:     0 6px 16px rgba(0,0,0,0.08);
+        --radius:        16px;
+        --radius-lg:     20px;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+    }
+
+    .wrap {
+        padding: 24px 16px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .title {
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: clamp(28px, 5.5vw, 42px);
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .title span {
+        color: var(--accent);
+    }
+
+    .subtitle {
+        font-size: 15px;
+        color: var(--text-muted);
+        margin-top: 6px;
+        font-weight: 400;
+    }
+
+    .btn-create {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+    }
+
+    .btn-create svg {
+        stroke: white;
+    }
+
+    .btn-create:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(253,121,129,0.3);
+    }
+
+    .funds-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 48px;
+    }
+
+    .fund-card {
+        background: var(--bg-card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        padding: 20px;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: all 0.18s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .fund-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .fund-name {
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .fund-desc {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        line-height: 1.4;
+        margin: 4px 0 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .fund-amount {
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .fund-amount span {
+        font-size: 0.9em;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    .fund-amount-label {
+        font-size: 12.5px;
+        color: var(--text-light);
+        margin-top: -2px;
+    }
+
+    .fund-pnl {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .fund-pnl.up    { color: var(--up); }
+    .fund-pnl.down  { color: var(--down); }
+    .fund-pnl.neutral { color: var(--neutral); }
+
+    .fund-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12.5px;
+        color: var(--text-light);
+        margin-top: 8px;
+    }
+
+    .fund-dots {
+        display: flex;
+        gap: 6px;
+        margin: 8px 0 4px;
+    }
+
+    .fund-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .all-chart-section {
+        margin-top: 32px;
+    }
+
+    .section-title {
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .chart-card {
+        background: var(--bg-card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .period-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .period-tab {
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .period-tab.active,
+    .period-tab:hover {
+        background: rgba(253, 121, 129, 0.1);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 100px 20px 140px;
+        color: var(--text-muted);
+    }
+
+    .empty-icon {
+        font-size: 72px;
+        margin-bottom: 24px;
+        opacity: 0.7;
+    }
+
+    .empty-title {
+        font-family: 'Baloo Bhaijaan 2', sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 12px;
+    }
+
+    .empty-sub {
+        font-size: 15px;
+        max-width: 420px;
+        margin: 0 auto 32px;
+        line-height: 1.45;
+    }
+
+    @media (min-width: 768px) {
+        .wrap {
+            padding: 32px 40px;
+        }
+
+        .title {
+            font-size: 48px;
+        }
+
+        .funds-grid {
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div>
+      <div class="title">My <span>Funds</span></div>
+      <div class="subtitle">Manage your virtual investment portfolios</div>
+    </div>
+    <a href="{% url 'simulator:fund_create' %}" class="btn-create">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      New Fund
+    </a>
+  </div>
+
+  {% if funds %}
+  <div class="funds-grid">
+    {% for item in funds %}
+    <a href="{% url 'simulator:fund_detail' item.obj.pk %}" class="fund-card">
+      <div class="fund-name">{{ item.obj.name }}</div>
+      <div class="fund-desc">{{ item.obj.description|default:"No description" }}</div>
+      <div class="fund-amount">{{ item.obj.total_amount|floatformat:0 }} <span style="font-size:.95rem;color:var(--muted)">$</span></div>
+      <div class="fund-amount-label">Fund size</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="fund-pnl {% if item.total_pnl > 0 %}up{% elif item.total_pnl < 0 %}down{% else %}neutral{% endif %}">
+          {% if item.total_pnl > 0 %}▲{% elif item.total_pnl < 0 %}▼{% else %}—{% endif %}
+          {% if item.total_pnl >= 0 %}+{% endif %}{{ item.total_pnl_pct|floatformat:2 }}%
+        </span>
+        <span style="color:var(--muted);font-size:.8rem;">{% if item.total_pnl >= 0 %}+{% endif %}{{ item.total_pnl|floatformat:2 }} $</span>
+      </div>
+      <div class="fund-dots">{% for c in item.colors %}<div class="fund-dot" style="background:{{ c }}"></div>{% endfor %}</div>
+      <div class="fund-meta">
+        <span>{{ item.assets_count }} asset{{ item.assets_count|pluralize }}</span>
+        <span>{{ item.obj.created_at|date:"d M Y" }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="all-chart-section">
+    <div class="section-title">All Funds Performance</div>
+    <div class="chart-card">
+      <div class="period-tabs">
+        <button class="period-tab active" onclick="loadChart('1mo',this)">1M</button>
+        <button class="period-tab" onclick="loadChart('3mo',this)">3M</button>
+        <button class="period-tab" onclick="loadChart('6mo',this)">6M</button>
+        <button class="period-tab" onclick="loadChart('1y',this)">1Y</button>
+        <button class="period-tab" onclick="loadChart('2y',this)">2Y</button>
+        <button class="period-tab" onclick="loadChart('5y',this)">5Y</button>
+      </div>
+      <canvas id="allChart" height="90"></canvas>
+      <div id="legend" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;"></div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📊</div>
+    <div class="empty-title">No funds yet</div>
+    <div class="empty-sub">Create your first fund and start building a portfolio of stocks and bonds</div>
+    <a href="{% url 'simulator:fund_create' %}" class="btn-create">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Create First Fund
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+  Chart.defaults.color='#6b6b88';
+  Chart.defaults.borderColor='rgba(255,255,255,0.05)';
+  let ci=null;
+  async function loadChart(period,btn){
+    document.querySelectorAll('.period-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const data=(await fetch(`{% url 'simulator:all_funds_chart' %}?period=${period}`).then(r=>r.json()));
+    const legend=document.getElementById('legend'); legend.innerHTML='';
+    const datasets=data.funds.map(f=>{
+      legend.innerHTML+=`<div style="display:flex;align-items:center;gap:6px;font-size:.8rem;"><div style="width:9px;height:9px;border-radius:50%;background:${f.color}"></div>${f.fund_name}</div>`;
+      return{label:f.fund_name,data:f.data.map(p=>({x:p.date,y:p.value})),borderColor:f.color,backgroundColor:'transparent',borderWidth:2,tension:.4,pointRadius:0};
+    });
+    const canvas=document.getElementById('allChart');
+    if(ci){ci.destroy();ci=null;}
+    ci=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}%`}}},scales:{x:{type:'category',ticks:{maxTicksLimit:8,font:{size:11}}},y:{ticks:{callback:v=>v+'%',font:{size:11}}}}}});
+  }
+  {% if funds %}document.addEventListener('DOMContentLoaded',()=>{loadChart('1y',document.querySelector('.period-tab.active'));});{% endif %}
+</script>
+</body>
+</html>

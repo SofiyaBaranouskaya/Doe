@@ -1,6 +1,8 @@
 import os
 import re
 import mimetypes
+from datetime import time
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -13,6 +15,7 @@ from PIL import Image
 from django.utils.html import format_html
 from django.utils.text import slugify
 
+from apps.users.metrics import content_started, content_completed, content_time_spent
 from apps.users.storage_backends import StorjVideoStorage
 from utils.supabase_storage import SupabaseStorage
 from django.utils.safestring import mark_safe
@@ -262,6 +265,40 @@ class Content(models.Model):
                 return False
 
         return True
+
+    def track_start(self, user):
+        """Отслеживание начала просмотра контента"""
+        content_started.labels(
+            content_type=self.content_type.model,
+            content_id=self.object_id,
+            page=self.page.page_key
+        ).inc()
+
+        # Сохраняем время начала в сессии или кэше
+        from django.core.cache import cache
+        cache.set(f'content_start_{user.id}_{self.id}', time.time(), timeout=3600)
+
+    def track_complete(self, user):
+        """Отслеживание завершения контента"""
+        from django.core.cache import cache
+
+        content_completed.labels(
+            content_type=self.content_type.model,
+            content_id=self.object_id,
+            page=self.page.page_key
+        ).inc()
+
+        # Расчет времени, проведенного на контенте
+        start_time = cache.get(f'content_start_{user.id}_{self.id}')
+        if start_time:
+            duration = time.time() - start_time
+            content_time_spent.labels(
+                content_type=self.content_type.model,
+                content_id=self.object_id,
+                page=self.page.page_key
+            ).observe(duration)
+
+            cache.delete(f'content_start_{user.id}_{self.id}')
 
     @property
     def poster_base64_display(self):
