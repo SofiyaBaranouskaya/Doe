@@ -47,17 +47,17 @@
         <span>Favourites</span>
     </a>
 
-    <a href="{% url 'hot_takes_page' %}">
-        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;">
-            <mask id="mask0_2334_1341" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
-            <rect width="31" height="31" fill="#D9D9D9"/>
-            </mask>
-            <g mask="url(#mask0_2334_1341)">
-            <path d="M21.1512 24.5417L16.5658 19.9563L18.3741 18.1479L21.1189 20.8927L26.6085 15.4032L28.4168 17.2438L21.1512 24.5417ZM21.1512 14.2084L16.5658 9.62295L18.3741 7.81462L21.1189 10.5594L26.6085 5.06982L28.4168 6.91045L21.1512 14.2084ZM2.5835 21.9584V19.375H14.2085V21.9584H2.5835ZM2.5835 11.625V9.0417H14.2085V11.625H2.5835Z" fill="black"/>
-            </g>
-        </svg>
-        <span>Hot takes</span>
-    </a>
+<!--    <a href="{% url 'hot_takes_page' %}">-->
+<!--        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;">-->
+<!--            <mask id="mask0_2334_1341" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">-->
+<!--            <rect width="31" height="31" fill="#D9D9D9"/>-->
+<!--            </mask>-->
+<!--            <g mask="url(#mask0_2334_1341)">-->
+<!--            <path d="M21.1512 24.5417L16.5658 19.9563L18.3741 18.1479L21.1189 20.8927L26.6085 15.4032L28.4168 17.2438L21.1512 24.5417ZM21.1512 14.2084L16.5658 9.62295L18.3741 7.81462L21.1189 10.5594L26.6085 5.06982L28.4168 6.91045L21.1512 14.2084ZM2.5835 21.9584V19.375H14.2085V21.9584H2.5835ZM2.5835 11.625V9.0417H14.2085V11.625H2.5835Z" fill="black"/>-->
+<!--            </g>-->
+<!--        </svg>-->
+<!--        <span>Hot takes</span>-->
+<!--    </a>-->
 
     <a href="{% url 'glossary_page' %}">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -71,6 +71,29 @@
         <span>Glossary</span>
     </a>
 
+    <a href="{% url 'simulator:fund_list' %}">
+        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <mask id="mask0_2091_simulator" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
+                <rect width="31" height="31" fill="#D9D9D9"/>
+            </mask>
+            <g mask="url(#mask0_2091_simulator)">
+                <path d="M3.875 25.8333V23.25H27.125V25.8333H3.875ZM6.45833 21.9583V14.2083L11.625 17.7917L16.7917 10.625L21.9583 14.2083L27.125 6.45833V10.375L21.9583 18.125L16.7917 14.5417L11.625 21.7083L6.45833 18.125V21.9583Z" fill="#1C1B1F"/>
+            </g>
+        </svg>
+        <span>Simulator</span>
+    </a>
+
+    <a href="{% url 'aichat:chat' %}">
+        <svg width="31" height="31" viewBox="0 0 31 31" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.5 22.5V8.5C6.5 7.6 7.1 7 8 7H23C23.9 7 24.5 7.6 24.5 8.5V18C24.5 18.9 23.9 19.5 23 19.5H11.5L6.5 22.5Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="12" cy="13.5" r="1.2" fill="black"/>
+            <circle cx="15.5" cy="13.5" r="1.2" fill="black"/>
+            <circle cx="19" cy="13.5" r="1.2" fill="black"/>
+        </svg>
+        <span>Ai Сhat</span>
+    </a>
+
+
     <a href="{% url 'user_profile' %}">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2091_648" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
@@ -82,6 +105,5 @@
         </svg>
         <span>Profile</span>
     </a>
-
 
 </div>

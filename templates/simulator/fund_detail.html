@@ -34,14 +34,57 @@
             font-family: 'Poppins', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main_content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .nav_pc {
+            display: none;
+            width: 240px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .fd-wrap {
+            flex: 1;
             padding: 24px 16px;
-            max-width: 1400px;
-            margin: 0 auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
+
+        .nav_pannel {
+            flex-shrink: 0;
+            background: white;
+            height: 72px;           /* подгоните под вашу мобильную навигацию */
+        }
+
+        .doe_icon {
+            margin: 40% auto;
+        }
+
+        /* ──────────────────────────────────────────────── */
+        /*               Основные стили страницы            */
+        /* ──────────────────────────────────────────────── */
 
         .back-link {
             display: inline-flex;
@@ -97,7 +140,9 @@
             padding: 8px 16px;
             border-radius: 999px;
             white-space: nowrap;
+            margin-top: 20px;
         }
+
         .pnl-badge.up    { background: rgba(16,185,129,0.12); color: var(--up);    }
         .pnl-badge.down  { background: rgba(239,68,68,0.12);  color: var(--down);  }
         .pnl-badge.neutral { background: rgba(107,114,128,0.12); color: var(--neutral); }
@@ -514,600 +559,317 @@
         .toast-err { background: var(--down); }
         .toast-ok  { background: var(--up); }
 
-        @media (min-width: 768px) {
-            .fd-wrap { padding: 32px 40px; }
-            .fd-title { font-size: 48px; }
+        /* ──────────────────────────────────────────────── */
+        /*                   Адаптив                        */
+        /* ──────────────────────────────────────────────── */
+
+        @media (min-width: 790px) {
+            .nav_pannel {
+                display: none !important;
+            }
+
+            .nav_pc {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .fd-wrap {
+                padding: 32px 40px;
+            }
+
+            .fd-title {
+                font-size: clamp(32px, 5vw, 48px);
+            }
         }
+
+        @media (min-width: 1024px) {
+            .fd-layout {
+                grid-template-columns: 2fr 360px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .fd-wrap {
+                padding: 40px 60px;
+            }
+        }
+
+@media (max-width: 1023px) {
+  .chart-container {
+    height: 260px;           /* или даже 220–240px */
+  }
+
+  .chart-card,
+  .assets-panel,
+  .pnl-section {
+    width: 80%;
+    padding: 16px;
+  }
+
+  .pnl-table th,
+  .pnl-table td {
+    padding: 8px 6px;
+    font-size: 12.5px;
+  }
+
+  .pnl-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
     </style>
-
-<!--<style>-->
-<!--    @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap');-->
-<!--    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');-->
-
-<!--    :root {-->
-<!--        &#45;&#45;accent:        #FD7981;-->
-<!--        &#45;&#45;accent-dark:   #f5658c;-->
-<!--        &#45;&#45;text:          #1E293B;-->
-<!--        &#45;&#45;text-muted:    #6b6b88;-->
-<!--        &#45;&#45;text-light:    #9ca3af;-->
-<!--        &#45;&#45;bg:            #ffffff;-->
-<!--        &#45;&#45;bg-card:       #ffffff;-->
-<!--        &#45;&#45;border:        rgba(226, 232, 240, 0.6);-->
-<!--        &#45;&#45;up:            #10b981;-->
-<!--        &#45;&#45;down:          #ef4444;-->
-<!--        &#45;&#45;neutral:       #6b7280;-->
-<!--        &#45;&#45;shadow-sm:     0 2px 8px rgba(0,0,0,0.06);-->
-<!--        &#45;&#45;shadow-md:     0 6px 16px rgba(0,0,0,0.08);-->
-<!--        &#45;&#45;radius:        16px;-->
-<!--    }-->
-
-<!--    * { box-sizing: border-box; }-->
-
-<!--    body {-->
-<!--        margin: 0;-->
-<!--        padding: 0;-->
-<!--        font-family: 'Poppins', system-ui, sans-serif;-->
-<!--        background: var(&#45;&#45;bg);-->
-<!--        color: var(&#45;&#45;text);-->
-<!--        min-height: 100vh;-->
-<!--        overflow-x: hidden;-->
-<!--    }-->
-
-<!--    .fd-wrap {-->
-<!--        padding: 20px 14px;-->
-<!--        max-width: 1400px;-->
-<!--        margin: 0 auto;-->
-<!--    }-->
-
-<!--    .back-link {-->
-<!--        display: inline-flex;-->
-<!--        align-items: center;-->
-<!--        gap: 6px;-->
-<!--        color: var(&#45;&#45;text-muted);-->
-<!--        font-size: 13px;-->
-<!--        font-weight: 500;-->
-<!--        text-decoration: none;-->
-<!--        margin-bottom: 16px;-->
-<!--        transition: color 0.15s;-->
-<!--    }-->
-
-<!--    .back-link:hover { color: var(&#45;&#45;accent); }-->
-
-<!--    .fd-header {-->
-<!--        display: flex;-->
-<!--        flex-direction: column;-->
-<!--        gap: 12px;-->
-<!--        margin-bottom: 24px;-->
-<!--    }-->
-
-<!--    .fd-title {-->
-<!--        font-family: 'Baloo Bhaijaan 2', sans-serif;-->
-<!--        font-size: clamp(24px, 7vw, 38px);-->
-<!--        font-weight: 700;-->
-<!--        margin: 0;-->
-<!--        line-height: 1.1;-->
-<!--    }-->
-
-<!--    .fd-desc {-->
-<!--        font-size: 14px;-->
-<!--        color: var(&#45;&#45;text-muted);-->
-<!--        margin-top: 4px;-->
-<!--    }-->
-
-<!--    .fd-header-right {-->
-<!--        display: flex;-->
-<!--        flex-wrap: wrap;-->
-<!--        gap: 16px;-->
-<!--        align-items: center;-->
-<!--    }-->
-
-<!--    .fund-total-label { font-size: 12px; color: var(&#45;&#45;text-light); margin-bottom: 2px; }-->
-<!--    .fund-total { font-family: 'Baloo Bhaijaan 2', sans-serif; font-size: clamp(20px, 5.5vw, 28px); font-weight: 800; }-->
-
-<!--    .pnl-badge {-->
-<!--        font-weight: 600;-->
-<!--        font-size: 13px;-->
-<!--        padding: 6px 12px;-->
-<!--        border-radius: 999px;-->
-<!--        white-space: nowrap;-->
-<!--    }-->
-
-<!--    .stats-row {-->
-<!--        display: grid;-->
-<!--        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));-->
-<!--        gap: 12px;-->
-<!--        margin: 24px 0 32px;-->
-<!--    }-->
-
-<!--    .stat-card {-->
-<!--        background: var(&#45;&#45;bg-card);-->
-<!--        border-radius: var(&#45;&#45;radius);-->
-<!--        border: 1px solid var(&#45;&#45;border);-->
-<!--        padding: 14px;-->
-<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
-<!--        text-align: center;-->
-<!--    }-->
-
-<!--    .stat-label { font-size: 12px; color: var(&#45;&#45;text-light); margin-bottom: 4px; }-->
-<!--    .stat-value { font-family: 'Baloo Bhaijaan 2', sans-serif; font-size: 20px; font-weight: 700; }-->
-
-<!--    .fd-layout {-->
-<!--        display: flex;-->
-<!--        flex-direction: column;-->
-<!--        gap: 28px;-->
-<!--    }-->
-
-<!--    .chart-card {-->
-<!--        background: var(&#45;&#45;bg-card);-->
-<!--        border-radius: var(&#45;&#45;radius);-->
-<!--        border: 1px solid var(&#45;&#45;border);-->
-<!--        padding: 16px;-->
-<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
-<!--    }-->
-
-<!--    .chart-container {-->
-<!--        position: relative;-->
-<!--        height: 280px;-->
-<!--        width: 100%;-->
-<!--        margin: 12px 0;-->
-<!--    }-->
-
-<!--    .chart-top {-->
-<!--        display: flex;-->
-<!--        flex-direction: column;-->
-<!--        gap: 12px;-->
-<!--        margin-bottom: 12px;-->
-<!--    }-->
-
-<!--    .chart-title { font-family: 'Baloo Bhaijaan 2', sans-serif; font-size: 18px; font-weight: 700; margin: 0; }-->
-
-<!--    .mode-switch {-->
-<!--        display: flex;-->
-<!--        gap: 6px;-->
-<!--        background: rgba(0,0,0,0.03);-->
-<!--        border-radius: 999px;-->
-<!--        padding: 3px;-->
-<!--        width: fit-content;-->
-<!--    }-->
-
-<!--    .mode-btn {-->
-<!--        background: transparent;-->
-<!--        border: none;-->
-<!--        padding: 6px 12px;-->
-<!--        border-radius: 999px;-->
-<!--        font-size: 12.5px;-->
-<!--        font-weight: 500;-->
-<!--        color: var(&#45;&#45;text-muted);-->
-<!--        cursor: pointer;-->
-<!--    }-->
-
-<!--    .mode-btn.active {-->
-<!--        background: white;-->
-<!--        box-shadow: 0 1px 4px rgba(0,0,0,0.1);-->
-<!--        color: var(&#45;&#45;text);-->
-<!--    }-->
-
-<!--    .tabs-row {-->
-<!--        display: flex;-->
-<!--        flex-wrap: wrap;-->
-<!--        gap: 6px;-->
-<!--    }-->
-
-<!--    .tab-btn {-->
-<!--        background: transparent;-->
-<!--        border: 1px solid var(&#45;&#45;border);-->
-<!--        border-radius: 999px;-->
-<!--        padding: 6px 12px;-->
-<!--        font-size: 12px;-->
-<!--        font-weight: 500;-->
-<!--        color: var(&#45;&#45;text-muted);-->
-<!--        cursor: pointer;-->
-<!--    }-->
-
-<!--    .tab-btn.active, .fc-active {-->
-<!--        background: rgba(253,121,129,0.1);-->
-<!--        border-color: var(&#45;&#45;accent);-->
-<!--        color: var(&#45;&#45;accent);-->
-<!--    }-->
-
-<!--    .chart-legend {-->
-<!--        display: flex;-->
-<!--        flex-wrap: wrap;-->
-<!--        gap: 10px;-->
-<!--        margin-top: 12px;-->
-<!--        font-size: 12.5px;-->
-<!--    }-->
-
-<!--    .forecast-scenarios {-->
-<!--        display: flex;-->
-<!--        flex-wrap: wrap;-->
-<!--        gap: 10px;-->
-<!--        margin-top: 12px;-->
-<!--        font-size: 12px;-->
-<!--    }-->
-
-<!--    .sc-badge {-->
-<!--        padding: 4px 10px;-->
-<!--        border-radius: 999px;-->
-<!--        font-size: 11.5px;-->
-<!--    }-->
-
-<!--    .pnl-section {-->
-<!--        background: var(&#45;&#45;bg-card);-->
-<!--        border-radius: var(&#45;&#45;radius);-->
-<!--        border: 1px solid var(&#45;&#45;border);-->
-<!--        padding: 16px;-->
-<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
-<!--        overflow-x: auto;-->
-<!--    }-->
-
-<!--    .pnl-header {-->
-<!--        display: flex;-->
-<!--        flex-direction: column;-->
-<!--        gap: 12px;-->
-<!--        margin-bottom: 16px;-->
-<!--    }-->
-
-<!--    .pnl-header-title { font-family: 'Baloo Bhaijaan 2', sans-serif; font-size: 18px; font-weight: 700; }-->
-
-<!--    .refresh-btn {-->
-<!--        background: rgba(253,121,129,0.1);-->
-<!--        border: none;-->
-<!--        border-radius: 999px;-->
-<!--        padding: 8px 14px;-->
-<!--        font-size: 13px;-->
-<!--        color: var(&#45;&#45;accent);-->
-<!--        cursor: pointer;-->
-<!--        display: flex;-->
-<!--        align-items: center;-->
-<!--        gap: 6px;-->
-<!--        width: fit-content;-->
-<!--    }-->
-
-<!--    .pnl-table {-->
-<!--        width: 100%;-->
-<!--        min-width: 600px; /* скролл на мобильных */-->
-<!--        border-collapse: collapse;-->
-<!--        font-size: 13px;-->
-<!--    }-->
-
-<!--    .pnl-table th, .pnl-table td {-->
-<!--        padding: 10px 8px;-->
-<!--        text-align: right;-->
-<!--        border-bottom: 1px solid var(&#45;&#45;border);-->
-<!--    }-->
-
-<!--    .pnl-table th { font-weight: 500; color: var(&#45;&#45;text-muted); text-align: left; font-size: 12px; white-space: nowrap; }-->
-
-<!--    .assets-panel {-->
-<!--        background: var(&#45;&#45;bg-card);-->
-<!--        border-radius: var(&#45;&#45;radius);-->
-<!--        border: 1px solid var(&#45;&#45;border);-->
-<!--        padding: 16px;-->
-<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
-<!--    }-->
-
-<!--    .panel-header {-->
-<!--        display: flex;-->
-<!--        justify-content: space-between;-->
-<!--        align-items: center;-->
-<!--        margin-bottom: 16px;-->
-<!--        flex-wrap: wrap;-->
-<!--        gap: 12px;-->
-<!--    }-->
-
-<!--    .panel-title { font-family: 'Baloo Bhaijaan 2', sans-serif; font-size: 18px; font-weight: 700; }-->
-
-<!--    .asset-item {-->
-<!--        display: flex;-->
-<!--        align-items: center;-->
-<!--        gap: 10px;-->
-<!--        padding: 10px 0;-->
-<!--        border-bottom: 1px solid var(&#45;&#45;border);-->
-<!--    }-->
-
-<!--    .asset-dot { width: 10px; height: 10px; border-radius: 50%; }-->
-
-<!--    .asset-info { flex: 1; min-width: 0; }-->
-<!--    .asset-ticker { font-weight: 700; font-size: 14px; }-->
-<!--    .asset-name { font-size: 11.5px; color: var(&#45;&#45;text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }-->
-
-<!--    .asset-right { text-align: right; min-width: 70px; }-->
-<!--    .asset-amount { font-weight: 600; font-size: 14px; }-->
-<!--    .asset-alloc { font-size: 11.5px; color: var(&#45;&#45;text-light); }-->
-
-<!--    .remove-btn {-->
-<!--        background: none;-->
-<!--        border: none;-->
-<!--        color: var(&#45;&#45;text-muted);-->
-<!--        font-size: 16px;-->
-<!--        cursor: pointer;-->
-<!--        padding: 4px;-->
-<!--    }-->
-
-<!--    .add-section {-->
-<!--        margin-top: 20px;-->
-<!--        padding-top: 16px;-->
-<!--        border-top: 1px solid var(&#45;&#45;border);-->
-<!--    }-->
-
-<!--    .add-label { font-weight: 600; font-size: 14px; margin-bottom: 12px; }-->
-
-<!--    .search-input, .amount-input, .pct-input {-->
-<!--        width: 100%;-->
-<!--        padding: 10px 14px;-->
-<!--        border: 1px solid var(&#45;&#45;border);-->
-<!--        border-radius: var(&#45;&#45;radius);-->
-<!--        font-size: 14px;-->
-<!--    }-->
-
-<!--    .amount-row { display: flex; gap: 12px; margin: 12px 0; }-->
-<!--    .amount-input, .pct-input { flex: 1; }-->
-
-<!--    .color-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }-->
-<!--    .color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }-->
-<!--    .color-swatch.selected { border-color: var(&#45;&#45;accent); box-shadow: 0 0 0 3px rgba(253,121,129,0.2); }-->
-
-<!--    .add-btn {-->
-<!--        width: 100%;-->
-<!--        background: var(&#45;&#45;accent);-->
-<!--        color: white;-->
-<!--        border: none;-->
-<!--        border-radius: 999px;-->
-<!--        padding: 12px;-->
-<!--        font-weight: 600;-->
-<!--        font-size: 14px;-->
-<!--        cursor: pointer;-->
-<!--    }-->
-
-<!--    .add-btn:disabled { opacity: 0.55; cursor: not-allowed; }-->
-
-<!--    .toast {-->
-<!--        position: fixed;-->
-<!--        bottom: 24px;-->
-<!--        left: 50%;-->
-<!--        transform: translateX(-50%);-->
-<!--        padding: 12px 24px;-->
-<!--        border-radius: 999px;-->
-<!--        color: white;-->
-<!--        font-weight: 500;-->
-<!--        z-index: 1000;-->
-<!--        display: none;-->
-<!--    }-->
-
-<!--    /* Десктопные улучшения — как в твоём первом примере */-->
-<!--    @media (min-width: 768px) {-->
-<!--        .fd-wrap { padding: 32px 40px; }-->
-<!--        .fd-title { font-size: clamp(32px, 5vw, 48px); }-->
-<!--        .fd-header { flex-direction: row; align-items: center; }-->
-<!--        .fd-header-right { flex-direction: row; gap: 24px; }-->
-<!--        .stats-row { gap: 20px; }-->
-<!--        .chart-container { height: 380px; }-->
-<!--        .chart-title { font-size: 22px; }-->
-<!--        .mode-btn { padding: 8px 14px; font-size: 13.5px; }-->
-<!--        .tab-btn { padding: 7px 14px; font-size: 13px; }-->
-<!--        .pnl-section { padding: 20px; }-->
-<!--        .assets-panel { padding: 20px; }-->
-<!--        .panel-title { font-size: 22px; }-->
-<!--        .add-btn { font-size: 15px; padding: 14px; }-->
-<!--    }-->
-
-<!--    @media (min-width: 1024px) {-->
-<!--        .fd-layout { flex-direction: row; }-->
-<!--        .assets-panel { position: sticky; top: 24px; align-self: start; }-->
-<!--    }-->
-<!--</style>-->
-
 </head>
 <body>
 
-<div class="fd-wrap">
+<div class="main">
 
-    <a href="{% url 'simulator:fund_list' %}" class="back-link">← All Funds</a>
+    <div class="main_content">
 
-    <div class="fd-header">
-        <div>
-            <div class="fd-title">{{ fund.name }}</div>
-            {% if fund.description %}<div class="fd-desc">{{ fund.description }}</div>{% endif %}
-        </div>
-        <div class="fd-header-right">
-            <div>
-                <div class="fund-total-label">Fund Size</div>
-                <div class="fund-total">{{ fund.total_amount|floatformat:2 }} $</div>
-            </div>
-            <span id="headerPnlBadge" class="pnl-badge {% if total_pnl > 0 %}up{% elif total_pnl < 0 %}down{% else %}neutral{% endif %}">
-                {% if total_pnl >= 0 %}▲ +{% else %}▼ {% endif %}{{ total_pnl_pct|floatformat:2 }}%
-                &nbsp;({% if total_pnl >= 0 %}+{% endif %}{{ total_pnl|floatformat:2 }} $)
-            </span>
-        </div>
-    </div>
+        <!-- Десктопная навигация -->
+        <div class="nav_pc">
+            <svg width="137" height="99" viewBox="0 0 137 99" fill="none" xmlns="http://www.w3.org/2000/svg" class="doe_icon">
+                <path d="M8.33456 70.5284C8.33456 67.8026 8.74756 65.4485 9.57356 63.4661C10.3996 61.4424 11.5353 59.7698 12.9808 58.4482C14.4676 57.1266 16.1816 56.156 18.1227 55.5365C20.1051 54.8757 22.232 54.5453 24.5035 54.5453C25.3295 54.5453 26.1349 54.6279 26.9196 54.7931C27.7043 54.917 28.3444 55.0822 28.84 55.2887V45.2528C29.253 45.1289 29.9138 45.005 30.8224 44.8811C31.731 44.7159 32.6603 44.6333 33.6102 44.6333C34.5188 44.6333 35.3241 44.6953 36.0262 44.8192C36.7696 44.9431 37.3891 45.1909 37.8847 45.5626C38.3803 45.9343 38.752 46.4505 38.9998 47.1113C39.2476 47.7308 39.3715 48.5568 39.3715 49.5893V78.9536C39.3715 80.8947 38.4629 82.4435 36.6457 83.5999C35.448 84.3846 33.8993 85.066 31.9995 85.6442C30.0997 86.2637 27.9108 86.5735 25.4328 86.5735C22.7483 86.5735 20.3322 86.2018 18.1846 85.4584C16.0783 84.715 14.2818 83.6412 12.795 82.237C11.3495 80.8328 10.2344 79.1601 9.44966 77.219C8.70626 75.2366 8.33456 73.0064 8.33456 70.5284ZM25.9284 62.7847C23.6982 62.7847 21.9842 63.4248 20.7865 64.7051C19.5888 65.9854 18.99 67.9265 18.99 70.5284C18.99 73.089 19.5475 75.0301 20.6626 76.3517C21.7777 77.632 23.3884 78.2722 25.4947 78.2722C26.2381 78.2722 26.8989 78.1689 27.4771 77.9624C28.0966 77.7146 28.5716 77.4462 28.902 77.1571V63.5281C28.076 63.0325 27.0848 62.7847 25.9284 62.7847ZM77.0952 70.5284C77.0952 73.089 76.7028 75.3812 75.9181 77.4049C75.1334 79.3873 74.0183 81.0599 72.5728 82.4228C71.1686 83.7857 69.4753 84.8182 67.4929 85.5203C65.5105 86.2224 63.301 86.5735 60.8643 86.5735C58.4276 86.5735 56.218 86.2018 54.2356 85.4584C52.2532 84.715 50.5393 83.6618 49.0938 82.2989C47.6896 80.8947 46.5951 79.2014 45.8104 77.219C45.0257 75.2366 44.6334 73.0064 44.6334 70.5284C44.6334 68.0917 45.0257 65.8822 45.8104 63.8998C46.5951 61.9174 47.6896 60.2447 49.0938 58.8818C50.5393 57.4776 52.2532 56.4038 54.2356 55.6604C56.218 54.917 58.4276 54.5453 60.8643 54.5453C63.301 54.5453 65.5105 54.9377 67.4929 55.7224C69.4753 56.4658 71.1686 57.5396 72.5728 58.9438C74.0183 60.3067 75.1334 61.9793 75.9181 63.9617C76.7028 65.9441 77.0952 68.133 77.0952 70.5284ZM55.4127 70.5284C55.4127 73.0477 55.8876 74.9888 56.8375 76.3517C57.8287 77.6733 59.1916 78.3341 60.9262 78.3341C62.6608 78.3341 63.9824 77.6527 64.891 76.2898C65.8409 74.9269 66.3159 73.0064 66.3159 70.5284C66.3159 68.0504 65.8409 66.1506 64.891 64.829C63.9411 63.4661 62.5989 62.7847 60.8643 62.7847C59.1297 62.7847 57.7874 63.4661 56.8375 64.829C55.8876 66.1506 55.4127 68.0504 55.4127 70.5284ZM98.1543 86.5735C95.7176 86.5735 93.4461 86.2431 91.3398 85.5823C89.2748 84.8802 87.4576 83.8477 85.8882 82.4848C84.3601 81.1219 83.1418 79.4079 82.2332 77.3429C81.3659 75.2779 80.9322 72.8619 80.9322 70.0948C80.9322 67.369 81.3659 65.0355 82.2332 63.0944C83.1418 61.112 84.3188 59.5013 85.7643 58.2623C87.2098 56.982 88.8618 56.0528 90.7203 55.4746C92.5788 54.8551 94.4786 54.5453 96.4197 54.5453C98.6086 54.5453 100.591 54.8757 102.367 55.5365C104.184 56.1973 105.733 57.1059 107.013 58.2623C108.335 59.4187 109.347 60.8023 110.049 62.413C110.792 64.0237 111.164 65.7789 111.164 67.6787C111.164 69.0829 110.771 70.1567 109.987 70.9001C109.202 71.6435 108.108 72.1185 106.703 72.325L91.4018 74.6171C91.8561 75.98 92.7853 77.0125 94.1895 77.7146C95.5937 78.3754 97.2044 78.7058 99.0216 78.7058C100.715 78.7058 102.305 78.4993 103.792 78.0863C105.32 77.632 106.559 77.1158 107.509 76.5376C108.17 76.9506 108.727 77.5288 109.181 78.2722C109.636 79.0156 109.863 79.8003 109.863 80.6263C109.863 82.4848 108.996 83.8683 107.261 84.7769C105.939 85.479 104.453 85.954 102.801 86.2018C101.149 86.4496 99.5998 86.5735 98.1543 86.5735ZM96.4197 62.2271C95.4285 62.2271 94.5612 62.3923 93.8178 62.7227C93.1157 63.0531 92.5375 63.4868 92.0832 64.0237C91.6289 64.5193 91.2779 65.0975 91.0301 65.7583C90.8236 66.3778 90.6997 67.0179 90.6584 67.6787L101.252 65.9441C101.128 65.1181 100.674 64.2921 99.8889 63.4661C99.1042 62.6401 97.9478 62.2271 96.4197 62.2271Z" fill="#FD7981"/>
+                <path d="M92.2197 28.5079C94.1121 28.8033 97.5235 28.3204 102.446 24.3818C107.369 20.4436 110.512 20.9597 111.149 26.037C111.786 31.1145 109.466 41.1518 113.426 40.6465C117.386 40.1413 118.656 42.0021 117.872 45.5601C117.087 49.1179 118.173 59.4703 116.92 62.3427C115.666 65.215 94.5717 44.4154 83.5521 40.4064C72.5321 36.3975 72.9492 35.9531 75.9024 30.2018C78.8556 24.4507 79.2942 23.5289 81.8901 24.476C84.486 25.4234 88.8348 17.4222 90.7317 21.0028C92.6284 24.5835 90.3658 28.2185 92.2197 28.5079Z" fill="url(#paint0_linear_1893_29783)"/>
+                <path d="M120.004 55.8367C109.148 45.1536 97.8726 38.9347 90.3246 35.5989C82.1431 31.9832 76.4565 30.8812 76.4 30.8704L76.5464 30.1667C76.6033 30.1775 82.3502 31.2892 90.5978 34.9316C98.2031 38.2904 109.565 44.5536 120.502 55.3171L120.004 55.8367Z" fill="#2C2C2C"/>
+                <mask id="path-4-inside-1_1893_29783" fill="white">
+                    <path d="M72.2741 36.866L72.5366 36.3979C72.5835 36.3142 77.3505 29.0695 79.7112 22.6759C79.5601 22.6167 79.3777 22.5344 79.1838 22.4233C78.3982 21.9736 77.1408 20.8773 77.5482 18.5877C77.9013 16.6022 79.6635 15.4493 81.934 15.7187C82.2257 15.753 83.8034 16.5148 83.237 16.1906C84.6772 17.015 85.0528 18.3054 84.6209 19.933C84.0137 22.2213 82.2057 22.8332 81.3927 22.9404C81.3259 24.7321 81.6049 25.8941 82.1871 26.2272C82.3629 26.3277 82.5714 26.3587 82.8251 26.3218C84.3463 26.1003 86.5401 23.6284 88.8664 19.5235C88.2086 19.0638 87.2279 18.048 87.6115 16.227C87.7998 15.3324 88.2644 14.8223 89.1373 14.4121C90.084 13.9671 91.207 13.9724 91.9984 14.4254C92.4572 14.688 92.8947 14.8759 93.0373 15.3632C93.4032 16.6146 93.2487 17.8657 92.6233 18.7098C92.2564 19.2051 91.5577 19.7892 90.2795 19.8801C90.0307 22.8969 88.9401 29.7874 91.6047 31.3126C92.0051 31.5418 92.4665 31.6524 92.9761 31.6414C94.367 31.6112 99.4484 30.234 108.374 22.8223C107.809 22.2469 107.277 21.4299 107.375 20.4451C107.485 19.3356 108.046 18.446 108.99 17.8552C109.638 17.4492 110.708 17.0847 112.119 17.6542C113.203 18.0915 114.036 18.6878 114.279 19.7435C114.535 20.8527 114.026 21.8941 113.608 22.5494C112.87 23.7083 112.09 24.2698 110.737 24.0497C109.943 28.3453 108.022 40.6008 111.485 42.583C111.665 42.6859 111.861 42.7605 112.067 42.8042C115.76 43.5909 120.211 40.592 122.672 38.601C122.371 37.8619 122.078 36.4706 123.309 35.1819C124.33 34.1135 125.668 34.046 126.816 34.7034C127.587 35.1447 128.087 35.9559 128.189 36.9292C128.311 38.1045 127.865 39.0915 126.868 39.7668C125.973 40.3726 124.927 40.4384 123.974 39.9551C120.322 47.2524 119.674 49.2692 119.695 49.6409C120.589 49.4091 122.958 47.8184 125.562 45.7669C125.307 45.0343 125.031 43.6999 125.936 42.7789C126.842 41.8573 128.108 41.7732 129.04 42.3068C129.435 42.5332 129.931 43.0142 130.047 44.0188C130.187 45.2311 129.825 46.1978 128.939 46.8042C128.201 47.31 127.297 47.3278 126.456 46.8539C122.45 51.98 119.977 56.486 117.153 61.9176L116.929 62.3483L116.592 62.0171C116.489 61.9159 106.148 51.8124 93.301 44.4579C85.7722 40.1478 78.873 37.6137 72.7949 36.9249L72.2741 36.866ZM93.66 43.8316C105.281 50.4841 114.861 59.3706 116.752 61.171C119.611 55.7591 123.661 49.6755 125.942 46.3629C123.902 47.9681 121.332 49.8304 120.121 50.0612C119.923 50.0988 119.786 50.0532 119.698 50.0006C119.273 49.7569 118.492 49.2913 123.518 39.2984L123.701 38.9346L124.031 39.1533C124.834 39.6865 125.729 39.686 126.486 39.1736C127.261 38.649 127.7 37.7225 127.605 36.8133C127.527 36.0563 127.161 35.4551 126.577 35.1203C125.711 34.6249 124.6 34.8471 123.81 35.6732C122.771 36.7605 123.122 37.9291 123.424 38.5292L123.554 38.7874L123.327 38.9741C120.818 41.0406 116.04 44.9215 111.946 44.0494C111.671 43.9908 111.409 43.8911 111.168 43.753C107.45 41.6249 108.894 29.9894 110.111 23.5674L110.182 23.1909L110.547 23.2776C112.11 23.6496 112.775 22.9858 113.22 22.2876C113.544 21.7792 113.798 20.8223 113.591 19.923C113.397 19.083 112.845 18.4684 111.963 18.112C111.061 17.748 110.199 17.797 109.469 18.2536C108.712 18.7275 108.166 19.609 108.077 20.4992C107.992 21.3575 108.611 22.0931 109.144 22.5591L109.458 22.8329L109.131 23.107C105.275 26.3352 97.5947 32.0842 93.3056 32.1769C92.6692 32.1907 92.0879 32.0495 91.578 31.7575C88.6208 30.065 89.264 23.4107 89.5896 19.6696C86.3689 25.4154 84.18 26.8461 82.9082 27.031C82.5009 27.0903 82.1377 27.0306 81.8282 26.8533C80.9481 26.3498 80.5693 24.9186 80.7021 22.5999L80.7218 22.2561L81.0615 22.2535C81.1616 22.2527 83.5242 22.2072 84.1415 19.8798C84.5869 18.201 83.7001 17.2875 82.8778 16.8167C82.4783 16.588 82.0659 16.4578 81.8346 16.4302C79.9381 16.2052 78.5286 17.095 78.2436 18.6974C77.9296 20.4647 78.777 21.3584 79.543 21.7971C79.9436 22.0265 80.2816 22.1058 80.2851 22.1067L80.7017 22.2025L80.5193 22.601C78.3373 27.3419 74.4439 34.41 73.4077 36.2754C79.4514 37.0561 86.2618 39.5966 93.66 43.8316ZM126.401 45.9517L126.572 46.0732C127.265 46.567 127.972 46.6111 128.553 46.2133C129.205 45.7667 129.571 44.8413 129.464 43.9109C129.398 43.3377 129.174 42.9387 128.799 42.7239C128.155 42.3551 127.092 42.6037 126.43 43.2778C125.712 44.0083 126.108 45.2393 126.312 45.7347L126.401 45.9517ZM91.7588 14.8432C91.166 14.504 90.2745 14.5077 89.5405 14.8528C88.8814 15.1626 88.4418 15.6978 88.3022 16.3602C87.9711 17.933 88.9047 18.7307 89.4905 19.0661L89.6895 19.1772L89.963 19.1764C90.9223 19.173 91.6286 18.8745 92.0622 18.2894C92.5509 17.6297 92.662 16.6181 92.3592 15.5831C92.2668 15.2672 92.0647 15.0184 91.7588 14.8432Z"/>
+                </mask>
+                <path d="M72.2741 36.866L72.5366 36.3979C72.5835 36.3142 77.3505 29.0695 79.7112 22.6759C79.5601 22.6167 79.3777 22.5344 79.1838 22.4233C78.3982 21.9736 77.1408 20.8773 77.5482 18.5877C77.9013 16.6022 79.6635 15.4493 81.934 15.7187C82.2257 15.753 83.8034 16.5148 83.237 16.1906C84.6772 17.015 85.0528 18.3054 84.6209 19.933C84.0137 22.2213 82.2057 22.8332 81.3927 22.9404C81.3259 24.7321 81.6049 25.8941 82.1871 26.2272C82.3629 26.3277 82.5714 26.3587 82.8251 26.3218C84.3463 26.1003 86.5401 23.6284 88.8664 19.5235C88.2086 19.0638 87.2279 18.048 87.6115 16.227C87.7998 15.3324 88.2644 14.8223 89.1373 14.4121C90.084 13.9671 91.207 13.9724 91.9984 14.4254C92.4572 14.688 92.8947 14.8759 93.0373 15.3632C93.4032 16.6146 93.2487 17.8657 92.6233 18.7098C92.2564 19.2051 91.5577 19.7892 90.2795 19.8801C90.0307 22.8969 88.9401 29.7874 91.6047 31.3126C92.0051 31.5418 92.4665 31.6524 92.9761 31.6414C94.367 31.6112 99.4484 30.234 108.374 22.8223C107.809 22.2469 107.277 21.4299 107.375 20.4451C107.485 19.3356 108.046 18.446 108.99 17.8552C109.638 17.4492 110.708 17.0847 112.119 17.6542C113.203 18.0915 114.036 18.6878 114.279 19.7435C114.535 20.8527 114.026 21.8941 113.608 22.5494C112.87 23.7083 112.09 24.2698 110.737 24.0497C109.943 28.3453 108.022 40.6008 111.485 42.583C111.665 42.6859 111.861 42.7605 112.067 42.8042C115.76 43.5909 120.211 40.592 122.672 38.601C122.371 37.8619 122.078 36.4706 123.309 35.1819C124.33 34.1135 125.668 34.046 126.816 34.7034C127.587 35.1447 128.087 35.9559 128.189 36.9292C128.311 38.1045 127.865 39.0915 126.868 39.7668C125.973 40.3726 124.927 40.4384 123.974 39.9551C120.322 47.2524 119.674 49.2692 119.695 49.6409C120.589 49.4091 122.958 47.8184 125.562 45.7669C125.307 45.0343 125.031 43.6999 125.936 42.7789C126.842 41.8573 128.108 41.7732 129.04 42.3068C129.435 42.5332 129.931 43.0142 130.047 44.0188C130.187 45.2311 129.825 46.1978 128.939 46.8042C128.201 47.31 127.297 47.3278 126.456 46.8539C122.45 51.98 119.977 56.486 117.153 61.9176L116.929 62.3483L116.592 62.0171C116.489 61.9159 106.148 51.8124 93.301 44.4579C85.7722 40.1478 78.873 37.6137 72.7949 36.9249L72.2741 36.866ZM93.66 43.8316C105.281 50.4841 114.861 59.3706 116.752 61.171C119.611 55.7591 123.661 49.6755 125.942 46.3629C123.902 47.9681 121.332 49.8304 120.121 50.0612C119.923 50.0988 119.786 50.0532 119.698 50.0006C119.273 49.7569 118.492 49.2913 123.518 39.2984L123.701 38.9346L124.031 39.1533C124.834 39.6865 125.729 39.686 126.486 39.1736C127.261 38.649 127.7 37.7225 127.605 36.8133C127.527 36.0563 127.161 35.4551 126.577 35.1203C125.711 34.6249 124.6 34.8471 123.81 35.6732C122.771 36.7605 123.122 37.9291 123.424 38.5292L123.554 38.7874L123.327 38.9741C120.818 41.0406 116.04 44.9215 111.946 44.0494C111.671 43.9908 111.409 43.8911 111.168 43.753C107.45 41.6249 108.894 29.9894 110.111 23.5674L110.182 23.1909L110.547 23.2776C112.11 23.6496 112.775 22.9858 113.22 22.2876C113.544 21.7792 113.798 20.8223 113.591 19.923C113.397 19.083 112.845 18.4684 111.963 18.112C111.061 17.748 110.199 17.797 109.469 18.2536C108.712 18.7275 108.166 19.609 108.077 20.4992C107.992 21.3575 108.611 22.0931 109.144 22.5591L109.458 22.8329L109.131 23.107C105.275 26.3352 97.5947 32.0842 93.3056 32.1769C92.6692 32.1907 92.0879 32.0495 91.578 31.7575C88.6208 30.065 89.264 23.4107 89.5896 19.6696C86.3689 25.4154 84.18 26.8461 82.9082 27.031C82.5009 27.0903 82.1377 27.0306 81.8282 26.8533C80.9481 26.3498 80.5693 24.9186 80.7021 22.5999L80.7218 22.2561L81.0615 22.2535C81.1616 22.2527 83.5242 22.2072 84.1415 19.8798C84.5869 18.201 83.7001 17.2875 82.8778 16.8167C82.4783 16.588 82.0659 16.4578 81.8346 16.4302C79.9381 16.2052 78.5286 17.095 78.2436 18.6974C77.9296 20.4647 78.777 21.3584 79.543 21.7971C79.9436 22.0265 80.2816 22.1058 80.2851 22.1067L80.7017 22.2025L80.5193 22.601C78.3373 27.3419 74.4439 34.41 73.4077 36.2754C79.4514 37.0561 86.2618 39.5966 93.66 43.8316ZM126.401 45.9517L126.572 46.0732C127.265 46.567 127.972 46.6111 128.553 46.2133C129.205 45.7667 129.571 44.8413 129.464 43.9109C129.398 43.3377 129.174 42.9387 128.799 42.7239C128.155 42.3551 127.092 42.6037 126.43 43.2778C125.712 44.0083 126.108 45.2393 126.312 45.7347L126.401 45.9517ZM91.7588 14.8432C91.166 14.504 90.2745 14.5077 89.5405 14.8528C88.8814 15.1626 88.4418 15.6978 88.3022 16.3602C87.9711 17.933 88.9047 18.7307 89.4905 19.0661L89.6895 19.1772L89.963 19.1764C90.9223 19.173 91.6286 18.8745 92.0622 18.2894C92.5509 17.6297 92.662 16.6181 92.3592 15.5831C92.2668 15.2672 92.0647 15.0184 91.7588 14.8432Z" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="1.0585" mask="url(#path-4-inside-1_1893_29783)"/>
+                <defs>
+                    <linearGradient id="paint0_linear_1893_29783" x1="107.224" y1="30.6513" x2="94.4321" y2="49.4499" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FD7981"/>
+                        <stop offset="1" stop-color="#FFE694"/>
+                    </linearGradient>
+                </defs>
+            </svg>
 
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-label">Invested</div>
-            <div class="stat-value" id="statInvested">{{ fund.total_invested|floatformat:2 }} $</div>
+            {% include 'videos/nav_pc.html' %}
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Free</div>
-            <div class="stat-value {% if unallocated > 0 %}up{% endif %}" id="statFree">{{ unallocated|floatformat:2 }} $</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Assets</div>
-            <div class="stat-value" id="statCount">{{ assets|length }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Total P&L</div>
-            <div class="stat-value {% if total_pnl > 0 %}up{% elif total_pnl < 0 %}down{% endif %}" id="statPnl">
-                {% if total_pnl >= 0 %}+{% endif %}{{ total_pnl|floatformat:2 }} $
-            </div>
-        </div>
-    </div>
 
-    <div class="fd-layout">
-        <div>
-            <div class="chart-card">
-                <div class="chart-top">
+        <!-- Основной контент -->
+        <div class="content-area">
+            <div class="fd-wrap">
+
+                <a href="{% url 'simulator:fund_list' %}" class="back-link">← All Funds</a>
+
+                <div class="fd-header">
                     <div>
-                        <div class="chart-title">Asset Performance</div>
-                        <div class="mode-switch">
-                            <button class="mode-btn active" id="modeHistory" onclick="setMode('history')">History</button>
-                            <button class="mode-btn" id="modeForecast" onclick="setMode('forecast')">Forecast</button>
-                        </div>
+                        <div class="fd-title">{{ fund.name }}</div>
+                        {% if fund.description %}<div class="fd-desc">{{ fund.description }}</div>{% endif %}
                     </div>
-                    <div>
-                        <div id="historyTabs" class="tabs-row">
-                            <button class="tab-btn active" data-period="1mo" onclick="loadHistory('1mo',this)">1M</button>
-                            <button class="tab-btn" data-period="3mo" onclick="loadHistory('3mo',this)">3M</button>
-                            <button class="tab-btn" data-period="6mo" onclick="loadHistory('6mo',this)">6M</button>
-                            <button class="tab-btn" data-period="1y" onclick="loadHistory('1y',this)">1Y</button>
-                            <button class="tab-btn" data-period="2y" onclick="loadHistory('2y',this)">2Y</button>
-                            <button class="tab-btn" data-period="5y" onclick="loadHistory('5y',this)">5Y</button>
+                    <div class="fd-header-right">
+                        <div>
+                            <div class="fund-total-label">Fund Size</div>
+                            <div class="fund-total">{{ fund.total_amount|floatformat:2 }} $</div>
                         </div>
-                        <div id="forecastTabs" class="tabs-row" style="display:none;">
-                            <button class="tab-btn fc-active" data-months="1" onclick="loadForecast(1,this)">1M</button>
-                            <button class="tab-btn" data-months="3" onclick="loadForecast(3,this)">3M</button>
-                            <button class="tab-btn" data-months="12" onclick="loadForecast(12,this)">1Y</button>
-                            <button class="tab-btn" data-months="60" onclick="loadForecast(60,this)">5Y</button>
+                        <span id="headerPnlBadge" class="pnl-badge {% if total_pnl > 0 %}up{% elif total_pnl < 0 %}down{% else %}neutral{% endif %}" style="height: auto;">
+                            {% if total_pnl >= 0 %}▲ +{% else %}▼ {% endif %}{{ total_pnl_pct|floatformat:2 }}%
+                            &nbsp;({% if total_pnl >= 0 %}+{% endif %}{{ total_pnl|floatformat:2 }} $)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Invested</div>
+                        <div class="stat-value" id="statInvested">{{ fund.total_invested|floatformat:2 }} $</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Free</div>
+                        <div class="stat-value {% if unallocated > 0 %}up{% endif %}" id="statFree">{{ unallocated|floatformat:2 }} $</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Assets</div>
+                        <div class="stat-value" id="statCount">{{ assets|length }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total P&L</div>
+                        <div class="stat-value {% if total_pnl > 0 %}up{% elif total_pnl < 0 %}down{% endif %}" id="statPnl">
+                            {% if total_pnl >= 0 %}+{% endif %}{{ total_pnl|floatformat:2 }} $
                         </div>
                     </div>
                 </div>
 
-                <div class="chart-container">
-                    <canvas id="mainChart"></canvas>
-                </div>
-
-                <div id="chartLegend" class="chart-legend"></div>
-
-                <div id="forecastScenarios" class="forecast-scenarios" style="display:none;">
-                    <span class="sc-badge opt">Optimistic</span>
-                    <span class="sc-badge base">Base</span>
-                    <span class="sc-badge pess">Pessimistic</span>
-                    <span style="color:var(--text-muted);font-size:.72rem;">— based on historical volatility</span>
-                </div>
-            </div>
-
-            <div class="pnl-section">
-                <div class="pnl-header">
-                    <div class="pnl-header-title">P&L by Asset</div>
-                    <button class="refresh-btn" onclick="refreshPrices(this)">
-                        <span id="refreshIcon">↻</span> Refresh Prices
-                    </button>
-                </div>
-                <table class="pnl-table">
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Invested $</th>
-                            <th>Entry Price</th>
-                            <th>Current</th>
-                            <th>P&L %</th>
-                            <th>P&L $</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pnlBody">
-                        {% for a in assets %}
-                        <tr data-asset-id="{{ a.id }}" data-amount="{{ a.amount }}" data-entry="{{ a.price_at_add|default:0 }}">
-                            <td>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <div style="width:8px;height:8px;border-radius:50%;background:{{ a.color }};flex-shrink:0;"></div>
-                                    <div>
-                                        <div style="font-weight:700; display: flex;">{{ a.ticker }}</div>
-                                        <div style="color:var(--text-muted);font-size:.75rem;">{{ a.name }}</div>
+                <div class="fd-layout">
+                    <div>
+                        <div class="chart-card">
+                            <div class="chart-top">
+                                <div>
+                                    <div class="chart-title">Asset Performance</div>
+                                    <div class="mode-switch">
+                                        <button class="mode-btn active" id="modeHistory" onclick="setMode('history')">History</button>
+                                        <button class="mode-btn" id="modeForecast" onclick="setMode('forecast')">Forecast</button>
                                     </div>
                                 </div>
-                            </td>
-                            <td>{{ a.amount|floatformat:2 }}</td>
-                            <td>{{ a.price_at_add|floatformat:4|default:"—" }}</td>
-                            <td class="cur-price">{{ a.current_price|floatformat:4|default:"—" }}</td>
-                            <td class="pnl-pct {% if a.pnl_pct > 0 %}up{% elif a.pnl_pct < 0 %}down{% else %}neutral{% endif %}">
-                                {% if a.pnl_pct >= 0 %}+{% endif %}{{ a.pnl_pct|floatformat:2 }}%
-                            </td>
-                            <td class="pnl-abs {% if a.pnl_amount > 0 %}up{% elif a.pnl_amount < 0 %}down{% else %}neutral{% endif %}">
-                                {% if a.pnl_amount >= 0 %}+{% endif %}{{ a.pnl_amount|floatformat:2 }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr class="pnl-total-row">
-                            <td colspan="4">Total</td>
-                            <td id="totalPct" class="{% if total_pnl_pct > 0 %}up{% elif total_pnl_pct < 0 %}down{% else %}neutral{% endif %}">
-                                {% if total_pnl_pct >= 0 %}+{% endif %}{{ total_pnl_pct|floatformat:2 }}%
-                            </td>
-                            <td id="totalAbs" class="{% if total_pnl > 0 %}up{% elif total_pnl < 0 %}down{% else %}neutral{% endif %}">
-                                {% if total_pnl >= 0 %}+{% endif %}{{ total_pnl|floatformat:2 }}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                                <div>
+                                    <div id="historyTabs" class="tabs-row">
+                                        <button class="tab-btn active" data-period="1mo" onclick="loadHistory('1mo',this)">1M</button>
+                                        <button class="tab-btn" data-period="3mo" onclick="loadHistory('3mo',this)">3M</button>
+                                        <button class="tab-btn" data-period="6mo" onclick="loadHistory('6mo',this)">6M</button>
+                                        <button class="tab-btn" data-period="1y" onclick="loadHistory('1y',this)">1Y</button>
+                                        <button class="tab-btn" data-period="2y" onclick="loadHistory('2y',this)">2Y</button>
+                                        <button class="tab-btn" data-period="5y" onclick="loadHistory('5y',this)">5Y</button>
+                                    </div>
+                                    <div id="forecastTabs" class="tabs-row" style="display:none;">
+                                        <button class="tab-btn fc-active" data-months="1" onclick="loadForecast(1,this)">1M</button>
+                                        <button class="tab-btn" data-months="3" onclick="loadForecast(3,this)">3M</button>
+                                        <button class="tab-btn" data-months="12" onclick="loadForecast(12,this)">1Y</button>
+                                        <button class="tab-btn" data-months="60" onclick="loadForecast(60,this)">5Y</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="mainChart"></canvas>
+                            </div>
+
+                            <div id="chartLegend" class="chart-legend"></div>
+
+                            <div id="forecastScenarios" class="forecast-scenarios" style="display:none;">
+                                <span class="sc-badge opt">Optimistic</span>
+                                <span class="sc-badge base">Base</span>
+                                <span class="sc-badge pess">Pessimistic</span>
+                                <span style="color:var(--text-muted);font-size:.72rem;">— based on historical volatility</span>
+                            </div>
+                        </div>
+
+                        <div class="pnl-section">
+                            <div class="pnl-header">
+                                <div class="pnl-header-title">P&L by Asset</div>
+                                <button class="refresh-btn" onclick="refreshPrices(this)">
+                                    <span id="refreshIcon">↻</span> Refresh Prices
+                                </button>
+                            </div>
+                            <table class="pnl-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th>Invested $</th>
+                                        <th>Entry Price</th>
+                                        <th>Current</th>
+                                        <th>P&L %</th>
+                                        <th>P&L $</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pnlBody">
+                                    {% for a in assets %}
+                                    <tr data-asset-id="{{ a.id }}" data-amount="{{ a.amount }}" data-entry="{{ a.price_at_add|default:0 }}">
+                                        <td>
+                                            <div style="display:flex;align-items:center;gap:8px;">
+                                                <div style="width:8px;height:8px;border-radius:50%;background:{{ a.color }};flex-shrink:0;"></div>
+                                                <div>
+                                                    <div style="font-weight:700; display: flex;">{{ a.ticker }}</div>
+                                                    <div style="color:var(--text-muted);font-size:.75rem;">{{ a.name }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ a.amount|floatformat:2 }}</td>
+                                        <td>{{ a.price_at_add|floatformat:4|default:"—" }}</td>
+                                        <td class="cur-price">{{ a.current_price|floatformat:4|default:"—" }}</td>
+                                        <td class="pnl-pct {% if a.pnl_pct > 0 %}up{% elif a.pnl_pct < 0 %}down{% else %}neutral{% endif %}">
+                                            {% if a.pnl_pct >= 0 %}+{% endif %}{{ a.pnl_pct|floatformat:2 }}%
+                                        </td>
+                                        <td class="pnl-abs {% if a.pnl_amount > 0 %}up{% elif a.pnl_amount < 0 %}down{% else %}neutral{% endif %}">
+                                            {% if a.pnl_amount >= 0 %}+{% endif %}{{ a.pnl_amount|floatformat:2 }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="pnl-total-row">
+                                        <td colspan="4">Total</td>
+                                        <td id="totalPct" class="{% if total_pnl_pct > 0 %}up{% elif total_pnl_pct < 0 %}down{% else %}neutral{% endif %}">
+                                            {% if total_pnl_pct >= 0 %}+{% endif %}{{ total_pnl_pct|floatformat:2 }}%
+                                        </td>
+                                        <td id="totalAbs" class="{% if total_pnl > 0 %}up{% elif total_pnl < 0 %}down{% else %}neutral{% endif %}">
+                                            {% if total_pnl >= 0 %}+{% endif %}{{ total_pnl|floatformat:2 }}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="assets-panel">
+                            <div class="panel-header">
+                                <div class="panel-title">Assets</div>
+                                <div class="unallocated-badge">free: <span id="freeDisplay">{{ unallocated|floatformat:2 }}</span> $</div>
+                            </div>
+
+                            <div id="assetsList">
+                                {% for a in assets %}
+                                <div class="asset-item" id="asset-{{ a.id }}">
+                                    <div class="asset-dot" style="background:{{ a.color }}"></div>
+                                    <div class="asset-info">
+                                        <div class="asset-ticker">{{ a.ticker }}</div>
+                                        <div class="asset-name">{{ a.name }}</div>
+                                        <div class="asset-pnl {% if a.pnl_pct > 0 %}up{% elif a.pnl_pct < 0 %}down{% else %}neutral{% endif %}">
+                                            {% if a.pnl_pct >= 0 %}+{% endif %}{{ a.pnl_pct|floatformat:2 }}%
+                                        </div>
+                                    </div>
+                                    <div class="asset-right">
+                                        <div class="asset-amount">{{ a.amount|floatformat:0 }} $</div>
+                                        <div class="asset-alloc">{{ a.allocation_pct }}%</div>
+                                    </div>
+                                    <button class="remove-btn" onclick="removeAsset({{ a.id }})" title="Remove">✕</button>
+                                </div>
+                                {% empty %}
+                                <div id="emptyMsg" style="text-align:center;padding:20px;color:var(--text-muted);font-size:.83rem;">Add your first asset below ↓</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="add-section">
+                                <div class="add-label">Add Asset</div>
+                                <div class="search-wrap" style="position: relative;">
+                                    <input type="text" class="search-input" id="searchInput"
+                                           placeholder="Search: AAPL, Tesla, BTC..." autocomplete="off"
+                                           oninput="searchAssets(this.value)">
+                                    <div class="search-dropdown" id="searchDropdown"></div>
+                                </div>
+
+                                <div class="sel-asset-box" id="selAssetBox">
+                                    <div class="sel-asset-row">
+                                        <div>
+                                            <span id="selTicker" style="font-weight:700;color:var(--accent);font-size:.88rem;"></span>
+                                            <span id="selName" style="color:var(--text-muted);font-size:.76rem;margin-left:7px;"></span>
+                                        </div>
+                                        <button class="sel-clear" onclick="clearSelection()">✕</button>
+                                    </div>
+                                </div>
+
+                                <div class="amount-row">
+                                    <input type="number" class="amount-input" id="amountInput" placeholder="Amount $" min="1" step="any" oninput="syncPct()">
+                                    <input type="number" class="pct-input" id="pctInput" placeholder="%" min="0.1" max="100" step="any" oninput="syncAmount()">
+                                </div>
+
+                                <div class="color-row" id="colorRow">
+                                    {% for color in available_colors %}
+                                    <div class="color-swatch" style="background:{{ color }}" data-color="{{ color }}" onclick="selectColor(this)"></div>
+                                    {% endfor %}
+                                </div>
+
+                                <button class="add-btn" id="addBtn" onclick="addAsset()" disabled>Add Asset</button>
+                                <div class="add-error" id="addError"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <div>
-            <div class="assets-panel">
-                <div class="panel-header">
-                    <div class="panel-title">Assets</div>
-                    <div class="unallocated-badge">free: <span id="freeDisplay">{{ unallocated|floatformat:2 }}</span> $</div>
-                </div>
-
-                <div id="assetsList">
-                    {% for a in assets %}
-                    <div class="asset-item" id="asset-{{ a.id }}">
-                        <div class="asset-dot" style="background:{{ a.color }}"></div>
-                        <div class="asset-info">
-                            <div class="asset-ticker">{{ a.ticker }}</div>
-                            <div class="asset-name">{{ a.name }}</div>
-                            <div class="asset-pnl {% if a.pnl_pct > 0 %}up{% elif a.pnl_pct < 0 %}down{% else %}neutral{% endif %}">
-                                {% if a.pnl_pct >= 0 %}+{% endif %}{{ a.pnl_pct|floatformat:2 }}%
-                            </div>
-                        </div>
-                        <div class="asset-right">
-                            <div class="asset-amount">{{ a.amount|floatformat:0 }} $</div>
-                            <div class="asset-alloc">{{ a.allocation_pct }}%</div>
-                        </div>
-                        <button class="remove-btn" onclick="removeAsset({{ a.id }})" title="Remove">✕</button>
-                    </div>
-                    {% empty %}
-                    <div id="emptyMsg" style="text-align:center;padding:20px;color:var(--text-muted);font-size:.83rem;">Add your first asset below ↓</div>
-                    {% endfor %}
-                </div>
-
-                <div class="add-section">
-                    <div class="add-label">Add Asset</div>
-                    <div class="search-wrap" style="position: relative;">
-                        <input type="text" class="search-input" id="searchInput"
-                               placeholder="Search: AAPL, Tesla, BTC..." autocomplete="off"
-                               oninput="searchAssets(this.value)">
-                        <div class="search-dropdown" id="searchDropdown"></div>
-                    </div>
-
-                    <div class="sel-asset-box" id="selAssetBox">
-                        <div class="sel-asset-row">
-                            <div>
-                                <span id="selTicker" style="font-weight:700;color:var(--accent);font-size:.88rem;"></span>
-                                <span id="selName" style="color:var(--text-muted);font-size:.76rem;margin-left:7px;"></span>
-                            </div>
-                            <button class="sel-clear" onclick="clearSelection()">✕</button>
-                        </div>
-                    </div>
-
-                    <div class="amount-row">
-                        <input type="number" class="amount-input" id="amountInput" placeholder="Amount $" min="1" step="any" oninput="syncPct()">
-                        <input type="number" class="pct-input" id="pctInput" placeholder="%" min="0.1" max="100" step="any" oninput="syncAmount()">
-                    </div>
-
-                    <div class="color-row" id="colorRow">
-                        {% for color in available_colors %}
-                        <div class="color-swatch" style="background:{{ color }}" data-color="{{ color }}" onclick="selectColor(this)"></div>
-                        {% endfor %}
-                    </div>
-
-                    <button class="add-btn" id="addBtn" onclick="addAsset()" disabled>Add Asset</button>
-                    <div class="add-error" id="addError"></div>
-                </div>
-            </div>
-        </div>
     </div>
+
+    <!-- Мобильная навигация внизу -->
+    <div class="nav_pannel">
+        {% include 'videos/nav.html' %}
+    </div>
+
 </div>
 
 <div class="toast toast-err" id="toastErr"></div>
@@ -1115,6 +877,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script>
+// Ваш JavaScript остаётся без изменений
 const FUND_ID    = {{ fund.pk }};
 const FUND_TOTAL = {{ fund.total_amount }};
 Chart.defaults.color = '#6b6b88';
@@ -1319,7 +1082,7 @@ function drawChart(datasets) {
   });
 }
 
-// ── Search, Add, Remove, Refresh ── (твой код без изменений)
+// ── Search, Add, Remove, Refresh ──
 async function searchAssets(q) {
   clearTimeout(searchTm);
   const dd = document.getElementById('searchDropdown');
