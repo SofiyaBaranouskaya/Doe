@@ -1355,7 +1355,6 @@ async function sendMessage() {
                         <button class="feedback-btn" onclick="rateMessage(${data.message_id}, 5)">👍</button>
                         <button class="feedback-btn" onclick="rateMessage(${data.message_id}, 1)">👎</button>
                     </div>
-                    <div class="token-usage">Tokens: ${data.tokens_used || 0}</div>
                 `;
                 container.appendChild(assistantDiv);
 

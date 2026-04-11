@@ -41,7 +41,7 @@ class ContentAdminForm(forms.ModelForm):
 
     class Meta:
         model = Content
-        fields = ['content_type', 'object_id']
+        fields = ['content_type', 'object_id', 'condition']  # Добавили condition
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,6 +51,53 @@ class ContentAdminForm(forms.ModelForm):
             model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
         )
 
+        # Настраиваем поле condition
+        static_choices = [
+            ('dob_before_1996', 'DOB: Before (or in) 1996'),
+            ('dob_after_1996', 'DOB: After 1996'),
+            ('grad_expected', 'Graduation Year: Expected this summer or later'),
+            ('grad_already', 'Graduation Year: Already graduated'),
+            ('vibe_early', 'Financial Knowledge vibe: Pretty early'),
+            ('vibe_mid', 'Financial Knowledge vibe: Mid'),
+            ('vibe_expert', 'Financial Knowledge vibe: I\'m the one that explains things to my friends'),
+            ('industry_arts_design', 'Industry: Arts & Design'),
+            ('industry_business', 'Industry: Business'),
+            ('industry_communications_pr', 'Industry: Communications & PR'),
+            ('industry_cs_tech', 'Industry: Computer Science & Technology'),
+            ('industry_consulting', 'Industry: Consulting'),
+            ('industry_data_science', 'Industry: Data Science & Analytics'),
+            ('industry_education', 'Industry: Education'),
+            ('industry_engineering', 'Industry: Engineering'),
+            ('industry_environmental', 'Industry: Environmental / Sustainability'),
+            ('industry_finance', 'Industry: Finance or Accounting'),
+            ('industry_healthcare', 'Industry: Healthcare'),
+            ('industry_hospitality', 'Industry: Hospitality / Tourism'),
+            ('industry_ir', 'Industry: International Relations'),
+            ('industry_journalism', 'Industry: Journalism'),
+            ('industry_law', 'Industry: Law or Public Policy'),
+            ('industry_marketing', 'Industry: Marketing or Advertising'),
+            ('industry_media', 'Industry: Media & Entertainment'),
+            ('industry_nonprofit', 'Industry: Non-Profit / Social Impact'),
+            ('industry_psychology', 'Industry: Psychology or Behavioral Science'),
+            ('industry_science', 'Industry: Science & Research'),
+            ('industry_sports', 'Industry: Sports & Athletics'),
+            ('industry_startups', 'Industry: Startups and Entrepreneurship'),
+            ('industry_writing', 'Industry: Writing / Literature'),
+        ]
+
+        # Динамические школы
+        schools = Schools.objects.all().order_by('name')
+        for school in schools:
+            static_choices.append((f'school_{school.id}', f'School: {school.name}'))
+
+        self.fields['condition'] = forms.ChoiceField(
+            choices=[('', '---------')] + static_choices,
+            required=False,
+            label='Access condition',
+            help_text='Condition that must be met for this content to be available'
+        )
+
+        # Логика для object_id (как было раньше)
         if 'content_type' in self.data:
             try:
                 content_type_id = self.data.get('content_type')
@@ -77,17 +124,14 @@ class ContentAdminForm(forms.ModelForm):
         content_type = cleaned_data.get('content_type')
         object_id = cleaned_data.get('object_id')
 
-        # Если выбран content_type, но не выбран object_id - не вызываем ошибку
         if content_type and not object_id:
-            # Можно либо разрешить создание без object_id, либо установить значение по умолчанию
-            pass
+            pass  # Разрешаем создание без object_id
 
         return cleaned_data
 
     def clean_object_id(self):
         object_id = self.cleaned_data.get('object_id')
         return object_id.id if object_id else None
-
 
 class FunFactForm(forms.ModelForm):
     class Meta:

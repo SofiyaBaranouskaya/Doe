@@ -448,29 +448,29 @@
                 data-available="{{ content.is_available|yesno:'true,false' }}"
                 onclick="location.href='{% if content.content_type.model == 'video' %}{% url 'video_detail' content.object_id %}{% elif content.content_type.model == 'funfact' %}{% url 'fun_fact_detail' content.object_id %}{% elif content.content_type.model == 'challenge' %}{% url 'challenge_detail' content.object_id %}{% elif content.content_type.model == 'chitchat' %}{% url 'chitchat_detail' content.object_id %}{% elif content.content_type.model == 'quiz' %}{% url 'quiz_detail_welcome' content.object_id %}{% endif %}'">
 
-                    <button class="heart-btn"
-                            data-model="{{ content.content_type.model }}"
-                            data-object-id="{{ content.object_id }}"
-                            aria-pressed="{{ content.is_liked|yesno:'true,false' }}">
+<!--                    <button class="heart-btn"-->
+<!--                            data-model="{{ content.content_type.model }}"-->
+<!--                            data-object-id="{{ content.object_id }}"-->
+<!--                            aria-pressed="{{ content.is_liked|yesno:'true,false' }}">-->
 
-                        {% if content.is_liked %}
-                            <!-- красное -->
-                            <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13.0637 3.08154L15.1965 9.646H23.6379L22.3928 10.5503L16.8088 14.6069L18.9417 21.1714L19.4172 22.6353L18.1721 21.731L12.5881 17.6733L7.00415 21.731L5.75903 22.6353L6.23462 21.1714L8.36646 14.6069L2.78345 10.5503L1.53833 9.646H9.97974L12.1125 3.08154L12.5881 1.61768L13.0637 3.08154Z" fill="#FD7981" stroke="#4A4A4A"/>
-                            </svg>
-                        {% else %}
-                            <!-- контур -->
-                            <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13.0637 3.08154L15.1965 9.646H23.6379L22.3928 10.5503L16.8088 14.6069L18.9417 21.1714L19.4172 22.6353L18.1721 21.731L12.5881 17.6733L7.00415 21.731L5.75903 22.6353L6.23462 21.1714L8.36646 14.6069L2.78345 10.5503L1.53833 9.646H9.97974L12.1125 3.08154L12.5881 1.61768L13.0637 3.08154Z" fill="none" stroke="#4A4A4A"/>
-                            </svg>
+<!--                        {% if content.is_liked %}-->
+<!--                            &lt;!&ndash; красное &ndash;&gt;-->
+<!--                            <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--                            <path d="M13.0637 3.08154L15.1965 9.646H23.6379L22.3928 10.5503L16.8088 14.6069L18.9417 21.1714L19.4172 22.6353L18.1721 21.731L12.5881 17.6733L7.00415 21.731L5.75903 22.6353L6.23462 21.1714L8.36646 14.6069L2.78345 10.5503L1.53833 9.646H9.97974L12.1125 3.08154L12.5881 1.61768L13.0637 3.08154Z" fill="#FD7981" stroke="#4A4A4A"/>-->
+<!--                            </svg>-->
+<!--                        {% else %}-->
+<!--                            &lt;!&ndash; контур &ndash;&gt;-->
+<!--                            <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--                            <path d="M13.0637 3.08154L15.1965 9.646H23.6379L22.3928 10.5503L16.8088 14.6069L18.9417 21.1714L19.4172 22.6353L18.1721 21.731L12.5881 17.6733L7.00415 21.731L5.75903 22.6353L6.23462 21.1714L8.36646 14.6069L2.78345 10.5503L1.53833 9.646H9.97974L12.1125 3.08154L12.5881 1.61768L13.0637 3.08154Z" fill="none" stroke="#4A4A4A"/>-->
+<!--                            </svg>-->
 
-                        {% endif %}
-                    </button>
+<!--                        {% endif %}-->
+<!--                    </button>-->
 
                     {% if content.content_type.model == 'video' %}
-                        <svg class="play_icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4.69897 0.383455C2.61707 -0.697825 0 0.636152 0 2.77862V21.2214C0 23.3638 2.61712 24.6978 4.69897 23.6165L22.4532 14.3952C24.5156 13.324 24.5156 10.676 22.4532 9.60484L4.69897 0.383455Z" fill="white"/>
-                        </svg>
+<!--                        <svg class="play_icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--                            <path d="M4.69897 0.383455C2.61707 -0.697825 0 0.636152 0 2.77862V21.2214C0 23.3638 2.61712 24.6978 4.69897 23.6165L22.4532 14.3952C24.5156 13.324 24.5156 10.676 22.4532 9.60484L4.69897 0.383455Z" fill="white"/>-->
+<!--                        </svg>-->
                     {% elif content.content_type.model == 'funfact' %}
                         <span>Fun Fact</span>
                     {% elif content.content_type.model == 'challenge' %}

@@ -3,6 +3,7 @@ import re
 import mimetypes
 from datetime import time
 
+from django.apps import apps
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -12,6 +13,7 @@ from django.core.validators import FileExtensionValidator
 import base64
 from io import BytesIO
 from PIL import Image
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.text import slugify
 
@@ -200,6 +202,21 @@ class Content(models.Model):
         help_text='Filled automatically for video content'
     )
 
+    # НОВОЕ ПОЛЕ: условие доступа (хранит строковое значение)
+    condition = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='Access condition',
+        help_text='Condition that must be met for this content to be available'
+    )
+
+    has_conditions = models.BooleanField(
+        default=False,
+        verbose_name='Has conditions',
+        help_text='Internal field for condition handling'
+    )
+
     class Meta:
         ordering = ['page', 'order']
         indexes = [
@@ -213,7 +230,6 @@ class Content(models.Model):
         return f'Content #{self.pk}'
 
     def save(self, *args, **kwargs):
-        # автоматически проставляем order внутри страницы
         if not self.order:
             last_order = Content.objects.filter(
                 page=self.page
@@ -222,7 +238,6 @@ class Content(models.Model):
             )['order__max'] or 0
             self.order = last_order + 1
 
-        # если контент — видео, сохраняем постер
         if self.value and isinstance(self.value, Video):
             self.poster_base64 = getattr(self.value, 'poster_base64', None)
 
@@ -231,13 +246,26 @@ class Content(models.Model):
     def is_available_for_user(self, user, completed_ids=None):
         """
         Проверяет, доступен ли контент пользователю.
-        completed_ids — опционально, set с ID пройденного контента (для оптимизации)
         """
-        # Правило 1: всегда доступен по флагу
+        print(f"\n=== DEBUG: Content ID {self.id} ===")
+        print(f"Content title: {self.value.title if self.value else 'No value'}")
+        print(f"Condition: {self.condition}")
+        print(f"Always available: {self.always_available}")
+
+        # Правило 1: ВСЕГДА проверяем condition, если он задан
+        if self.condition:
+            condition_result = self._check_condition_for_user(user)
+            print(f"Condition check result: {condition_result}")
+            if not condition_result:
+                print("❌ NOT available: condition check failed")
+                return False
+
+        # Правило 2: если always_available = True, то пропускаем проверку последовательности
         if self.always_available:
+            print("✅ Available: always_available bypasses sequence check")
             return True
 
-        # Получаем все контенты на этой странице, отсортированные по order
+        # Получаем все контенты на этой странице
         page_contents = Content.objects.filter(
             page=self.page
         ).order_by('order')
@@ -245,26 +273,182 @@ class Content(models.Model):
         # Если это первый элемент — доступен
         first_content = page_contents.first()
         if first_content and self.pk == first_content.pk:
+            print("✅ Available: first content on page")
             return True
 
         # Если не передали completed_ids — загружаем
         if completed_ids is None:
             completed_ids = set(user.completed_content.values_list('pk', flat=True))
 
-        # Правило 3: проверяем, все ли предыдущие элементы пройдены
+        print(f"Completed content IDs: {completed_ids}")
+
+        # Проверяем, все ли предыдущие элементы пройдены
         for prev in page_contents:
             if prev.order >= self.order:
-                break  # Достигли текущего элемента
+                break
 
-            # Пропускаем элементы, которые всегда доступны
+            print(f"Checking previous content ID {prev.id} (order {prev.order})")
+
+            # Если предыдущий элемент always_available - он не блокирует
             if prev.always_available:
+                print(f"  - Skipping: always_available")
                 continue
 
-            # Если предыдущий элемент НЕ пройден — текущий заблокирован
-            if prev.pk not in completed_ids:
-                return False
+            # Если предыдущий элемент имеет condition, который пользователь НЕ прошел,
+            # то этот элемент не должен блокировать (он просто недоступен пользователю)
+            if prev.condition:
+                if not prev._check_condition_for_user(user):
+                    print(f"  - Skipping: previous content condition not met for user")
+                    continue
 
+            if prev.pk not in completed_ids:
+                print(f"❌ NOT available: previous content {prev.id} not completed")
+                return False
+            else:
+                print(f"  - Previous content {prev.id} is completed")
+
+        print("✅ Available: all checks passed")
         return True
+
+    def _check_condition_for_user(self, user):
+        """
+        Проверяет, соответствует ли пользователь condition контента.
+        """
+        # Кешируем результат в атрибуте пользователя
+        cache_key = f'_content_condition_{self.id}'
+        if hasattr(user, cache_key):
+            return getattr(user, cache_key)
+
+        if not self.condition:
+            result = True
+            setattr(user, cache_key, result)
+            return result
+
+        # DOB условия
+        if self.condition == 'dob_before_1996':
+            if user.date_of_birth:
+                result = user.date_of_birth.year <= 1996
+            else:
+                result = False
+
+        elif self.condition == 'dob_after_1996':
+            if user.date_of_birth:
+                result = user.date_of_birth.year > 1996
+            else:
+                result = False
+
+        # Graduation Year условия
+        elif self.condition == 'grad_expected':
+            current_year = timezone.now().year
+            UserSchool = apps.get_model('users', 'UserSchool')
+            result = UserSchool.objects.filter(
+                user=user,
+                graduation_year__gte=str(current_year)
+            ).exists()
+
+        elif self.condition == 'grad_already':
+            current_year = timezone.now().year
+            UserSchool = apps.get_model('users', 'UserSchool')
+            result = UserSchool.objects.filter(
+                user=user,
+                graduation_year__lt=str(current_year)
+            ).exists()
+
+        # Financial Knowledge Vibe условия
+        elif self.condition == 'vibe_early':
+            early_vibes = ['Total Newbie', 'Budget Queen', 'Debt Slayer']
+            result = user.current_vibe in early_vibes if user.current_vibe else False
+
+        elif self.condition == 'vibe_mid':
+            mid_vibes = ['Index Fund Girl', 'Dividend Chaser', 'Side Hustle Queen', 'FIRE Curious']
+            result = user.current_vibe in mid_vibes if user.current_vibe else False
+
+        elif self.condition == 'vibe_expert':
+            expert_vibes = ['Crypto Tourist', 'Options Degenerate', 'Wsb Survivor', 'Robinhood Addict', 'YOLO Investor']
+            result = user.current_vibe in expert_vibes if user.current_vibe else False
+
+        # Industry условия
+        elif self.condition.startswith('industry_'):
+            industry_map = {
+                'industry_arts_design': 'Arts & Design',
+                'industry_business': 'Business',
+                'industry_communications_pr': 'Communications & PR',
+                'industry_cs_tech': 'Computer Science & Technology',
+                'industry_consulting': 'Consulting',
+                'industry_data_science': 'Data Science & Analytics',
+                'industry_education': 'Education',
+                'industry_engineering': 'Engineering',
+                'industry_environmental': 'Environmental / Sustainability',
+                'industry_finance': 'Finance or Accounting',
+                'industry_healthcare': 'Healthcare',
+                'industry_hospitality': 'Hospitality / Tourism',
+                'industry_ir': 'International Relations',
+                'industry_journalism': 'Journalism',
+                'industry_law': 'Law or Public Policy',
+                'industry_marketing': 'Marketing or Advertising',
+                'industry_media': 'Media & Entertainment',
+                'industry_nonprofit': 'Non-Profit / Social Impact',
+                'industry_psychology': 'Psychology or Behavioral Science',
+                'industry_science': 'Science & Research',
+                'industry_sports': 'Sports & Athletics',
+                'industry_startups': 'Startups and Entrepreneurship',
+                'industry_writing': 'Writing / Literature',
+            }
+            expected_industry = industry_map.get(self.condition)
+            if expected_industry and user.industry:
+                # Разбиваем строку с индустриями пользователя по разделителю ;;
+                user_industries = user.industry.split(';;')
+                # Убираем возможные пробелы в начале и конце каждой индустрии
+                user_industries = [ind.strip() for ind in user_industries if ind.strip()]
+                result = expected_industry in user_industries
+            else:
+                result = False
+
+        # School условия (формат: school_<id>)
+        elif self.condition.startswith('school_'):
+            try:
+                school_id = int(self.condition.split('_')[1])
+                print(f"  School: looking for school with ID={school_id}")
+
+                try:
+                    # Правильный путь к моделям
+                    Schools = apps.get_model('users', 'Schools')
+                    UserSchool = apps.get_model('users', 'UserSchool')
+
+                    school_obj = Schools.objects.filter(id=school_id).first()
+
+                    if school_obj:
+                        school_name = school_obj.name
+                        print(f"  School: found school name '{school_name}' for ID={school_id}")
+
+                        # Проверяем, есть ли у пользователя школа с таким названием
+                        from django.db import models
+                        result = UserSchool.objects.filter(
+                            user=user
+                        ).filter(
+                            models.Q(school__name__iexact=school_name) |
+                            models.Q(other_school_name__iexact=school_name)
+                        ).exists()
+
+                        print(f"  School: user has school '{school_name}': {result}")
+                    else:
+                        print(f"  School: no school found with ID={school_id}")
+                        result = False
+
+                except LookupError as e:
+                    print(f"  School: error getting models - {e}")
+                    result = False
+                except Exception as e:
+                    print(f"  School: unexpected error - {e}")
+                    result = False
+
+            except (IndexError, ValueError) as e:
+                print(f"  School: error parsing condition - {e}")
+                result = False
+
+        # Кешируем результат
+        setattr(user, cache_key, result)
+        return result
 
     def track_start(self, user):
         """Отслеживание начала просмотра контента"""
@@ -274,7 +458,6 @@ class Content(models.Model):
             page=self.page.page_key
         ).inc()
 
-        # Сохраняем время начала в сессии или кэше
         from django.core.cache import cache
         cache.set(f'content_start_{user.id}_{self.id}', time.time(), timeout=3600)
 
@@ -288,7 +471,6 @@ class Content(models.Model):
             page=self.page.page_key
         ).inc()
 
-        # Расчет времени, проведенного на контенте
         start_time = cache.get(f'content_start_{user.id}_{self.id}')
         if start_time:
             duration = time.time() - start_time
@@ -306,11 +488,6 @@ class Content(models.Model):
             return f"data:image/jpeg;base64,{self.poster_base64}"
         return None
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['content_type', 'object_id']),
-        ]
-        ordering = ['page', 'order']  # сортируем по странице, затем по order
 
 
 class Video(models.Model):
@@ -516,7 +693,7 @@ class ChitChatAnswer(models.Model):
         ChitChatUserChoice,
         on_delete=models.CASCADE,
         related_name="answers",
-        verbose_name="User's ChitChat Choice"
+        verbose_name="User'js ChitChat Choice"
     )
     option_pair = models.ForeignKey(
         ChitChatOption,
@@ -525,7 +702,7 @@ class ChitChatAnswer(models.Model):
     )
     answer = models.CharField(
         max_length=200,
-        verbose_name="User's Answer"
+        verbose_name="User'js Answer"
     )
 
     class Meta:

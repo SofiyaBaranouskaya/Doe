@@ -170,10 +170,10 @@ class PageAdmin(admin.ModelAdmin):
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
     form = ContentAdminForm
-    list_display = ('page', 'content_type', 'safe_linked_object', 'order', 'always_available')
+    list_display = ('page', 'content_type', 'safe_linked_object', 'condition', 'order', 'always_available')
     list_editable = ('order',)
     readonly_fields = ('poster_base64', 'safe_linked_object')
-    fields = ['page', 'order', 'content_type', 'object_id', 'always_available', 'poster_base64', 'safe_linked_object']
+    fields = ['page', 'order', 'content_type', 'object_id', 'condition', 'always_available', 'poster_base64', 'safe_linked_object']
     list_filter = (SpecificContentTypeFilter, 'page')
 
     def safe_linked_object(self, obj):

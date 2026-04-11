@@ -260,9 +260,9 @@ class Migration(migrations.Migration):
             name='ChitChatAnswer',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('answer', models.CharField(max_length=200, verbose_name="User's Answer")),
+                ('answer', models.CharField(max_length=200, verbose_name="User'js Answer")),
                 ('option_pair', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.chitchatoption', verbose_name='Option Pair')),
-                ('user_choice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='users.chitchatuserchoice', verbose_name="User's ChitChat Choice")),
+                ('user_choice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='users.chitchatuserchoice', verbose_name="User'js ChitChat Choice")),
             ],
             options={
                 'verbose_name': 'Chit Chat | Single Answer',
@@ -273,7 +273,7 @@ class Migration(migrations.Migration):
             name='Content',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('page', models.CharField(choices=[('things_first', 'First Moves'), ('levers', 'The Levers'), ('power_portfolio', 'Power Portfolio'), ('playbook', "The Playbook (IRL How-To's)"), ('capital_cash', 'Capital Beyond Cash'), ('money_sports', 'Money & Sports'), ('new_ventures', 'New Ventures'), ('rel_money', 'Relationships & Money')], default='things_first', max_length=50, verbose_name='Page')),
+                ('page', models.CharField(choices=[('things_first', 'First Moves'), ('levers', 'The Levers'), ('power_portfolio', 'Power Portfolio'), ('playbook', "The Playbook (IRL How-To'js)"), ('capital_cash', 'Capital Beyond Cash'), ('money_sports', 'Money & Sports'), ('new_ventures', 'New Ventures'), ('rel_money', 'Relationships & Money')], default='things_first', max_length=50, verbose_name='Page')),
                 ('object_id', models.PositiveIntegerField(null=True)),
                 ('order', models.PositiveIntegerField(default=0, help_text='Order of display on the page', verbose_name='Display order')),
                 ('poster_base64', models.TextField(blank=True, editable=False, help_text='Filled automatically', null=True, verbose_name='Poster url')),

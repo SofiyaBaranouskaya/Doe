@@ -82,7 +82,7 @@ def fetch_history(ticker: str, period: str = '1y') -> List[dict]:
                 continue
             out.append({'date': d, 'close': round(float(c), 4)})
 
-        # Ensure the last point is labelled today if it's the most recent trading date
+        # Ensure the last point is labelled today if it'js the most recent trading date
         # (Yahoo sometimes returns yesterday). We just relabel, not fabricate a price.
         if out and out[-1]['date'] != today_str:
             out[-1]['date'] = today_str

@@ -614,6 +614,46 @@
     }
 }
 
+
+/* Retake the Platform Tour */
+.retake-tour {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.retake-tour a {
+    font-family: 'Poppins', sans-serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 22px;
+    color: #8E8888;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.retake-tour a:hover {
+    color: #FD7981;
+    text-decoration: underline;
+}
+
+/* Десктопная версия */
+@media (min-width: 904px) {
+    .status {
+        width: 30%;
+        margin: auto;
+        padding: 20px 26px 30px 26px; /* чуть больше отступ снизу */
+    }
+
+    .retake-tour {
+        margin-top: 32px;
+    }
+
+    .retake-tour a {
+        font-size: 16px;
+    }
+}
+
 /* Адаптация для мобильных */
 @media (max-width: 768px) {
     .modal-content {
@@ -960,6 +1000,9 @@
                                     <p>Events</p>
                                     <h2 style="margin: 0px;">0</h2>
                                 </div>
+                            </div>
+                            <div class="retake-tour">
+                                <a href="#" id="retakeTourLink">Retake the Platform Tour</a>
                             </div>
                         </div>
                     </div>

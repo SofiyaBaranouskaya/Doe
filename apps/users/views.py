@@ -683,16 +683,10 @@ def industry_field_view(request):
 @login_required
 def who_are_you_today_view(request):
     user = request.user
-
-    # Проверяем, есть ли параметр next в URL (режим редактирования)
-    edit_mode = 'next' in request.GET
-    next_url = request.GET.get('next')
+    edit_mode = 'next' in request.GET or 'next' in request.POST
+    next_url = request.GET.get('next') or request.POST.get('next')
 
     if request.method == 'POST':
-        # Для POST тоже проверяем
-        edit_mode = 'next' in request.POST
-        next_url = request.POST.get('next')
-
         raw = request.POST.get('who_are_you_tags', '[]')
         try:
             values = json.loads(raw)
@@ -702,12 +696,13 @@ def who_are_you_today_view(request):
         user.you_today = ';; '.join([v.strip() for v in values if v.strip()])
         user.save()
 
-        # Возвращаемся в зависимости от режима
         if edit_mode and next_url:
             return redirect(next_url)
         else:
-            return redirect('home')  # или другой финальный шаг
+            # Новый пользователь → переходим на главную и запускаем тур
+            return redirect('/home/?tour=1')
 
+    # GET
     current = []
     if user.you_today:
         current = [v.strip() for v in user.you_today.split(';;') if v.strip()]
@@ -717,7 +712,6 @@ def who_are_you_today_view(request):
         'edit_mode': edit_mode,
         'next': next_url if edit_mode else None,
     })
-
 
 def parse_school_data(post_data):
     schools_data = defaultdict(dict)
@@ -1069,15 +1063,91 @@ def dynamic_page(request, slug):
 
         filtered_contents.append(content)
 
-    # 🔒 ВЫЧИСЛЯЕМ is_available ДЛЯ ВСЕХ (включая неавторизованных)
+    # 🔒 ФИЛЬТРУЕМ КОНТЕНТ ПО ВСЕМ УСЛОВИЯМ
+    available_contents = []
+
     if request.user.is_authenticated:
         # Предзагружаем completed_content для производительности
         completed_ids = set(request.user.completed_content.values_list('pk', flat=True))
+
+        # Получаем все контенты на этой странице для проверки последовательности
+        page_contents = Content.objects.filter(
+            page=page
+        ).order_by('order')
+
+        # Создаем словарь для быстрого доступа к результатам проверки условий
+        condition_cache = {}
+
+        def check_condition_for_content(content, user):
+            """Проверяет условие для контента с кешированием"""
+            cache_key = f'condition_{content.id}'
+            if cache_key in condition_cache:
+                return condition_cache[cache_key]
+
+            result = content._check_condition_for_user(user)
+            condition_cache[cache_key] = result
+            return result
+
         for c in filtered_contents:
-            c.is_available = c.is_available_for_user(request.user, completed_ids=completed_ids)
+            # Правило 1: ВСЕГДА проверяем condition, если он задан
+            if c.condition:
+                condition_passed = check_condition_for_content(c, request.user)
+                if not condition_passed:
+                    # Пропускаем этот элемент - он не будет отображаться
+                    continue
+
+            # Правило 2: если always_available = True, то пропускаем проверку последовательности
+            if c.always_available:
+                c.is_available = True
+                available_contents.append(c)
+                continue
+
+            # Правило 3: Если это первый элемент — доступен
+            first_content = page_contents.first()
+            if first_content and c.pk == first_content.pk:
+                c.is_available = True
+                available_contents.append(c)
+                continue
+
+            # Правило 4: Проверяем, все ли предыдущие элементы пройдены
+            is_sequence_available = True
+            for prev in page_contents:
+                if prev.order >= c.order:
+                    break
+
+                # Если предыдущий элемент always_available - он не блокирует
+                if prev.always_available:
+                    continue
+
+                # Если предыдущий элемент имеет condition, который пользователь НЕ прошел,
+                # то этот элемент не должен блокировать
+                if prev.condition:
+                    if not check_condition_for_content(prev, request.user):
+                        continue
+
+                # Проверяем, пройден ли предыдущий элемент
+                if prev.pk not in completed_ids:
+                    is_sequence_available = False
+                    break
+
+            if is_sequence_available:
+                c.is_available = True
+                available_contents.append(c)
+            else:
+                # Элемент недоступен из-за последовательности, но мы все равно
+                # можем его показать как заблокированный (опционально)
+                c.is_available = False
+                # available_contents.append(c)  # Раскомментируйте, если хотите показывать заблокированные
     else:
+        # Для неавторизованных пользователей
         for c in filtered_contents:
-            c.is_available = False  # Или True, если хотите показывать всё неавторизованным
+            # Показываем только контент без условий
+            if not c.condition:
+                c.is_available = False if not c.always_available else True
+                available_contents.append(c)
+
+    # Заменяем filtered_contents на отфильтрованный список
+    filtered_contents = available_contents
 
     # если пользователь не авторизован
     if not request.user.is_authenticated:
@@ -1617,7 +1687,7 @@ def challenge_view_content(request, pk):
         if display_type == 'table':
             choice.attempts_filtered = choice.attempts.all()
 
-    logger.info("Passing to template: %s", {
+    logger.info("Passing to template: %js", {
         'challenge': challenge,
         'user_choices': user_choices,
         'display_type': display_type,
