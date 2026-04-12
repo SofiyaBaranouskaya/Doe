@@ -56,9 +56,25 @@ def events_page(request):
 def simulator_page(request):
     return render(request, 'videos/simulator_page.html')
 
+
 def glossary_page(request):
     items = Glossary.objects.all().order_by("order")
-    return render(request, "videos/glossary_page.html", {"items": items})
+
+    # Проверяем, нужно ли показывать тур
+    show_tour = request.GET.get('tour') == '1'
+
+    # Если тур уже был показан, сохраняем в сессии
+    if show_tour and not request.session.get('tour_shown_glossary', False):
+        request.session['tour_shown_glossary'] = True
+        request.session.modified = True
+    elif not show_tour:
+        # Если тур не запрошен, проверяем сессию
+        show_tour = not request.session.get('tour_shown_glossary', False) and request.GET.get('tour') == '1'
+
+    return render(request, "videos/glossary_page.html", {
+        "items": items,
+        "show_tour": show_tour,  # 👈 ДОБАВЬ ЭТУ СТРОКУ
+    })
 
 def saved_page(request):
     return render(request, 'videos/saved_page.html')
@@ -217,6 +233,17 @@ def user_profile(request):
 
     formatted_date = f"Doe Member since {season} {year}"
 
+    # Проверяем, нужно ли показывать тур
+    show_tour = request.GET.get('tour') == '1'
+
+    # Если тур уже был показан, сохраняем в сессии
+    if show_tour and not request.session.get('tour_shown_profile', False):
+        request.session['tour_shown_profile'] = True
+        request.session.modified = True
+    elif not show_tour:
+        # Если тур не запрошен, проверяем сессию
+        show_tour = not request.session.get('tour_shown_profile', False) and request.GET.get('tour') == '1'
+
     return render(request, 'videos/user_profile.html', {
         'user': user,
         'interests_list': interests_list,
@@ -224,8 +251,10 @@ def user_profile(request):
         'completed_count': completed_count,
         'rewards': rewards,
         'user_profile_picture_base64': user.get_profile_picture_base64(),
-        'member_since': formatted_date,  # Добавляем в контекст
+        'member_since': formatted_date,
+        'show_tour': show_tour,  # 👈 ДОБАВЬ ЭТУ СТРОКУ
     })
+
 
 def user_profile_change(request):
     user = request.user
@@ -893,10 +922,24 @@ def generate_initial_avatar(user):
 #     return redirect('login')
 
 
+# В home_view можно добавить проверку на cookie или сессию
 def home_view(request):
     pages = Page.objects.filter(is_active=True).order_by('order')
+
+    # Проверяем, нужно ли показывать тур
+    show_tour = request.GET.get('tour') == '1'
+
+    # Если тур уже был показан, сохраняем в сессии
+    if show_tour and not request.session.get('tour_shown', False):
+        request.session['tour_shown'] = True
+        request.session.modified = True
+    elif not show_tour:
+        # Если тур не запрошен, проверяем сессию
+        show_tour = not request.session.get('tour_shown', False) and request.GET.get('tour') == '1'
+
     return render(request, 'videos/home_page.html', {
-        'pages': pages
+        'pages': pages,
+        'show_tour': show_tour,
     })
 
 # def home_view(request):
@@ -1178,6 +1221,20 @@ def dynamic_page(request, slug):
     context = {
         'page': page,
         'contents': filtered_contents
+    }
+
+    show_tour = request.GET.get('tour') == '1'
+
+    if show_tour and not request.session.get('tour_shown_content', False):
+        request.session['tour_shown_content'] = True
+        request.session.modified = True
+    elif not show_tour:
+        show_tour = not request.session.get('tour_shown_content', False) and request.GET.get('tour') == '1'
+
+    context = {
+        'page': page,
+        'contents': filtered_contents,
+        'show_tour': show_tour,  # 👈 ЭТО ДОЛЖНО БЫТЬ
     }
 
     return render(request, "videos/pages/page.html", context)

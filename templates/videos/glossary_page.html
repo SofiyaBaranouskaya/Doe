@@ -344,6 +344,135 @@
                 margin-right: 100px;
             }
         }
+
+        /* Стили для тура */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 9998;
+            pointer-events: none;
+        }
+
+        .tour-highlight {
+            position: relative;
+            z-index: 10000 !important;
+            filter: none !important;
+            opacity: 1 !important;
+            padding: 7px;
+        }
+
+        .tour-hole {
+            position: fixed;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .tour-highlight-wrapper {
+            position: relative;
+            z-index: 10000;
+        }
+
+        .tour-tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, #fff 0%, #fef9f9 100%);
+            color: #2C2C2C;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 10001;
+            max-width: 320px;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            animation: fadeInUp 0.3s ease;
+            border: 1px solid rgba(253, 121, 129, 0.2);
+            pointer-events: auto;
+            margin-left: 20px;
+        }
+
+        .tour-tooltip h3 {
+            margin: 0 0 12px 0;
+            color: #FD7981;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .tour-tooltip p {
+            margin: 0 0 16px 0;
+            line-height: 1.5;
+            font-size: 14px;
+            color: #4a4a4a;
+        }
+
+        .tour-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .tour-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .tour-btn-next {
+            background-color: #FD7981;
+            color: white;
+        }
+
+        .tour-btn-next:hover {
+            background-color: #e5656d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(253, 121, 129, 0.3);
+        }
+
+        .tour-btn-skip {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .tour-btn-skip:hover {
+            background-color: #e8e8e8;
+        }
+
+        .tour-progress {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10001;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -635,6 +764,664 @@ document.addEventListener("DOMContentLoaded", function () {
     init();
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if show_tour %}
+    initializeGlossaryTour();
+    {% endif %}
+});
 
+function initializeGlossaryTour() {
+    const tourSteps = [
+        {
+            selector: '.search_filter_div',
+            title: 'Search Terms',
+            description: 'Quickly find specific terms by typing here. The glossary will filter in real-time.',
+            position: 'bottom'
+        },
+        {
+            selector: '.filter_variants p:first-child',
+            title: 'Alphabetical Order',
+            description: 'Sort all terms from A to Z for easy browsing. Click to activate this view.',
+            position: 'bottom'
+        },
+        {
+            selector: '.filter_variants p:last-child',
+            title: 'By Category',
+            description: 'Group terms by their categories to explore related concepts together. Click to activate this view.',
+            position: 'bottom'
+        },
+        {
+            selector: '.container:first-child',
+            title: 'Interactive Term Cards',
+            description: 'Click on any card to flip it and see the full definition! This makes learning new terms fun and interactive.',
+            position: 'bottom'
+        }
+    ];
+
+    let currentStep = 0;
+    let holeElement = null;
+    let tooltip = null;
+    let progress = null;
+    let currentHighlightedElement = null;
+
+    // Функция для определения видимого элемента с учётом активного фильтра
+    function getVisibleElement(selector) {
+        // Для фильтров - всегда показываем кнопки (они не скрываются)
+        if (selector === '.filter_variants p:first-child' || selector === '.filter_variants p:last-child') {
+            return document.querySelector(selector);
+        }
+        // Для карточки - ищем первую видимую
+        if (selector === '.container:first-child') {
+            const allContainers = document.querySelectorAll('.container');
+            for (let container of allContainers) {
+                if (container.style.display !== 'none') {
+                    return container;
+                }
+            }
+            return document.querySelector(selector);
+        }
+        return document.querySelector(selector);
+    }
+
+    // Фильтруем только существующие элементы
+    let availableSteps = [];
+    for (let step of tourSteps) {
+        const element = getVisibleElement(step.selector);
+        if (element !== null) {
+            availableSteps.push({
+                ...step,
+                element: element
+            });
+        }
+    }
+
+    if (availableSteps.length === 0) return;
+
+    function createHole(element) {
+        if (holeElement) holeElement.remove();
+        const rect = element.getBoundingClientRect();
+        const hole = document.createElement('div');
+        hole.className = 'tour-hole';
+        hole.style.cssText = `
+            position: fixed;
+            top: ${rect.top - 10}px;
+            left: ${rect.left - 10}px;
+            width: ${rect.width + 20}px;
+            height: ${rect.height + 20}px;
+            border-radius: 16px;
+            background-color: transparent;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            pointer-events: none;
+        `;
+        document.body.appendChild(hole);
+        return hole;
+    }
+
+    function updateHolePosition(element) {
+        if (!holeElement || !element) return;
+        const rect = element.getBoundingClientRect();
+        holeElement.style.top = (rect.top - 10) + 'px';
+        holeElement.style.left = (rect.left - 10) + 'px';
+        holeElement.style.width = (rect.width + 20) + 'px';
+        holeElement.style.height = (rect.height + 20) + 'px';
+    }
+
+    function removeHole() {
+        if (holeElement) {
+            holeElement.remove();
+            holeElement = null;
+        }
+    }
+
+    function createProgress() {
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'tour-progress';
+        updateProgressText(progressDiv);
+        document.body.appendChild(progressDiv);
+        return progressDiv;
+    }
+
+    function updateProgressText(progressElement) {
+        if (progressElement) {
+            progressElement.textContent = `Step ${currentStep + 1} out of ${availableSteps.length}`;
+        }
+    }
+
+    function clearHighlight() {
+        if (currentHighlightedElement) {
+            currentHighlightedElement.classList.remove('tour-highlight');
+            const wrapper = currentHighlightedElement.closest('.tour-highlight-wrapper');
+            if (wrapper && wrapper.parentNode) {
+                const parent = wrapper.parentNode;
+                parent.insertBefore(currentHighlightedElement, wrapper);
+                wrapper.remove();
+            }
+            currentHighlightedElement = null;
+        }
+        removeHole();
+    }
+
+    function highlightElement(element) {
+        if (!element) return null;
+        clearHighlight();
+        const parent = element.parentNode;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tour-highlight-wrapper';
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
+        parent.insertBefore(wrapper, element);
+        wrapper.appendChild(element);
+        element.classList.add('tour-highlight');
+        currentHighlightedElement = element;
+        holeElement = createHole(element);
+        const rect = element.getBoundingClientRect();
+        const isInViewport = rect.top >= 50 && rect.bottom <= window.innerHeight - 50;
+        if (!isInViewport) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => updateHolePosition(element), 300);
+        }
+        return element;
+    }
+
+    function positionTooltip(element, position) {
+        if (!element || !tooltip) return;
+        const rect = element.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        let top, left;
+        switch(position) {
+            case 'top':
+                top = rect.top - tooltipRect.height - 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                break;
+            case 'bottom':
+                top = rect.bottom + 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                break;
+            case 'left':
+                top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                left = rect.left - tooltipRect.width - 15;
+                break;
+            case 'right':
+                top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                left = rect.right + 15;
+                break;
+            default:
+                top = rect.bottom + 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        }
+        left = Math.max(10, Math.min(left, viewportWidth - tooltipRect.width - 10));
+        top = Math.max(10, Math.min(top, viewportHeight - tooltipRect.height - 10));
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+    }
+
+    function showStep(stepIndex) {
+        if (stepIndex >= availableSteps.length) {
+            finishTour();
+            return;
+        }
+        const step = availableSteps[stepIndex];
+        const targetElement = step.element;
+
+        if (!targetElement) {
+            currentStep++;
+            showStep(currentStep);
+            return;
+        }
+
+        highlightElement(targetElement);
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'tour-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        tooltip.innerHTML = `
+            <h3>${step.title}</h3>
+            <p>${step.description}</p>
+            <div class="tour-buttons">
+                ${stepIndex < availableSteps.length - 1 ?
+                    '<button class="tour-btn tour-btn-next">Next →</button>' :
+                    '<button class="tour-btn tour-btn-next">Finish tour</button>'
+                }
+                <button class="tour-btn tour-btn-skip">Skip tour</button>
+            </div>
+        `;
+
+        const nextBtn = tooltip.querySelector('.tour-btn-next');
+        const skipBtn = tooltip.querySelector('.tour-btn-skip');
+
+        nextBtn.onclick = () => {
+            if (stepIndex < availableSteps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            } else {
+                finishTour();
+            }
+        };
+
+        skipBtn.onclick = () => skipTour();
+
+        setTimeout(() => {
+            positionTooltip(targetElement, step.position);
+        }, 10);
+
+        if (progress) {
+            updateProgressText(progress);
+        }
+    }
+
+    function finishTour() {
+        clearHighlight();
+        if (tooltip) {
+            tooltip.remove();
+            tooltip = null;
+        }
+        if (progress) {
+            progress.remove();
+            progress = null;
+        }
+        localStorage.setItem('tour_completed_glossary', 'true');
+        const url = new URL(window.location.href);
+        url.searchParams.delete('tour');
+        window.history.replaceState({}, '', url);
+    }
+
+    function skipTour() {
+        finishTour();
+    }
+
+    progress = createProgress();
+
+    window.addEventListener('resize', function() {
+        if (currentHighlightedElement && currentStep < availableSteps.length) {
+            updateHolePosition(currentHighlightedElement);
+            if (tooltip) {
+                positionTooltip(currentHighlightedElement, availableSteps[currentStep].position);
+            }
+        }
+    });
+
+    window.addEventListener('scroll', function() {
+        if (currentHighlightedElement && currentStep < availableSteps.length) {
+            updateHolePosition(currentHighlightedElement);
+            if (tooltip) {
+                positionTooltip(currentHighlightedElement, availableSteps[currentStep].position);
+            }
+        }
+    });
+
+    // Небольшая задержка для корректного отображения
+    setTimeout(() => {
+        showStep(0);
+    }, 500);
+}
+
+
+
+
+function initializeGlossaryTour() {
+    const tourSteps = [
+        {
+            selector: '.search_field',
+            title: 'Search Terms',
+            description: 'Quickly find specific terms by typing here. The glossary will filter in real-time.',
+            position: 'bottom'
+        },
+        {
+            selector: '.filter_variants p:first-child',
+            title: 'Alphabetical Order',
+            description: 'Sort all terms from A to Z for easy browsing. Click to activate this view.',
+            position: 'bottom'
+        },
+        {
+            selector: '.filter_variants p:last-child',
+            title: 'By Category',
+            description: 'Group terms by their categories to explore related concepts together. Click to activate this view.',
+            position: 'bottom'
+        },
+        {
+            selector: '.container:first-child',
+            title: 'Term Cards',
+            description: 'Each term is displayed on a card. The front side shows the term name.',
+            position: 'bottom'
+        },
+        {
+            selector: '.container:first-child',
+            title: 'Definition Revealed!',
+            description: 'When you click on a card, it flips to reveal the definition! Watch closely...',
+            position: 'bottom',
+            isFlipping: true  // Маркер, что нужно перевернуть карточку и показать определение
+        }
+    ];
+
+    let currentStep = 0;
+    let holeElement = null;
+    let tooltip = null;
+    let progress = null;
+    let currentHighlightedElement = null;
+    let cardContainer = null;
+    let cardInner = null;
+    let flipTimeout = null;
+
+    function getVisibleElement(selector) {
+        if (selector === '.filter_variants p:first-child' || selector === '.filter_variants p:last-child') {
+            return document.querySelector(selector);
+        }
+        if (selector === '.container:first-child') {
+            const allContainers = document.querySelectorAll('.container');
+            for (let container of allContainers) {
+                if (container.style.display !== 'none') {
+                    return container;
+                }
+            }
+            return document.querySelector(selector);
+        }
+        if (selector === '.container:first-child .card-back') {
+            const firstCard = getVisibleElement('.container:first-child');
+            if (firstCard) {
+                return firstCard.querySelector('.card-back');
+            }
+        }
+        return document.querySelector(selector);
+    }
+
+    function flipCard(shouldFlip) {
+        if (!cardInner) return;
+        if (shouldFlip) {
+            cardInner.classList.add('flipped');
+        } else {
+            cardInner.classList.remove('flipped');
+        }
+    }
+
+    // Сохраняем карточку для переиспользования
+    const firstCard = getVisibleElement('.container:first-child');
+    if (firstCard) {
+        cardContainer = firstCard;
+        cardInner = cardContainer.querySelector('.card-inner');
+    }
+
+    // Фильтруем шаги
+    let availableSteps = [];
+    for (let step of tourSteps) {
+        const element = getVisibleElement(step.selector);
+        if (element !== null) {
+            availableSteps.push({
+                ...step,
+                element: element
+            });
+        }
+    }
+
+    if (availableSteps.length === 0) return;
+
+    function createHole(element) {
+        if (holeElement) holeElement.remove();
+        const rect = element.getBoundingClientRect();
+        const hole = document.createElement('div');
+        hole.className = 'tour-hole';
+        hole.style.cssText = `
+            position: fixed;
+            top: ${rect.top - 10}px;
+            left: ${rect.left - 10}px;
+            width: ${rect.width + 20}px;
+            height: ${rect.height + 20}px;
+            border-radius: 16px;
+            background-color: transparent;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            pointer-events: none;
+        `;
+        document.body.appendChild(hole);
+        return hole;
+    }
+
+    function updateHolePosition(element) {
+        if (!holeElement || !element) return;
+        const rect = element.getBoundingClientRect();
+        holeElement.style.top = (rect.top - 10) + 'px';
+        holeElement.style.left = (rect.left - 10) + 'px';
+        holeElement.style.width = (rect.width + 20) + 'px';
+        holeElement.style.height = (rect.height + 20) + 'px';
+    }
+
+    function removeHole() {
+        if (holeElement) {
+            holeElement.remove();
+            holeElement = null;
+        }
+    }
+
+    function createProgress() {
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'tour-progress';
+        updateProgressText(progressDiv);
+        document.body.appendChild(progressDiv);
+        return progressDiv;
+    }
+
+    function updateProgressText(progressElement) {
+        if (progressElement) {
+            progressElement.textContent = `Step ${currentStep + 1} out of ${availableSteps.length}`;
+        }
+    }
+
+    function clearHighlight() {
+        if (currentHighlightedElement) {
+            currentHighlightedElement.classList.remove('tour-highlight');
+            const wrapper = currentHighlightedElement.closest('.tour-highlight-wrapper');
+            if (wrapper && wrapper.parentNode) {
+                const parent = wrapper.parentNode;
+                parent.insertBefore(currentHighlightedElement, wrapper);
+                wrapper.remove();
+            }
+            currentHighlightedElement = null;
+        }
+        removeHole();
+    }
+
+    function highlightElement(element) {
+        if (!element) return null;
+        clearHighlight();
+        const parent = element.parentNode;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tour-highlight-wrapper';
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
+        parent.insertBefore(wrapper, element);
+        wrapper.appendChild(element);
+        element.classList.add('tour-highlight');
+        currentHighlightedElement = element;
+        holeElement = createHole(element);
+        const rect = element.getBoundingClientRect();
+        const isInViewport = rect.top >= 50 && rect.bottom <= window.innerHeight - 50;
+        if (!isInViewport) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => updateHolePosition(element), 300);
+        }
+        return element;
+    }
+
+    function positionTooltip(element, position) {
+        if (!element || !tooltip) return;
+        const rect = element.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        let top, left;
+        switch(position) {
+            case 'top':
+                top = rect.top - tooltipRect.height - 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                break;
+            case 'bottom':
+                top = rect.bottom + 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                break;
+            case 'left':
+                top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                left = rect.left - tooltipRect.width - 15;
+                break;
+            case 'right':
+                top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                left = rect.right + 15;
+                break;
+            default:
+                top = rect.bottom + 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        }
+        left = Math.max(10, Math.min(left, viewportWidth - tooltipRect.width - 10));
+        top = Math.max(10, Math.min(top, viewportHeight - tooltipRect.height - 10));
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+    }
+
+    function showTooltip(step, targetElement) {
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'tour-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        tooltip.innerHTML = `
+            <h3>${step.title}</h3>
+            <p>${step.description}</p>
+            <div class="tour-buttons">
+                ${currentStep < availableSteps.length - 1 ?
+                    '<button class="tour-btn tour-btn-next">Next →</button>' :
+                    '<button class="tour-btn tour-btn-next">Next →</button>'
+                }
+                <button class="tour-btn tour-btn-skip">Skip tour</button>
+            </div>
+        `;
+
+        const nextBtn = tooltip.querySelector('.tour-btn-next');
+        const skipBtn = tooltip.querySelector('.tour-btn-skip');
+
+        nextBtn.onclick = () => {
+            if (currentStep < availableSteps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            } else {
+                if (cardInner && cardInner.classList.contains('flipped')) {
+                    flipCard(false);
+                }
+                finishTour();
+            }
+        };
+
+        skipBtn.onclick = () => {
+            if (cardInner && cardInner.classList.contains('flipped')) {
+                flipCard(false);
+            }
+            finishTour();
+        };
+
+        setTimeout(() => {
+            positionTooltip(targetElement, step.position);
+        }, 10);
+
+        if (progress) {
+            updateProgressText(progress);
+        }
+    }
+
+    function showStep(stepIndex) {
+        if (stepIndex >= availableSteps.length) {
+            if (cardInner && cardInner.classList.contains('flipped')) {
+                flipCard(false);
+            }
+            finishTour();
+            return;
+        }
+
+        const step = availableSteps[stepIndex];
+        const targetElement = step.element;
+
+        if (!targetElement) {
+            currentStep++;
+            showStep(currentStep);
+            return;
+        }
+
+        // Шаг с переворотом карточки
+        if (step.isFlipping) {
+            highlightElement(targetElement);
+            showTooltip(step, targetElement);
+            // Переворачиваем карточку
+            setTimeout(() => {
+                flipCard(true);
+                // После переворота переходим к следующему шагу с задней стороной
+                setTimeout(() => {
+                    if (currentStep + 1 < availableSteps.length) {
+                        // Не переходим автоматически, ждём кнопку Next
+                    }
+                }, 500);
+            }, 300);
+            return;
+        }
+
+        // Обычные шаги
+        highlightElement(targetElement);
+        showTooltip(step, targetElement);
+    }
+
+    function finishTour() {
+        clearHighlight();
+        if (tooltip) {
+            tooltip.remove();
+            tooltip = null;
+        }
+        if (progress) {
+            progress.remove();
+            progress = null;
+        }
+
+        // Сохраняем в localStorage, что тур на dashboard пройден
+        localStorage.setItem('tour_completed_dashboard', 'true');
+
+        // Переходим на страницу глоссария с параметром tour=1
+        window.location.href = '/profile_page?tour=1';
+    }
+
+    function skipTour() {
+        if (cardInner && cardInner.classList.contains('flipped')) {
+            flipCard(false);
+        }
+        finishTour();
+    }
+
+    progress = createProgress();
+
+    window.addEventListener('resize', function() {
+        if (currentHighlightedElement && currentStep < availableSteps.length) {
+            updateHolePosition(currentHighlightedElement);
+            if (tooltip) {
+                positionTooltip(currentHighlightedElement, availableSteps[currentStep].position);
+            }
+        }
+    });
+
+    window.addEventListener('scroll', function() {
+        if (currentHighlightedElement && currentStep < availableSteps.length) {
+            updateHolePosition(currentHighlightedElement);
+            if (tooltip) {
+                positionTooltip(currentHighlightedElement, availableSteps[currentStep].position);
+            }
+        }
+    });
+
+    setTimeout(() => {
+        showStep(0);
+    }, 500);
+}
+
+
+</script>
 </body>
 </html>

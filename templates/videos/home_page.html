@@ -203,6 +203,149 @@
             }
         }
 
+
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 9998;
+    pointer-events: none;
+}
+
+/* Стиль для подсветки элемента */
+.tour-highlight {
+    position: relative;
+    z-index: 10000 !important;
+    filter: none !important;
+    opacity: 1 !important;
+    padding: 7px;
+}
+
+/* Стиль для отверстия в оверлее */
+.tour-hole {
+    position: fixed;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+    z-index: 9999;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* Стили для рамки вокруг элемента */
+.tour-highlight-wrapper {
+    position: relative;
+    z-index: 10000;
+}
+
+.tour-highlight-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+<!--    border: 4px solid #FD7981;-->
+<!--    border-radius: 16px;-->
+<!--    box-shadow: 0 0 0 8px rgba(253, 121, 129, 0.3);-->
+    pointer-events: none;
+<!--    animation: pulse 1.5s ease-in-out infinite;-->
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 8px rgba(253, 121, 129, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(253, 121, 129, 0.5);
+    }
+}
+
+.tour-tooltip {
+    position: fixed;
+    background: linear-gradient(135deg, #fff 0%, #fef9f9 100%);
+    color: #2C2C2C;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 10001;
+    max-width: 320px;
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    animation: fadeInUp 0.3s ease;
+    border: 1px solid rgba(253, 121, 129, 0.2);
+    pointer-events: auto;
+    margin-left: 20px;
+}
+
+.tour-tooltip h3 {
+    margin: 0 0 12px 0;
+    color: #FD7981;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.tour-tooltip p {
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+    font-size: 14px;
+    color: #4a4a4a;
+}
+
+.tour-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.tour-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.tour-btn-next {
+    background-color: #FD7981;
+    color: white;
+}
+
+.tour-btn-next:hover {
+    background-color: #e5656d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(253, 121, 129, 0.3);
+}
+
+.tour-btn-skip {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
+.tour-btn-skip:hover {
+    background-color: #e8e8e8;
+}
+
+.tour-progress {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 10001;
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
     </style>
 </head>
 <body>
@@ -285,5 +428,372 @@
     </div>
 
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if show_tour %}
+    initializeTour();
+    {% endif %}
+});
+
+function initializeTour() {
+    // Определяем шаги тура для навигационных элементов
+const tourSteps = [
+    {
+        selector: '.nav_pannel_pc a:first-child',
+        title: 'Dashboard',
+        description: 'Return to main dashboard with all active pages and courses.',
+        position: 'right'
+    },
+    {
+        selector: '.nav_pannel_pc a:nth-child(2)',
+        title: 'Favourites',
+        description: 'Save important content you like for quick access.',
+        position: 'right'
+    },
+    {
+        selector: '.nav_pannel_pc a:nth-child(3)',
+        title: 'Hot Takes',
+        description: 'Popular and trending topics. Share opinions and join discussions.',
+        position: 'right'
+    },
+    {
+        selector: '.nav_pannel_pc a:nth-child(4)',
+        title: 'Glossary',
+        description: 'Dictionary of terms and definitions. Find meanings of unfamiliar words.',
+        position: 'right'
+    },
+    {
+        selector: '.nav_pannel_pc a:nth-child(5)',
+        title: 'Profile',
+        description: 'Manage profile, view achievements and account settings.',
+        position: 'right'
+    },
+    {
+        selector: '.container',
+        title: 'Content Library',
+        description: 'All available learning materials are here. Click any card to start exploring and studying.',
+        position: 'right'
+    }
+];
+
+    let currentStep = 0;
+    let holeElement = null;
+    let tooltip = null;
+    let progress = null;
+    let currentHighlightedElement = null;
+
+    // Функция для создания отверстия в оверлее
+    function createHole(element) {
+        if (holeElement) {
+            holeElement.remove();
+        }
+
+        const rect = element.getBoundingClientRect();
+        const hole = document.createElement('div');
+        hole.className = 'tour-hole';
+        hole.style.position = 'fixed';
+        hole.style.top = (rect.top - 10) + 'px';
+        hole.style.left = (rect.left - 10) + 'px';
+        hole.style.width = (rect.width + 20) + 'px';
+        hole.style.height = (rect.height + 20) + 'px';
+        hole.style.borderRadius = '16px';
+        hole.style.backgroundColor = 'transparent';
+        hole.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.75)';
+        hole.style.zIndex = '9999';
+        hole.style.pointerEvents = 'none';
+
+        document.body.appendChild(hole);
+        return hole;
+    }
+
+    // Функция для обновления позиции отверстия
+    function updateHolePosition(element) {
+        if (!holeElement || !element) return;
+
+        const rect = element.getBoundingClientRect();
+        holeElement.style.top = (rect.top - 10) + 'px';
+        holeElement.style.left = (rect.left - 10) + 'px';
+        holeElement.style.width = (rect.width + 20) + 'px';
+        holeElement.style.height = (rect.height + 20) + 'px';
+    }
+
+    // Функция для удаления отверстия
+    function removeHole() {
+        if (holeElement) {
+            holeElement.remove();
+            holeElement = null;
+        }
+    }
+
+    // Функция для создания прогресса
+    function createProgress() {
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'tour-progress';
+        updateProgressText(progressDiv);
+        document.body.appendChild(progressDiv);
+        return progressDiv;
+    }
+
+    function updateProgressText(progressElement) {
+        if (progressElement) {
+            progressElement.textContent = `Step ${currentStep + 1} out of ${tourSteps.length}`;
+        }
+    }
+
+    // Функция для очистки подсветки
+    function clearHighlight() {
+        if (currentHighlightedElement) {
+            currentHighlightedElement.classList.remove('tour-highlight');
+            // Удаляем обертку, если она была
+            const wrapper = currentHighlightedElement.closest('.tour-highlight-wrapper');
+            if (wrapper && wrapper.parentNode) {
+                const parent = wrapper.parentNode;
+                parent.insertBefore(currentHighlightedElement, wrapper);
+                wrapper.remove();
+            }
+            currentHighlightedElement = null;
+        }
+        removeHole();
+    }
+
+    // Функция для подсветки элемента
+    function highlightElement(element) {
+        if (!element) return null;
+
+        clearHighlight();
+
+        // Создаем обертку для элемента, чтобы добавить рамку
+        const parent = element.parentNode;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tour-highlight-wrapper';
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
+
+        parent.insertBefore(wrapper, element);
+        wrapper.appendChild(element);
+
+        element.classList.add('tour-highlight');
+        currentHighlightedElement = element;
+
+        // Создаем отверстие в оверлее
+        holeElement = createHole(element);
+
+        // Прокручиваем к элементу, если он не виден
+        const rect = element.getBoundingClientRect();
+        const isInViewport = rect.top >= 50 && rect.bottom <= window.innerHeight - 50;
+
+        if (!isInViewport) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Обновляем позицию отверстия после прокрутки
+            setTimeout(() => updateHolePosition(element), 300);
+        }
+
+        return element;
+    }
+
+    // Функция для позиционирования подсказки
+    function positionTooltip(element, position) {
+        if (!element || !tooltip) return;
+
+        const rect = element.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let top, left;
+
+        // Базовая позиция относительно элемента
+        switch(position) {
+            case 'top':
+                top = rect.top - tooltipRect.height - 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                break;
+            case 'bottom':
+                top = rect.bottom + 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                break;
+            case 'left':
+                top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                left = rect.left - tooltipRect.width - 15;
+                break;
+            case 'right':
+                top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                left = rect.right + 15;
+                break;
+            default:
+                top = rect.bottom + 15;
+                left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        }
+
+        // Корректировка, чтобы подсказка не выходила за пределы экрана
+        left = Math.max(10, Math.min(left, viewportWidth - tooltipRect.width - 10));
+        top = Math.max(10, Math.min(top, viewportHeight - tooltipRect.height - 10));
+
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+    }
+
+    // Функция для показа текущего шага
+    function showStep(stepIndex) {
+        if (stepIndex >= tourSteps.length) {
+            finishTour();
+            return;
+        }
+
+        const step = tourSteps[stepIndex];
+        const targetElement = document.querySelector(step.selector);
+
+        if (!targetElement) {
+            console.warn(`Element not found: ${step.selector}`);
+            currentStep++;
+            showStep(currentStep);
+            return;
+        }
+
+        // Подсвечиваем элемент
+        highlightElement(targetElement);
+
+        // Создаем или обновляем подсказку
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'tour-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        // Обновляем содержимое подсказки
+        tooltip.innerHTML = `
+            <h3>${step.title}</h3>
+            <p>${step.description}</p>
+            <div class="tour-buttons">
+                ${stepIndex < tourSteps.length - 1 ?
+                    '<button class="tour-btn tour-btn-next">Next →</button>' :
+                    '<button class="tour-btn tour-btn-next">Next →</button>'
+                }
+                <button class="tour-btn tour-btn-skip">Skip for now</button>
+            </div>
+        `;
+
+        // Добавляем обработчики событий для кнопок
+        const nextBtn = tooltip.querySelector('.tour-btn-next');
+        const skipBtn = tooltip.querySelector('.tour-btn-skip');
+
+        nextBtn.onclick = () => {
+            if (stepIndex < tourSteps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            } else {
+                finishTour();
+            }
+        };
+
+        skipBtn.onclick = () => skipTour();
+
+        // Позиционируем подсказку
+        setTimeout(() => {
+            positionTooltip(targetElement, step.position);
+        }, 10);
+
+        // Обновляем прогресс
+        if (progress) {
+            updateProgressText(progress);
+        }
+    }
+
+    // Функция для завершения тура
+    function finishTour() {
+        clearHighlight();
+        if (tooltip) {
+            tooltip.remove();
+            tooltip = null;
+        }
+        if (progress) {
+            progress.remove();
+            progress = null;
+        }
+
+        // Сохраняем в localStorage, что тур на dashboard пройден
+        localStorage.setItem('tour_completed_dashboard', 'true');
+
+        // Переходим на страницу глоссария с параметром tour=1
+        window.location.href = '/page/first-things-first?tour=1';
+    }
+
+    // Функция для пропуска тура
+    function skipTour() {
+        finishTour();
+    }
+
+    // Функция для показа уведомления
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-weight: 600;
+            z-index: 10002;
+            animation: fadeInUp 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Создаем прогресс
+    progress = createProgress();
+
+    // Добавляем обработчик для изменения размера окна
+    window.addEventListener('resize', function() {
+        if (currentHighlightedElement && currentStep < tourSteps.length) {
+            updateHolePosition(currentHighlightedElement);
+            if (tooltip) {
+                positionTooltip(currentHighlightedElement, tourSteps[currentStep].position);
+            }
+        }
+    });
+
+    // Добавляем обработчик для скролла
+    window.addEventListener('scroll', function() {
+        if (currentHighlightedElement && currentStep < tourSteps.length) {
+            updateHolePosition(currentHighlightedElement);
+            if (tooltip) {
+                positionTooltip(currentHighlightedElement, tourSteps[currentStep].position);
+            }
+        }
+    });
+
+    // Запускаем тур с первого шага
+    setTimeout(() => {
+        showStep(0);
+    }, 500);
+}
+
+// Добавляем анимации
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
 </body>
 </html>
