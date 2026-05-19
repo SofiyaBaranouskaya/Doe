@@ -161,6 +161,25 @@ class Page(models.Model):
         return self.title
 
 
+class StaticImages(models.Model):
+    title = models.CharField(max_length=255)
+    image = models.ImageField(
+        upload_to='static_images/',
+        storage=SupabaseStorage(bucket_name='static_images'),
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Static Image'
+        verbose_name_plural = 'Static Images'
+
+    def __str__(self):
+        return self.title
+
+    def delete(self, *args, **kwargs):
+        if self.image:
+            self.image.delete(save=False)
+        super().delete(*args, **kwargs)
 
 class Content(models.Model):
     page = models.ForeignKey(
@@ -356,16 +375,13 @@ class Content(models.Model):
 
         # Financial Knowledge Vibe условия
         elif self.condition == 'vibe_early':
-            early_vibes = ['Total Newbie', 'Budget Queen', 'Debt Slayer']
-            result = user.current_vibe in early_vibes if user.current_vibe else False
+            result = user.current_vibe == "I’m pretty new" if user.current_vibe else False  # умный апостроф ’
 
         elif self.condition == 'vibe_mid':
-            mid_vibes = ['Index Fund Girl', 'Dividend Chaser', 'Side Hustle Queen', 'FIRE Curious']
-            result = user.current_vibe in mid_vibes if user.current_vibe else False
+            result = user.current_vibe == "Let’s call it ‘mid’" if user.current_vibe else False  # умные кавычки
 
         elif self.condition == 'vibe_expert':
-            expert_vibes = ['Crypto Tourist', 'Options Degenerate', 'Wsb Survivor', 'Robinhood Addict', 'YOLO Investor']
-            result = user.current_vibe in expert_vibes if user.current_vibe else False
+            result = user.current_vibe == "I’m the one that explains things to my friends" if user.current_vibe else False
 
         # Industry условия
         elif self.condition.startswith('industry_'):

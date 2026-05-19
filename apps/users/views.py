@@ -19,7 +19,7 @@ from django.contrib.contenttypes.models import ContentType
 from .metrics import user_actions
 from .models import Video, FunFact, Content, Challenge, ChitChat, ChitChatOption, ChitChatUserChoice, \
     ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeUserAttempt, Schools, UserSchool, Quiz, \
-    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites, UserReward, Rewards, Page
+    QuizUserChoice, QuizAnswer, QuizQuestion, Invitation, Glossary, Favourites, UserReward, Rewards, Page, StaticImages
 from django.contrib.auth import authenticate, login, get_backends, logout
 from django.contrib import messages
 from django.db.models import Q
@@ -103,11 +103,12 @@ def favourites_page(request):
         ct_by_model[model_name] = fav.content_type
 
     # Загружаем объекты одним запросом на тип
-    videos    = Video.objects.in_bulk(objects_by_type.get('video', []))
-    funfacts  = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
+    videos = Video.objects.in_bulk(objects_by_type.get('video', []))
+    funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
     challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
     chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
-    quizzes   = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+    quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+    static_images_dict = StaticImages.objects.in_bulk(objects_by_type.get('staticimages', []))
 
     filtered_contents = []
 
@@ -125,8 +126,14 @@ def favourites_page(request):
             obj = chitchats.get(fav.object_id)
         elif model == 'quiz':
             obj = quizzes.get(fav.object_id)
+        elif model == 'staticimages':
+            obj = static_images_dict.get(fav.object_id)
 
-        if not obj or not getattr(obj, 'title', None):
+        if not obj:
+            continue
+
+        # Для staticimages не проверяем title (у них всегда есть title)
+        if model != 'staticimages' and not getattr(obj, 'title', None):
             continue
 
         # Создаём объект, максимально похожий на то, что ожидает шаблон
@@ -135,32 +142,31 @@ def favourites_page(request):
 
         content = FakeContent()
 
-        content.content_type     = fav.content_type           # важно!
-        content.object_id        = fav.object_id
-        content.is_liked         = True                       # на странице избранного всегда True
-        content.value            = obj                        # ← основной объект модели
-        content.quiz             = None
-        content.poster_base64    = getattr(obj, 'poster_base64', None) if model == 'video' else None
+        content.content_type = fav.content_type
+        content.object_id = fav.object_id
+        content.is_liked = True  # на странице избранного всегда True
+        content.value = obj
+        content.quiz = None
+        content.poster_base64 = getattr(obj, 'poster_base64', None) if model == 'video' else None
 
-        # duration и points — как в основной логике
+        # duration и points
         content.duration = getattr(obj, 'duration', None)
-        content.points   = getattr(obj, 'points', None)
+        content.points = getattr(obj, 'points', None)
 
         if model == 'quiz':
             total_points = sum(q.points for q in obj.questions.all())
             content.points = total_points
             content.quiz = obj
-            content.quiz.total_points = total_points   # для шаблона {{ content.quiz.total_points }}
+            content.quiz.total_points = total_points
 
-        # Для совместимости с условиями вида content.value.duration / content.value.points
-        # (хотя теперь можно использовать content.duration и content.points напрямую)
-        content.value = obj
+        # Для staticimages добавляем поле image для шаблона
+        if model == 'staticimages':
+            content.image = obj.image
 
         filtered_contents.append(content)
 
     context = {
         'contents': filtered_contents,
-        # если в шаблоне используется page.title или другие поля — можно добавить заглушку
         'page': type('Page', (), {'title': 'Favourites', 'subtitle': 'Избранное'})(),
     }
 
@@ -1050,12 +1056,13 @@ def welcome_video(request):
 #
 #     return render(request, template_name, context)
 
-
 def dynamic_page(request, slug):
     page = get_object_or_404(Page, slug=slug, is_active=True)
+    static_images = StaticImages.objects.all().order_by('-uploaded_at')
 
+    # 1. ДОБАВЛЯЕМ 'staticimages' в список моделей
     content_types = ContentType.objects.filter(
-        model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
+        model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz', 'staticimages']
     )
 
     contents = Content.objects.filter(
@@ -1069,11 +1076,13 @@ def dynamic_page(request, slug):
     for content in contents:
         objects_by_type[content.content_type.model].append(content.object_id)
 
+    # 2. ЗАГРУЖАЕМ ВСЕ ТИПЫ КОНТЕНТА
     videos = Video.objects.in_bulk(objects_by_type.get('video', []))
     funfacts = FunFact.objects.in_bulk(objects_by_type.get('funfact', []))
     challenges = Challenge.objects.in_bulk(objects_by_type.get('challenge', []))
     chitchats = ChitChat.objects.in_bulk(objects_by_type.get('chitchat', []))
     quizzes = Quiz.objects.in_bulk(objects_by_type.get('quiz', []))
+    static_images_dict = StaticImages.objects.in_bulk(objects_by_type.get('staticimages', []))
 
     filtered_contents = []
 
@@ -1094,8 +1103,15 @@ def dynamic_page(request, slug):
             if obj and obj.title:
                 content.quiz = obj
                 content.quiz.total_points = sum(q.points for q in obj.questions.all())
+        elif model == 'staticimages':
+            obj = static_images_dict.get(content.object_id)
 
-        if not obj or not getattr(obj, 'title', None):
+        # Проверяем наличие объекта
+        if not obj:
+            continue
+
+        # Проверяем title для всех типов (кроме staticimages - у него всегда есть title)
+        if model != 'staticimages' and not getattr(obj, 'title', None):
             continue
 
         content.obj = obj
@@ -1106,91 +1122,53 @@ def dynamic_page(request, slug):
 
         filtered_contents.append(content)
 
-    # 🔒 ФИЛЬТРУЕМ КОНТЕНТ ПО ВСЕМ УСЛОВИЯМ
-    available_contents = []
-
+    # 🔒 ВЫЧИСЛЯЕМ is_available ДЛЯ ВСЕХ
     if request.user.is_authenticated:
-        # Предзагружаем completed_content для производительности
         completed_ids = set(request.user.completed_content.values_list('pk', flat=True))
 
-        # Получаем все контенты на этой странице для проверки последовательности
-        page_contents = Content.objects.filter(
-            page=page
-        ).order_by('order')
-
-        # Создаем словарь для быстрого доступа к результатам проверки условий
-        condition_cache = {}
-
-        def check_condition_for_content(content, user):
-            """Проверяет условие для контента с кешированием"""
-            cache_key = f'condition_{content.id}'
-            if cache_key in condition_cache:
-                return condition_cache[cache_key]
-
-            result = content._check_condition_for_user(user)
-            condition_cache[cache_key] = result
-            return result
+        final_contents = []
 
         for c in filtered_contents:
-            # Правило 1: ВСЕГДА проверяем condition, если он задан
-            if c.condition:
-                condition_passed = check_condition_for_content(c, request.user)
-                if not condition_passed:
-                    # Пропускаем этот элемент - он не будет отображаться
-                    continue
-
-            # Правило 2: если always_available = True, то пропускаем проверку последовательности
-            if c.always_available:
-                c.is_available = True
-                available_contents.append(c)
-                continue
-
-            # Правило 3: Если это первый элемент — доступен
-            first_content = page_contents.first()
-            if first_content and c.pk == first_content.pk:
-                c.is_available = True
-                available_contents.append(c)
-                continue
-
-            # Правило 4: Проверяем, все ли предыдущие элементы пройдены
-            is_sequence_available = True
-            for prev in page_contents:
-                if prev.order >= c.order:
-                    break
-
-                # Если предыдущий элемент always_available - он не блокирует
-                if prev.always_available:
-                    continue
-
-                # Если предыдущий элемент имеет condition, который пользователь НЕ прошел,
-                # то этот элемент не должен блокировать
-                if prev.condition:
-                    if not check_condition_for_content(prev, request.user):
+            # ⭐ ДЛЯ СТАТИЧЕСКИХ ИЗОБРАЖЕНИЙ
+            if c.content_type.model == 'staticimages':
+                # Проверяем condition
+                if c.condition:
+                    condition_passed = c._check_condition_for_user(request.user)
+                    if not condition_passed:
+                        # Условие не выполнено - пропускаем (НЕ ДОБАВЛЯЕМ)
                         continue
 
-                # Проверяем, пройден ли предыдущий элемент
-                if prev.pk not in completed_ids:
-                    is_sequence_available = False
-                    break
+                # Если дошли сюда - condition выполнен или его нет
+                c.is_available = True  # Статические изображения всегда доступны если показаны
+                final_contents.append(c)
+                continue  # Пропускаем проверку последовательности
 
-            if is_sequence_available:
-                c.is_available = True
-                available_contents.append(c)
-            else:
-                # Элемент недоступен из-за последовательности, но мы все равно
-                # можем его показать как заблокированный (опционально)
-                c.is_available = False
-                # available_contents.append(c)  # Раскомментируйте, если хотите показывать заблокированные
+            # ДЛЯ ВСЕХ ОСТАЛЬНЫХ ТИПОВ КОНТЕНТА
+            # ПРАВИЛО 1: Проверяем condition
+            if c.condition:
+                condition_passed = c._check_condition_for_user(request.user)
+                if not condition_passed:
+                    # Условие не выполнено - контент НЕ ПОКАЗЫВАЕМ
+                    continue
+
+            # ПРАВИЛО 2: Проверяем последовательность и always_available
+            c.is_available = c.is_available_for_user(request.user, completed_ids=completed_ids)
+            final_contents.append(c)
     else:
         # Для неавторизованных пользователей
+        final_contents = []
         for c in filtered_contents:
-            # Показываем только контент без условий
-            if not c.condition:
-                c.is_available = False if not c.always_available else True
-                available_contents.append(c)
+            if c.content_type.model == 'staticimages':
+                if c.condition:
+                    c.is_available = False  # Нет пользователя - condition не выполнен
+                else:
+                    c.is_available = True
+                final_contents.append(c)
+            elif not c.condition:
+                c.is_available = c.always_available
+                final_contents.append(c)
 
-    # Заменяем filtered_contents на отфильтрованный список
-    filtered_contents = available_contents
+    filtered_contents = final_contents
 
     # если пользователь не авторизован
     if not request.user.is_authenticated:
@@ -1198,7 +1176,9 @@ def dynamic_page(request, slug):
             c.is_liked = False
         context = {
             'page': page,
-            'contents': filtered_contents
+            'contents': filtered_contents,
+            'show_tour': False,
+            'static_images': static_images,
         }
         return render(request, "videos/pages/page.html", context)
 
@@ -1207,21 +1187,18 @@ def dynamic_page(request, slug):
     for c in filtered_contents:
         ct_to_ids[c.content_type_id].append(c.object_id)
 
-    likes = Favourites.objects.filter(
-        user=request.user,
-        content_type_id__in=ct_to_ids.keys(),
-        object_id__in=[oid for ids in ct_to_ids.values() for oid in ids]
-    )
-
-    liked_set = {(l.content_type_id, l.object_id) for l in likes}
+    if ct_to_ids:
+        likes = Favourites.objects.filter(
+            user=request.user,
+            content_type_id__in=ct_to_ids.keys(),
+            object_id__in=[oid for ids in ct_to_ids.values() for oid in ids]
+        )
+        liked_set = {(l.content_type_id, l.object_id) for l in likes}
+    else:
+        liked_set = set()
 
     for c in filtered_contents:
         c.is_liked = (c.content_type_id, c.object_id) in liked_set
-
-    context = {
-        'page': page,
-        'contents': filtered_contents
-    }
 
     show_tour = request.GET.get('tour') == '1'
 
@@ -1234,36 +1211,11 @@ def dynamic_page(request, slug):
     context = {
         'page': page,
         'contents': filtered_contents,
-        'show_tour': show_tour,  # 👈 ЭТО ДОЛЖНО БЫТЬ
+        'show_tour': show_tour,
+        'static_images': static_images,
     }
 
     return render(request, "videos/pages/page.html", context)
-
-
-# def first_page(request):
-#     return render_page(request, 'things_first', 'videos/pages/first_page.html')
-#
-# def second_page(request):
-#     return render_page(request, 'levers', 'videos/pages/second_page.html')
-#
-# def third_page(request):
-#     return render_page(request, 'power_portfolio', 'videos/pages/third_page.html')
-#
-# def forth_page(request):
-#     return render_page(request, 'playbook', 'videos/pages/forth_page.html')
-#
-# def fifth_page(request):
-#     return render_page(request, 'capital_cash', 'videos/pages/fifth_page.html')
-#
-# def sixth_page(request):
-#     return render_page(request, 'money_sports', 'videos/pages/sixth_page.html')
-#
-# def seventh_page(request):
-#     return render_page(request, 'new_ventures', 'videos/pages/seventh_page.html')
-#
-# def eighth_page(request):
-#     return render_page(request, 'rel_money', 'videos/pages/eighth_page.html')
-
 
 def toggle_like(request, model, object_id):
     try:
@@ -1309,7 +1261,10 @@ def get_objects(request):
 def video_detail(request, video_id):
     video = get_object_or_404(Video, id=video_id)
 
+    added_to_completed = False
+    page_slug = None
     points_added = 0
+
     if request.user.is_authenticated:
         # Получаем тип контента для видео
         content_type = ContentType.objects.get_for_model(Video)
@@ -1339,9 +1294,23 @@ def video_detail(request, video_id):
             request.user.completed_content.add(content)
             request.user.save()
 
+        # 🔑 Получаем slug страницы из content.page
+        if content and content.page:
+            page_slug = content.page.slug
+
+        # Проверяем, просмотрен ли уже
+        if not request.user.completed_content.filter(pk=content.pk).exists():
+            points_added = video.points
+            request.user.points_count += points_added
+            request.user.completed_content.add(content)
+            request.user.save()
+            added_to_completed = True
+
     return render(request, 'videos/video.html', {
         'video': video,
-        'points_added': points_added
+        'points_added': points_added,
+        'added_to_completed': added_to_completed,
+        'page_slug': page_slug,
     })
 
 def fun_fact_detail(request, fun_fact_id):
@@ -1671,7 +1640,9 @@ def challenge_view_content(request, pk):
         else:
             element.options = None
 
-    is_submit_active = user_choices.filter(attempts__is_done=True).count() >= challenge.min_answers_required
+    # Правильно - считаем все попытки, независимо от is_done:
+    total_attempts = sum(choice.attempts.count() for choice in user_choices)
+    is_submit_active = total_attempts >= challenge.min_answers_required
 
     for choice in user_choices:
         for attempt in choice.attempts.all():
@@ -1877,11 +1848,24 @@ def submit_challenge(request, challenge_id):
         'elements_with_options': elements_with_options,
     })
 
+
 @login_required
 @require_POST
 def submit_challenge_in_add(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
     user = request.user
+
+    # Получаем URL для редиректа из POST или из связанной страницы
+    next_url = request.POST.get('next')
+
+    # Если next не передан, пытаемся получить из связанного контента
+    if not next_url:
+        content_type = ContentType.objects.get_for_model(Challenge)
+        content = Content.objects.filter(object_id=challenge.pk, content_type=content_type).first()
+        if content and content.page:
+            next_url = reverse('dynamic_page', kwargs={'slug': content.page.slug})
+        else:
+            next_url = reverse('challenge_view_content', kwargs={'pk': challenge.id})
 
     try:
         user_choice, _ = ChallengeUserChoice.objects.get_or_create(
@@ -1889,10 +1873,18 @@ def submit_challenge_in_add(request, challenge_id):
             challenge=challenge
         )
 
-        # Считаем, сколько уже было попыток ДО этой
+        # ⭐ ПРОВЕРКА: достаточно ли ответов перед сохранением
         already_attempts_count = ChallengeUserAttempt.objects.filter(
             choice=user_choice
         ).count()
+
+        # Если уже есть достаточно ответов, не создаём новую попытку
+        if already_attempts_count >= challenge.min_answers_required:
+            return JsonResponse({
+                'status': 'success',
+                'message': 'You have already submitted enough answers!',
+                'url': next_url
+            })
 
         # Создаем новую попытку
         attempt = ChallengeUserAttempt.objects.create(
@@ -1979,7 +1971,7 @@ def submit_challenge_in_add(request, challenge_id):
         return JsonResponse({
             'status': 'success',
             'message': 'Ответ успешно сохранен!',
-            'url': reverse('challenge_view_content', kwargs={'pk': challenge.id})
+            'url': next_url  # ← возвращаем URL для редиректа на страницу, откуда пришли
         })
 
     except Exception as e:

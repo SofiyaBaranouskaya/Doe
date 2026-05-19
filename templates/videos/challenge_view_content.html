@@ -859,161 +859,134 @@
                         {% endwith %}
                     {% endif %}
 
-
-                    {% if user_choices %}
-                        {% with first_choice=user_choices|first %}
-                            {% with user_attempts=first_choice.attempts.all %}
-                                {% if user_attempts.count >= min_answers_required %}
-                                    <button class="submit submit-active">Submit</button>
-                                {% else %}
-                                    <button class="submit submit-inactive">Submit</button>
-                                {% endif %}
-                            {% endwith %}
-                        {% endwith %}
-                    {% endif %}
-
                 {% endfor %}
 
+    {% if user_choices %}
+        <form method="post" action="{% url 'submit_challenge_in_add' challenge.id %}" id="final-submit-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% if page_slug %}{% url 'dynamic_page' page_slug %}{% else %}/{% endif %}">
+            <button type="submit" class="submit {% if is_submit_active %}submit-active{% else %}submit-inactive{% endif %}"
+                    {% if not is_submit_active %}disabled{% endif %}>
+                Submit
+            </button>
+        </form>
+    {% endif %}
 
-                {% elif display_type == 'table' %}
-                <form method="post" action="{% url 'submit_challenge' challenge.id %}" id="challenge-form">
-                  {% csrf_token %}
-                  <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-                    <thead>
-                      <tr>
-                        {% for column in display_settings.table_columns.all %}
-                          <th>{{ column.title }}</th>
+{% elif display_type == 'table' %}
+<form method="post" action="{% url 'submit_challenge_in_add' challenge.id %}" id="challenge-form">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% if page_slug %}{% url 'dynamic_page' page_slug %}{% else %}/{% endif %}">
+
+    <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <thead>
+            <tr>
+                {% for column in display_settings.table_columns.all %}
+                    <th>{{ column.title }}</th>
+                {% endfor %}
+                {% if display_settings.cancel_edit_delete %}
+                    <th>To Cancel</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for choice in user_choices %}
+                {% for attempt in choice.attempts_filtered %}
+                    <tr style="background-color: {{ attempt.block_color }};">
+                        {% for cell in attempt.table_cells %}
+                            <td>{{ cell.value }}</td>
                         {% endfor %}
-
                         {% if display_settings.cancel_edit_delete %}
-                          <th>To Cancel</th>
-                        {% endif %}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for choice in user_choices %}
-                        {% for attempt in choice.attempts_filtered %}
-                          <tr style="background-color: {{ attempt.block_color }};">
-                            {% for cell in attempt.table_cells %}
-                              <td>{{ cell.value }}</td>
-                            {% endfor %}
-
-                            {% if display_settings.cancel_edit_delete %}
-                              <td class="table-action-buttons">
-
-                                  <div class="table-confirm-btn">
-                                      <button type="button" class="table-action-button" onclick="toggleIcon({{ attempt.id }})">
-                                          <svg id="done-icon-{{ attempt.id }}" width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: {% if attempt.is_done|yesno:'True,False' == 'False' %}block{% else %}none{% endif %}">
-                                              <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#21272A"/>
-                                              <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z"/>
-                                          </svg>
-
-                                          <svg id="undone-icon-{{ attempt.id }}" width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: {% if attempt.is_done|yesno:'True,False' == 'True' %}block{% else %}none{% endif %}">
-                                              <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#21272A" />
-                                              <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z" fill="#21272A" />
-                                          </svg>
-                                      </button>
-                                  </div>
-
-                                  <div class="table-delete-edit-btn">
-                                      <button type="button" class="table-action-button" onclick="editAttempt({{ attempt.id }})">
+                            <td class="table-action-buttons">
+                                <div class="table-confirm-btn">
+                                    <button type="button" class="table-action-button" onclick="toggleIcon({{ attempt.id }})">
+                                        <svg id="done-icon-{{ attempt.id }}" width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: {% if attempt.is_done %}none{% else %}block{% endif %}">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#21272A"/>
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z"/>
+                                        </svg>
+                                        <svg id="undone-icon-{{ attempt.id }}" width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: {% if attempt.is_done %}block{% else %}none{% endif %}">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 12C2.25 6.61704 6.61704 2.25 12 2.25C17.383 2.25 21.75 6.61704 21.75 12C21.75 17.383 17.383 21.75 12 21.75C6.61704 21.75 2.25 17.383 2.25 12ZM12 3.75C7.44546 3.75 3.75 7.44546 3.75 12C3.75 16.5545 7.44546 20.25 12 20.25C16.5545 20.25 20.25 16.5545 20.25 12C20.25 7.44546 16.5545 3.75 12 3.75Z" fill="#00AA00" />
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.9824 7.67574C17.2996 7.94216 17.3407 8.41525 17.0743 8.73241L10.7743 16.2324C10.6347 16.3986 10.4299 16.4962 10.2128 16.4999C9.99576 16.5036 9.78776 16.4131 9.64254 16.2517L6.94254 13.2517C6.66544 12.9439 6.6904 12.4696 6.99828 12.1925C7.30617 11.9155 7.78038 11.9404 8.05748 12.2483L10.1805 14.6072L15.9257 7.76762C16.1921 7.45046 16.6652 7.40932 16.9824 7.67574Z" fill="#00AA00" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-delete-edit-btn">
+                                    <button type="button" class="table-action-button" onclick="editAttempt({{ attempt.id }})">
                                         <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M7 10H12.25" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             <path d="M9.625 1.75011C9.85706 1.5512 10.1718 1.43945 10.5 1.43945C10.6625 1.43945 10.8234 1.46689 10.9735 1.52019C11.1237 1.57349 11.2601 1.65162 11.375 1.75011C11.4899 1.8486 11.5811 1.96553 11.6432 2.09422C11.7054 2.2229 11.7374 2.36083 11.7374 2.50011C11.7374 2.6394 11.7054 2.77733 11.6432 2.90601C11.5811 3.0347 11.4899 3.15162 11.375 3.25011L4.08333 9.50011L1.75 10.0001L2.33333 8.00011L9.625 1.75011Z" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
-                                      </button>
-
-                                      <button type="button" class="table-action-button" onclick="deleteAttempt2({{ attempt.id }})">
-                                          <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                              <path d="M2.25 3.25H3.75H15.75" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                              <path d="M14.25 3.25016V10.8335C14.25 11.1208 14.092 11.3964 13.8107 11.5995C13.5294 11.8027 13.1478 11.9168 12.75 11.9168H5.25C4.85218 11.9168 4.47064 11.8027 4.18934 11.5995C3.90804 11.3964 3.75 11.1208 3.75 10.8335V3.25016M6 3.25016V2.16683C6 1.87951 6.15804 1.60396 6.43934 1.4008C6.72064 1.19763 7.10218 1.0835 7.5 1.0835H10.5C10.8978 1.0835 11.2794 1.19763 11.5607 1.4008C11.842 1.60396 12 1.87951 12 2.16683V3.25016" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                              <path d="M7.5 5.9585V9.2085" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                              <path d="M10.5 5.9585V9.2085" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                          </svg>
-                                      </button>
-
-                                      <div id="delete-confirmation2" class="confirmation-modal">
-                                          <div class="confirmation-content">
-                                              <p><b>Delete the goal?</b></p>
-                                              <button type="button" class="delete_ok" id="confirm-delete2">Ok</button>
-                                              <button type="button" class="delete_cancel" id="cancel-delete2">Cancel</button>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </td>
-                            {% endif %}
-                          </tr>
-                        {% endfor %}
-                      {% endfor %}
-                    </tbody>
-                  </table>
-
-                <a href="{% url 'challenge_add_content' challenge.id %}">
-                    <button type="button" class="add_button">
-                        {{ challenge.button_add_name }}
-                        <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <mask id="mask0_2001_12607" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                                <rect x="0.804688" width="24" height="24" fill="white"/>
-                            </mask>
-                            <g mask="url(#mask0_2001_12607)">
-                                <path d="M10.9475 12.8571H5.80469V11.1429H10.9475V6H12.6618V11.1429H17.8047V12.8571H12.6618V18H10.9475V12.8571Z" fill="white"/>
-                            </g>
-                        </svg>
-                    </button>
-                </a>
-
-
-                <div class="input-fields-container">
-                    {% for element in elements_to_show_after_confirm %}
-                      <div class="input-field">
-                        <label>{{ element.name }}</label>
-
-                        {% if element.element == 'input' %}
-                            <input
-                                type="text"
-                                placeholder="{{ element.value }}"
-                                name="field_{{ element.id }}"
-                                value="{{ item.value|default:'' }}"
-                            >
-                        {% elif element.element == 'textarea' %}
-                            <textarea
-                                placeholder="{{ element.value }}"
-                                name="field_{{ element.id }}"
-                            >{{ item.value|default:'' }}</textarea>
-                        {% elif element.element == "radio" %}
-                            <div class="radio-time_group">
-                                {% for option in element.options %}
-                                    <div class="radio-container">
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                name="field_{{ element.id }}"
-                                                value="{{ option }}"
-                                                {% if element.value == option %}checked{% endif %}
-                                                class="radio_button"
-                                            >
-                                            <span class="radio-custom"></span>
-                                            <span class="radio-text">{{ option }}</span>
-                                        </label>
+                                    </button>
+                                    <button type="button" class="table-action-button" onclick="deleteAttempt2({{ attempt.id }})">
+                                        <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2.25 3.25H3.75H15.75" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M14.25 3.25016V10.8335C14.25 11.1208 14.092 11.3964 13.8107 11.5995C13.5294 11.8027 13.1478 11.9168 12.75 11.9168H5.25C4.85218 11.9168 4.47064 11.8027 4.18934 11.5995C3.90804 11.3964 3.75 11.1208 3.75 10.8335V3.25016M6 3.25016V2.16683C6 1.87951 6.15804 1.60396 6.43934 1.4008C6.72064 1.19763 7.10218 1.0835 7.5 1.0835H10.5C10.8978 1.0835 11.2794 1.19763 11.5607 1.4008C11.842 1.60396 12 1.87951 12 2.16683V3.25016" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M7.5 5.9585V9.2085" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M10.5 5.9585V9.2085" stroke="#21272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                    <div id="delete-confirmation2" class="confirmation-modal">
+                                        <div class="confirmation-content">
+                                            <p><b>Delete the goal?</b></p>
+                                            <button type="button" class="delete_ok" id="confirm-delete2">Ok</button>
+                                            <button type="button" class="delete_cancel" id="cancel-delete2">Cancel</button>
+                                        </div>
                                     </div>
-                                {% endfor %}
-                            </div>
+                                </div>
+                            </td>
                         {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
 
-                      </div>
-                    {% endfor %}
-                </div>
+    <a href="{% url 'challenge_add_content' challenge.id %}">
+        <button type="button" class="add_button">
+            {{ challenge.button_add_name }}
+            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <mask id="mask0_2001_12607" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                    <rect x="0.804688" width="24" height="24" fill="white"/>
+                </mask>
+                <g mask="url(#mask0_2001_12607)">
+                    <path d="M10.9475 12.8571H5.80469V11.1429H10.9475V6H12.6618V11.1429H17.8047V12.8571H12.6618V18H10.9475V12.8571Z" fill="white"/>
+                </g>
+            </svg>
+        </button>
+    </a>
 
-                <button type="submit" class="submit submit-inactive" id="table-submit">Submit</button>
-
+    <div class="input-fields-container">
+        {% for element in elements_to_show_after_confirm %}
+            <div class="input-field">
+                <label>{{ element.name }}</label>
+                {% if element.element == 'input' %}
+                    <input type="text" placeholder="{{ element.value }}" name="field_{{ element.id }}" value="{{ item.value|default:'' }}">
+                {% elif element.element == 'textarea' %}
+                    <textarea placeholder="{{ element.value }}" name="field_{{ element.id }}">{{ item.value|default:'' }}</textarea>
+                {% elif element.element == "radio" %}
+                    <div class="radio-time_group">
+                        {% for option in element.options %}
+                            <div class="radio-container">
+                                <label>
+                                    <input type="radio" name="field_{{ element.id }}" value="{{ option }}" {% if element.value == option %}checked{% endif %} class="radio_button">
+                                    <span class="radio-custom"></span>
+                                    <span class="radio-text">{{ option }}</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
-                </form>
-
-                <div id="message-box" style="margin-top: 20px;"></div>
-
-
             </div>
+        {% endfor %}
     </div>
+
+    <!-- КНОПКА SUBMIT - ТОЛЬКО ОДИН РАЗ, ПОСЛЕ ВСЕХ ПОЛЕЙ -->
+    {% if is_submit_active %}
+        <button type="submit" class="submit submit-active" id="table-submit">Submit</button>
+    {% else %}
+        <button type="button" class="submit submit-inactive" id="table-submit" disabled>Submit</button>
+    {% endif %}
+</form>
+{% endif %}
 
     <div class="nav_pannel">
         {% include 'videos/nav.html' %}
@@ -1024,8 +997,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const icon = document.getElementById('page-icon');
     if (icon) {
         const page = icon.dataset.page;
-
-        // Соответствие между значениями страниц и URL
         const pageUrls = {
             'things_first': '/things_first/',
             'levers': '/levers/',
@@ -1036,268 +1007,336 @@ document.addEventListener('DOMContentLoaded', function() {
             'new_ventures': '/new_ventures/',
             'rel_money': '/rel_money/'
         };
-
-        // Обработчик клика
         icon.addEventListener('click', function() {
             if (page && pageUrls[page]) {
                 window.location.href = pageUrls[page];
             } else {
                 console.warn('Unknown page:', page);
-                window.location.href = '/home/'; // Fallback
+                window.location.href = '/home/';
             }
         });
     }
 });
 
-        // Получение CSRF-токена из куки
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
-            return cookieValue;
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+document.addEventListener('DOMContentLoaded', function () {
+    // ⭐ БЕЗОПАСНАЯ РАБОТА С addButton
+    const staticCard = document.querySelector('.static-card');
+    const addButton = document.getElementById('add_button_outof_static');
+
+    if (addButton) {
+        if (!staticCard || staticCard.style.display === 'none') {
+            addButton.style.display = 'inline-block';
+        } else {
+            addButton.style.display = 'none';
+        }
+    }
+
+const form = document.getElementById('challenge-form');
+const messageBox = document.getElementById('message-box');
+const tableSubmitButton = document.getElementById('table-submit');
+
+if (form && tableSubmitButton) {
+    form.addEventListener('submit', function (event) {
+        // Проверяем: если кнопка disabled - не отправляем
+        if (tableSubmitButton.disabled) {
+            event.preventDefault();
+            console.log('Submit button is disabled - form not submitted');
+            return false;
         }
 
-        const csrftoken = getCookie('csrftoken');
+        event.preventDefault();
+        console.log('Form submitted, sending request...');
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Получаем контейнер .static-card и кнопку add_button_outof_static
-            const staticCard = document.querySelector('.static-card');
-            const addButton = document.getElementById('add_button_outof_static');
+        const formData = new FormData(form);
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        const formAction = form.getAttribute('action');
 
-            // Проверяем, если .static-card не существует или скрыт, показываем кнопку
-            if (!staticCard || staticCard.style.display === 'none') {
-                addButton.style.display = 'inline-block'; // Кнопка будет видна
+        fetch(formAction, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.status === 'success') {
+                if (messageBox) {
+                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                }
+                // Редирект на URL из ответа
+                console.log('Redirecting to:', data.url);
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    console.error('No URL in response');
+                }
             } else {
-                addButton.style.display = 'none'; // Кнопка будет скрыта
-            }
-
-            const form = document.getElementById('challenge-form');
-            const messageBox = document.getElementById('message-box');
-            const tableSubmitButton = document.getElementById('table-submit');
-
-            if (form) {
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault();
-
-                    const formData = new FormData(form);
-                    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
-                    const formAction = form.getAttribute('action');
-
-                    fetch(formAction, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrfToken,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
-                    })
-                   .then(async response => {
-                        const contentType = response.headers.get("content-type") || "";
-
-                        if (!response.ok) {
-                            throw new Error("Server return the error");
-                        }
-
-                        if (contentType.includes("application/json")) {
-                            return await response.json();
-                        } else {
-                            throw new Error("Answer is not in JSON format");
-                        }
-                    })
-                    .then(data => {
-                        console.log(data);
-                        if (data.success) {
-                            messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-                        } else {
-                            messageBox.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        messageBox.innerHTML = `<div class="alert alert-danger">Something went wrong</div>`;
-                    });
-                });
-            }
-
-            // Обработка переключения текста
-            document.querySelectorAll('.toggle-text').forEach(button => {
-                button.addEventListener('click', e => {
-                    e.preventDefault();
-                    const textBlock = button.previousElementSibling;
-                    textBlock.classList.toggle('truncate-text');
-                    button.textContent = textBlock.classList.contains('truncate-text') ? '...' : '⬆️';
-                });
-            });
-
-
-            // Проверка заполнения полей для активации кнопки отправки
-            const inputFields = document.querySelectorAll('.input-fields-container input, .input-fields-container textarea, .input-fields-container input[type="radio"]');
-            function checkFields() {
-                let filled = false;
-                inputFields.forEach(field => {
-                    if ((field.type === 'radio' && field.checked) ||
-                        (field.type !== 'radio' && field.value.trim() !== '')) {
-                        filled = true;
-                    }
-                });
-                if (tableSubmitButton) {
-                    if (filled) {
-                        tableSubmitButton.classList.add('submit-active');
-                        tableSubmitButton.classList.remove('submit-inactive');
-                        tableSubmitButton.disabled = false;
-                    } else {
-                        tableSubmitButton.classList.add('submit-inactive');
-                        tableSubmitButton.classList.remove('submit-active');
-                        tableSubmitButton.disabled = true;
-                    }
+                if (messageBox) {
+                    messageBox.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                 }
             }
-            inputFields.forEach(field => {
-                field.addEventListener('input', checkFields);
-                field.addEventListener('change', checkFields);
-            });
-            checkFields();
-
-            // Кнопка сохранения статусов
-            if (tableSubmitButton) {
-                tableSubmitButton.addEventListener('click', function () {
-                    const updatedStatuses = [];
-
-                    document.querySelectorAll('.table-confirm-btn button').forEach(button => {
-                        const doneIcon = button.querySelector('svg[id^="done-icon"]');
-                        const attemptId = doneIcon.id.replace('done-icon-', '');
-                        const isDone = doneIcon.style.display === 'none';
-
-                        updatedStatuses.push({ id: attemptId, is_done: isDone });
-                    });
-
-                    fetch('/save_attempts_status/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrftoken,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ attempts: updatedStatuses })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'ok') {
-                            const message = document.getElementById('save-message');
-                            message.style.display = 'block';
-                            setTimeout(() => {
-                                message.style.display = 'none';
-                            }, 3000);
-                        }
-                    });
-                });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (messageBox) {
+                messageBox.innerHTML = `<div class="alert alert-danger">Something went wrong</div>`;
             }
         });
+    });
+}
 
-        function editAttempt(id) {
-            window.location.href = `/attempt/edit/${id}/`;
+    document.querySelectorAll('.toggle-text').forEach(button => {
+        button.addEventListener('click', e => {
+            e.preventDefault();
+            const textBlock = button.previousElementSibling;
+            if (textBlock) {
+                textBlock.classList.toggle('truncate-text');
+                button.textContent = textBlock.classList.contains('truncate-text') ? '...' : '⬆️';
+            }
+        });
+    });
+
+    const inputFields = document.querySelectorAll('.input-fields-container input, .input-fields-container textarea, .input-fields-container input[type="radio"]');
+
+    function checkFields() {
+        let filled = false;
+        inputFields.forEach(field => {
+            if ((field.type === 'radio' && field.checked) ||
+                (field.type !== 'radio' && field.value.trim() !== '')) {
+                filled = true;
+            }
+        });
+        if (tableSubmitButton) {
+            if (filled) {
+                tableSubmitButton.classList.add('submit-active');
+                tableSubmitButton.classList.remove('submit-inactive');
+                tableSubmitButton.disabled = false;
+            } else {
+                tableSubmitButton.classList.add('submit-inactive');
+                tableSubmitButton.classList.remove('submit-active');
+                tableSubmitButton.disabled = true;
+            }
         }
+    }
 
-        function toggleDone(attemptId, currentStatus) {
-            const url = currentStatus ? `/mark_undone/${attemptId}/` : `/mark_done/${attemptId}/`;
+    if (inputFields.length > 0) {
+        inputFields.forEach(field => {
+            field.addEventListener('input', checkFields);
+            field.addEventListener('change', checkFields);
+        });
+        checkFields();
+    }
 
-            fetch(url, {
+    if (tableSubmitButton) {
+        tableSubmitButton.addEventListener('click', function () {
+            const updatedStatuses = [];
+            document.querySelectorAll('.table-confirm-btn button').forEach(button => {
+                const doneIcon = button.querySelector('svg[id^="done-icon"]');
+                if (doneIcon) {
+                    const attemptId = doneIcon.id.replace('done-icon-', '');
+                    const isDone = doneIcon.style.display === 'none';
+                    updatedStatuses.push({ id: attemptId, is_done: isDone });
+                }
+            });
+            fetch('/save_attempts_status/', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ attempts: updatedStatuses })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'done' || data.status === 'undone') {
+                if (data.status === 'ok') {
+                    const message = document.getElementById('save-message');
+                    if (message) {
+                        message.style.display = 'block';
+                        setTimeout(() => {
+                            message.style.display = 'none';
+                        }, 3000);
+                    }
+                }
+            });
+        });
+    }
+});
+
+function editAttempt(id) {
+    window.location.href = `/attempt/edit/${id}/`;
+}
+
+function toggleDone(attemptId, currentStatus) {
+    const url = currentStatus ? `/mark_undone/${attemptId}/` : `/mark_done/${attemptId}/`;
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'done' || data.status === 'undone') {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Ошибка при смене статуса:', error));
+}
+
+function checkSubmitButton() {
+    let isDoneSelected = false;
+    document.querySelectorAll('.table-confirm-btn button').forEach(function (button) {
+        const doneIcon = button.querySelector('svg[id^="done-icon"]');
+        if (doneIcon && doneIcon.style.display === 'none') {
+            isDoneSelected = true;
+        }
+    });
+    const tableSubmitButton = document.getElementById('table-submit');
+    if (tableSubmitButton) {
+        if (isDoneSelected) {
+            tableSubmitButton.classList.remove('submit-inactive');
+            tableSubmitButton.classList.add('submit-active');
+            tableSubmitButton.disabled = false;
+        } else {
+            tableSubmitButton.classList.remove('submit-active');
+            tableSubmitButton.classList.add('submit-inactive');
+            tableSubmitButton.disabled = true;
+        }
+    }
+}
+
+function toggleIcon(attemptId) {
+    const doneIcon = document.getElementById('done-icon-' + attemptId);
+    const undoneIcon = document.getElementById('undone-icon-' + attemptId);
+    if (doneIcon && undoneIcon) {
+        if (doneIcon.style.display === 'none') {
+            doneIcon.style.display = 'block';
+            undoneIcon.style.display = 'none';
+        } else {
+            doneIcon.style.display = 'none';
+            undoneIcon.style.display = 'block';
+        }
+    }
+    checkSubmitButton();
+}
+
+function deleteAttempt(id, modalId, confirmId, cancelId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = "flex";
+    const confirmButton = document.getElementById(confirmId);
+    const cancelButton = document.getElementById(cancelId);
+    if (confirmButton) {
+        confirmButton.onclick = function () {
+            fetch(`/delete_attempt/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'deleted') {
                     location.reload();
                 }
-            })
-            .catch(error => {
-                console.error('Ошибка при смене статуса:', error);
             });
+            if (modal) modal.style.display = "none";
+        };
+    }
+    if (cancelButton) {
+        cancelButton.onclick = function () {
+            if (modal) modal.style.display = "none";
+        };
+    }
+}
+
+function deleteAttempt1(id) {
+    deleteAttempt(id, "delete-confirmation1", "confirm-delete1", "cancel-delete1");
+}
+
+function deleteAttempt2(id) {
+    deleteAttempt(id, "delete-confirmation2", "confirm-delete2", "cancel-delete2");
+}
+
+// Обработка текстовой формы submit
+const finalSubmitForm = document.getElementById('final-submit-form');
+if (finalSubmitForm) {
+    finalSubmitForm.addEventListener('submit', function(event) {
+        // Если кнопка disabled - не отправляем
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn && submitBtn.disabled) {
+            event.preventDefault();
+            return false;
         }
 
-        function checkSubmitButton() {
-            let isDoneSelected = false;
-            document.querySelectorAll('.table-confirm-btn button').forEach(function (button) {
-                const doneIcon = button.querySelector('svg[id^="done-icon"]');
-                if (doneIcon && doneIcon.style.display === 'none') {
-                    isDoneSelected = true;
-                }
-            });
+        // Форма отправится обычным POST-запросом
+        // Сервер вернёт JSON с redirect_url
+        event.preventDefault();
 
-            const tableSubmitButton = document.getElementById('table-submit');
-            if (tableSubmitButton) {
-                if (isDoneSelected) {
-                    tableSubmitButton.classList.remove('submit-inactive');
-                    tableSubmitButton.classList.add('submit-active');
-                    tableSubmitButton.disabled = false;
+        const formData = new FormData(this);
+        const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+        const formAction = this.getAttribute('action');
+
+        fetch(formAction, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Показываем сообщение об успехе (опционально)
+                const messageBox = document.getElementById('message-box');
+                if (messageBox) {
+                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                }
+                // Редирект на страницу, откуда пришли
+                const nextUrl = this.querySelector('[name="next"]').value;
+                if (nextUrl) {
+                    window.location.href = nextUrl;
+                } else if (data.url) {
+                    window.location.href = data.url;
                 } else {
-                    tableSubmitButton.classList.remove('submit-active');
-                    tableSubmitButton.classList.add('submit-inactive');
-                    tableSubmitButton.disabled = true;
+                    window.location.href = '/';
+                }
+            } else {
+                const messageBox = document.getElementById('message-box');
+                if (messageBox) {
+                    messageBox.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                 }
             }
-        }
-
-        function toggleIcon(attemptId) {
-            const doneIcon = document.getElementById('done-icon-' + attemptId);
-            const undoneIcon = document.getElementById('undone-icon-' + attemptId);
-
-            if (doneIcon.style.display === 'none') {
-                doneIcon.style.display = 'block';
-                undoneIcon.style.display = 'none';
-            } else {
-                doneIcon.style.display = 'none';
-                undoneIcon.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const messageBox = document.getElementById('message-box');
+            if (messageBox) {
+                messageBox.innerHTML = `<div class="alert alert-danger">Something went wrong</div>`;
             }
+        });
+    });
+}
 
-            checkSubmitButton();
-        }
-
-        function deleteAttempt(id, modalId, confirmId, cancelId) {
-            const modal = document.getElementById(modalId);
-            modal.style.display = "flex";
-
-            const confirmButton = document.getElementById(confirmId);
-            const cancelButton = document.getElementById(cancelId);
-
-            confirmButton.onclick = function () {
-                fetch(`/delete_attempt/${id}/`, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': csrftoken }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'deleted') {
-                        location.reload();
-                    }
-                });
-
-                modal.style.display = "none";
-            };
-
-            cancelButton.onclick = function () {
-                modal.style.display = "none";
-            };
-        }
-
-        function deleteAttempt1(id) {
-            deleteAttempt(id, "delete-confirmation1", "confirm-delete1", "cancel-delete1");
-        }
-
-        function deleteAttempt2(id) {
-            deleteAttempt(id, "delete-confirmation2", "confirm-delete2", "cancel-delete2");
-        }
     </script>
 
 </body>

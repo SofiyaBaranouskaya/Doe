@@ -247,10 +247,10 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            column
             justify-content: space-between;
             gap: 10px;
             overflow-x: auto;
+            margin-top: 15px;
         }
 
         label {
@@ -301,9 +301,8 @@
 
         .radio-text {
             font-family: 'Poppins', sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
-            color: #333;
             margin-left: 5px;
         }
 
@@ -560,6 +559,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            margin-top: 15px;
         }
 
         .checkbox-container {
@@ -715,9 +715,16 @@
             }
 
             .radio-text {
-                font-size: 16px;
+                font-size: 18px;
             }
         }
+
+        @media (width < 790px) {
+            .radio-container {
+                margin-bottom: 0px;
+            }
+        }
+
 
     </style>
 </head>

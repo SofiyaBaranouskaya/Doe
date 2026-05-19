@@ -17,7 +17,7 @@ class RegistrationForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.username = self.cleaned_data['email']  # авто-установка username = email
+        user.username = self.cleaned_data['email']
         if commit:
             user.save()
         return user
@@ -41,14 +41,14 @@ class ContentAdminForm(forms.ModelForm):
 
     class Meta:
         model = Content
-        fields = ['content_type', 'object_id', 'condition']  # Добавили condition
+        fields = ['content_type', 'object_id', 'condition']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Фильтруем только существующие модели
         self.fields['content_type'].queryset = ContentType.objects.filter(
-            model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz']
+            model__in=['video', 'funfact', 'challenge', 'chitchat', 'quiz', 'staticimages']
         )
 
         # Настраиваем поле condition
@@ -57,9 +57,9 @@ class ContentAdminForm(forms.ModelForm):
             ('dob_after_1996', 'DOB: After 1996'),
             ('grad_expected', 'Graduation Year: Expected this summer or later'),
             ('grad_already', 'Graduation Year: Already graduated'),
-            ('vibe_early', 'Financial Knowledge vibe: Pretty early'),
-            ('vibe_mid', 'Financial Knowledge vibe: Mid'),
-            ('vibe_expert', 'Financial Knowledge vibe: I\'m the one that explains things to my friends'),
+            ('vibe_early', 'Financial Knowledge vibe: I’m pretty new'),
+            ('vibe_mid', 'Financial Knowledge vibe: Let’s call it “mid”'),
+            ('vibe_expert', 'Financial Knowledge vibe: I’m the one that explains things to my friends'),
             ('industry_arts_design', 'Industry: Arts & Design'),
             ('industry_business', 'Industry: Business'),
             ('industry_communications_pr', 'Industry: Communications & PR'),

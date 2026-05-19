@@ -190,11 +190,11 @@
     display: inline-flex;
     align-items: center;
     padding: 6px 12px;
-    background-color: #FF6F6C;
+    background-color: #ffc6d4;
     border-radius: 20px;
     font-size: 14px;
-    color: white;
-    white-space: nowrap; /* Запрещает перенос текста внутри чипса */
+    color: #333;
+    white-space: nowrap;
 }
 
 .interests_hobbies, .goal {
@@ -209,7 +209,6 @@
 .two_buttons {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
 }
 
 /* Адаптивность для кнопок на мобильных */
@@ -730,7 +729,7 @@
                 border-radius: 16px;
                 border: 2px solid #FD7981;
                 padding: 10px;
-                margin: auto;
+                margin-top: 0;
             }
 
             .pc_status {
@@ -752,8 +751,8 @@
             }
 
             .profile_icon {
-                width: 142px;
-                height: 142px;
+                width: 110px;
+                height: 110px;
             }
 
             .edit_svg {
@@ -767,7 +766,6 @@
             }
 
             .lists_content {
-                 max-height: 328px;
                  width: fit-content;
             }
 
@@ -1063,7 +1061,7 @@
                                     <h4>About</h4>
                                     <p style="margin-left: 35px; padding: 5px;">{{ user.curr_city |default:'Not set yet' }}</p>
                                     <p style="margin-left: 35px; padding: 5px;">{{ user.current_vibe |default:'Not set yet' }}</p>
-                                    <p style="margin-left: 35px; padding: 5px;">{{ member_since }}</p>
+<!--                                    <p style="margin-left: 35px; padding: 5px;">{{ member_since }}</p>-->
                                 </div>
                                 <div class="interests_hobbies">
                                     <h4>Industry & Field</h4>

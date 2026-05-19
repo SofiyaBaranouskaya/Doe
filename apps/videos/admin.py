@@ -13,16 +13,52 @@ from apps.users.models import (
     ChitChat, ChitChatOption, ChitChatUserChoice,
     Challenge, ChallengeElement, ChallengeUserAnswer, ChallengeUserChoice, ChitChatAnswer, ChallengeDisplaySettings,
     TextFieldDisplayOrder, TableColumnSetting, ChallengeUserAttempt, Schools, UserSchool, QuizQuestion, Quiz,
-    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards, UserReward, Page)
+    QuizUserChoice, QuizAnswer, Invitation, Glossary, Favourites, Rewards, UserReward, Page, StaticImages)
 from import_export.admin import ExportMixin
 from import_export import resources, fields
 from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
+from django.core.exceptions import ValidationError
+
 class UserResource(resources.ModelResource):
     class Meta:
         model = User
+
+
+class StaticImagesForm(forms.ModelForm):
+    class Meta:
+        model = StaticImages
+        fields = ['title', 'image']
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image and hasattr(image, 'content_type'):
+            # Check if file is actually an image
+            if not image.content_type.startswith('image/'):
+                raise ValidationError('Only image files are allowed (JPEG, PNG, GIF, WEBP)')
+
+            # Optional: limit file size (e.g., 5MB)
+            if image.size > 5 * 1024 * 1024:
+                raise ValidationError('Image file size must be less than 5MB')
+        return image
+
+@admin.register(StaticImages)
+class StaticImagesAdmin(admin.ModelAdmin):
+    form = StaticImagesForm
+    list_display = ['title', 'uploaded_at']
+    readonly_fields = ['uploaded_at']
+
+    def has_add_permission(self, request):
+        return True
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return True
+
 
 class ExportAdminMixin(ExportMixin, admin.ModelAdmin):
     pass

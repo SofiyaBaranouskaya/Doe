@@ -14,6 +14,7 @@
 
     span {
         height: 20px;
+        margin-left: 10px;
     }
 
     .nav_pannel_pc{
@@ -25,6 +26,14 @@
         padding: 7px 10px 7px 10px;
         margin: 30px 40px;
     }
+
+    .menu-divider {
+        border: none;
+        border-top: 2px solid black;
+        margin: 10px 0;
+        width: 100%;
+    }
+
 </style>
 
 <div class="nav_pannel_pc">
@@ -40,24 +49,26 @@
         <span>Dashboard</span>
     </a>
 
+    <hr class="menu-divider">
+
     <a href="{% url 'favourites_page' %}">
         <svg width="29" height="29" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.3638 0L15.2825 8.98278H24.7275L17.0863 14.5344L20.005 23.5172L12.3638 17.9656L4.72256 23.5172L7.64124 14.5344L3.52859e-05 8.98278H9.44509L12.3638 0Z" fill="black"/>
         </svg>
-        <span>Favourites</span>
+        <span>Favorites</span>
     </a>
 
-    <a href="{% url 'hot_takes_page' %}">
-        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;">
-            <mask id="mask0_2334_1341" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
-            <rect width="31" height="31" fill="#D9D9D9"/>
-            </mask>
-            <g mask="url(#mask0_2334_1341)">
-            <path d="M21.1512 24.5417L16.5658 19.9563L18.3741 18.1479L21.1189 20.8927L26.6085 15.4032L28.4168 17.2438L21.1512 24.5417ZM21.1512 14.2084L16.5658 9.62295L18.3741 7.81462L21.1189 10.5594L26.6085 5.06982L28.4168 6.91045L21.1512 14.2084ZM2.5835 21.9584V19.375H14.2085V21.9584H2.5835ZM2.5835 11.625V9.0417H14.2085V11.625H2.5835Z" fill="black"/>
-            </g>
-        </svg>
-        <span>Hot takes</span>
-    </a>
+<!--    <a href="{% url 'hot_takes_page' %}">-->
+<!--        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;">-->
+<!--            <mask id="mask0_2334_1341" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">-->
+<!--            <rect width="31" height="31" fill="#D9D9D9"/>-->
+<!--            </mask>-->
+<!--            <g mask="url(#mask0_2334_1341)">-->
+<!--            <path d="M21.1512 24.5417L16.5658 19.9563L18.3741 18.1479L21.1189 20.8927L26.6085 15.4032L28.4168 17.2438L21.1512 24.5417ZM21.1512 14.2084L16.5658 9.62295L18.3741 7.81462L21.1189 10.5594L26.6085 5.06982L28.4168 6.91045L21.1512 14.2084ZM2.5835 21.9584V19.375H14.2085V21.9584H2.5835ZM2.5835 11.625V9.0417H14.2085V11.625H2.5835Z" fill="black"/>-->
+<!--            </g>-->
+<!--        </svg>-->
+<!--        <span>Hot takes</span>-->
+<!--    </a>-->
 
     <a href="{% url 'glossary_page' %}">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -93,6 +104,8 @@
 <!--        <span>Ai Сhat</span>-->
 <!--    </a>-->
 
+
+    <hr class="menu-divider">
 
     <a href="{% url 'user_profile' %}">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
