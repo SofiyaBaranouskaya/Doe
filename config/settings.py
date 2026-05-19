@@ -222,16 +222,16 @@ SUPABASE_KEY = env('SUPABASE_KEY')
 
 DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
 
-try:
-    import django_heroku
-    # Применяем настройки Heroku
-    django_heroku.settings(
-        locals(),
-        staticfiles=False,  # Мы используем WhiteNoise
-        allowed_hosts=False # У нас уже есть ALLOWED_HOSTS
-    )
-except ImportError:
-    pass
+# try:
+#     import django_heroku
+#     # Применяем настройки Heroku
+#     django_heroku.settings(
+#         locals(),
+#         staticfiles=False,  # Мы используем WhiteNoise
+#         allowed_hosts=False # У нас уже есть ALLOWED_HOSTS
+#     )
+# except ImportError:
+#     pass
 
 # WhiteNoise configuration
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
