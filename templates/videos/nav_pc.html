@@ -29,7 +29,7 @@
 
     .menu-divider {
         border: none;
-        border-top: 2px solid black;
+        border-top: 2px solid #0000003d;
         margin: 10px 0;
         width: 100%;
     }
@@ -37,7 +37,7 @@
 </style>
 
 <div class="nav_pannel_pc">
-    <a href="{% url 'home' %}">
+    <a href="{% url 'home' %}" data-tour="dashboard">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2091_642" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
             <rect width="31" height="31" fill="#D9D9D9"/>
@@ -49,9 +49,9 @@
         <span>Dashboard</span>
     </a>
 
-<!--    <hr class="menu-divider">-->
+    <hr class="menu-divider">
 
-    <a href="{% url 'favourites_page' %}">
+    <a href="{% url 'favourites_page' %}" data-tour="favorites">
         <svg width="29" height="29" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.3638 0L15.2825 8.98278H24.7275L17.0863 14.5344L20.005 23.5172L12.3638 17.9656L4.72256 23.5172L7.64124 14.5344L3.52859e-05 8.98278H9.44509L12.3638 0Z" fill="black"/>
         </svg>
@@ -70,7 +70,7 @@
 <!--        <span>Hot takes</span>-->
 <!--    </a>-->
 
-    <a href="{% url 'glossary_page' %}">
+    <a href="{% url 'glossary_page' %}" data-tour="glossary">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2334_498" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
             <rect width="31" height="31" fill="#D9D9D9"/>
@@ -82,32 +82,32 @@
         <span>Glossary</span>
     </a>
 
-    <a href="{% url 'simulator:fund_list' %}">
-        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <mask id="mask0_2091_simulator" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
-                <rect width="31" height="31" fill="#D9D9D9"/>
-            </mask>
-            <g mask="url(#mask0_2091_simulator)">
-                <path d="M3.875 25.8333V23.25H27.125V25.8333H3.875ZM6.45833 21.9583V14.2083L11.625 17.7917L16.7917 10.625L21.9583 14.2083L27.125 6.45833V10.375L21.9583 18.125L16.7917 14.5417L11.625 21.7083L6.45833 18.125V21.9583Z" fill="#1C1B1F"/>
-            </g>
-        </svg>
-        <span>Simulator</span>
-    </a>
+<!--    <a href="{% url 'simulator:fund_list' %}">-->
+<!--        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--            <mask id="mask0_2091_simulator" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">-->
+<!--                <rect width="31" height="31" fill="#D9D9D9"/>-->
+<!--            </mask>-->
+<!--            <g mask="url(#mask0_2091_simulator)">-->
+<!--                <path d="M3.875 25.8333V23.25H27.125V25.8333H3.875ZM6.45833 21.9583V14.2083L11.625 17.7917L16.7917 10.625L21.9583 14.2083L27.125 6.45833V10.375L21.9583 18.125L16.7917 14.5417L11.625 21.7083L6.45833 18.125V21.9583Z" fill="#1C1B1F"/>-->
+<!--            </g>-->
+<!--        </svg>-->
+<!--        <span>Simulator</span>-->
+<!--    </a>-->
 
-    <a href="{% url 'aichat:chat' %}">
-        <svg width="31" height="31" viewBox="0 0 31 31" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6.5 22.5V8.5C6.5 7.6 7.1 7 8 7H23C23.9 7 24.5 7.6 24.5 8.5V18C24.5 18.9 23.9 19.5 23 19.5H11.5L6.5 22.5Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="12" cy="13.5" r="1.2" fill="black"/>
-            <circle cx="15.5" cy="13.5" r="1.2" fill="black"/>
-            <circle cx="19" cy="13.5" r="1.2" fill="black"/>
-        </svg>
-        <span>Ai Сhat</span>
-    </a>
+<!--    <a href="{% url 'aichat:chat' %}">-->
+<!--        <svg width="31" height="31" viewBox="0 0 31 31" xmlns="http://www.w3.org/2000/svg">-->
+<!--            <path d="M6.5 22.5V8.5C6.5 7.6 7.1 7 8 7H23C23.9 7 24.5 7.6 24.5 8.5V18C24.5 18.9 23.9 19.5 23 19.5H11.5L6.5 22.5Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round"/>-->
+<!--            <circle cx="12" cy="13.5" r="1.2" fill="black"/>-->
+<!--            <circle cx="15.5" cy="13.5" r="1.2" fill="black"/>-->
+<!--            <circle cx="19" cy="13.5" r="1.2" fill="black"/>-->
+<!--        </svg>-->
+<!--        <span>Ai Сhat</span>-->
+<!--    </a>-->
 
 
-<!--    <hr class="menu-divider">-->
+    <hr class="menu-divider">
 
-    <a href="{% url 'user_profile' %}">
+    <a href="{% url 'user_profile' %}" data-tour="profile">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2091_648" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
             <rect width="31" height="31" fill="#D9D9D9"/>

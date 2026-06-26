@@ -73,10 +73,154 @@
             box-sizing: border-box;
         }
 
-        .iti{
-            width: 100%;
-            margin-bottom: 15px;
-        }
+            .iti {
+                width: 100% !important;
+                margin-bottom: 15px !important;
+                position: relative !important;
+                display: block !important;
+            }
+
+            /* Контейнер флага (поверх инпута) */
+            .iti__flag-container {
+                position: absolute !important;
+                top: 0 !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                padding: 0 !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                z-index: 2 !important;
+            }
+
+            /* Выбранный флаг */
+            .iti__selected-flag {
+                padding: 0 8px 0 12px !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: transparent !important;
+                border-radius: 30px 0 0 30px !important;
+                cursor: pointer !important;
+            }
+
+            /* Код страны */
+            .iti--separate-dial-code .iti__selected-dial-code {
+                font-size: 18px !important;
+                font-weight: 500 !important;
+                color: #2C2C2C !important;
+                margin-left: 6px !important;
+            }
+
+            /* Стрелка */
+            .iti__arrow {
+                margin-left: 6px !important;
+                border-top: 4px solid #555 !important;
+                border-left: 4px solid transparent !important;
+                border-right: 4px solid transparent !important;
+            }
+
+            /* Само поле ввода - с отступом слева для флага */
+            .iti__tel-input {
+                padding-left: 90px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                font-family: 'Poppins', sans-serif !important;
+                font-size: 14px !important;
+                height: 50px !important;
+                border: 1.5px solid #E0E0E0 !important;
+                border-radius: 30px !important;
+                position: relative !important;
+                z-index: 1 !important;
+            }
+
+            .iti__tel-input:focus {
+                outline: none !important;
+                border-color: #FFC6D4 !important;
+            }
+
+            /* Список стран - правильное позиционирование */
+            .iti__country-list {
+                position: absolute !important;
+                top: 100% !important;
+                left: 0 !important;
+                margin-top: 5px !important;
+                width: 100% !important;
+                min-width: 250px !important;
+                max-height: 200px !important;
+                font-size: 14px !important;
+                border-radius: 12px !important;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+                overflow-y: auto !important;
+                z-index: 9999 !important;
+                background: white !important;
+                border: 1px solid #e0e0e0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                list-style: none !important;
+            }
+
+            /* Элементы списка */
+            .iti__country {
+                padding: 8px 15px !important;
+                font-size: 14px !important;
+                display: flex !important;
+                align-items: center !important;
+                cursor: pointer !important;
+                border-bottom: 1px solid #f0f0f0 !important;
+            }
+
+            .iti__country:last-child {
+                border-bottom: none !important;
+            }
+
+            .iti__country:hover {
+                background-color: #f5f5f5 !important;
+            }
+
+            .iti__country.iti__highlight {
+                background-color: #e8f0fe !important;
+            }
+
+            /* Обертка для правильного позиционирования */
+            .phone-wrapper {
+                position: relative;
+                width: 100%;
+            }
+
+            /* Медиа-запросы для десктопа */
+            @media (min-width: 790px) {
+                .iti__tel-input {
+                    height: 70px !important;
+                    font-size: 18px !important;
+                    padding-left: 130px !important;
+                    border-radius: 57px !important;
+                }
+
+                .iti__selected-flag {
+                    padding: 0 15px 0 20px !important;
+                }
+
+                .iti__country-list {
+                    max-width: 400px !important;
+                    max-height: 250px !important;
+                }
+            }
+
+            /* Медиа-запросы для мобильных */
+            @media (max-width: 789px) {
+                .iti__tel-input {
+                    height: 50px !important;
+                    font-size: 16px !important;
+                    padding-left: 110px !important;
+                }
+
+                .iti__country-list {
+                    max-width: 100% !important;
+                    max-height: 250px !important;
+                }
+            }
 
         input:focus{
           outline: none;
@@ -249,7 +393,7 @@
                 height: 70px;
                 font-size: 18px;
                 border-radius: 57px;
-                padding: 26px 55px;
+                padding: 26px 26px;
             }
 
             .sign-up-button {
@@ -310,7 +454,7 @@
 
             <!-- Email Field -->
             <label for="id_email">E-mail</label>
-            <input type="email" id="id_email" name="email" placeholder="Enter your email" required>
+            <input type="email" id="id_email" name="email" placeholder="Enter your email" value="{{ email|default:'' }}" required>
             {% if form.email.errors %}
                 <div class="error-messages">
                     <ul>
@@ -327,8 +471,10 @@
 
             <!-- Mobile Phone Field -->
             <label for="id_mobile_phone">Mobile Phone</label>
-            <input type="tel" id="id_mobile_phone" name="phone_number" placeholder="Enter your mobile phone" required>
-            <div id="phone-error" class="error-messages"></div> <!-- Блок для ошибок с id -->
+            <div class="phone-wrapper">
+                <input type="tel" id="id_mobile_phone" name="phone_number" placeholder="Enter your mobile phone" value="{{ phone_number|default:'' }}" required>
+                <div id="phone-error" class="error-messages"></div>
+            </div>
             {% if form.phone_number.errors %}
                 <div class="error-messages">
                     <ul>
@@ -343,7 +489,7 @@
             <!-- Password Fields -->
             <label for="id_password1">Password</label>
             <div class="password-field">
-                <input type="password" id="id_password1" name="password1" placeholder="Enter your password" required>
+                <input type="password" id="id_password1" name="password1" placeholder="Enter your password" value="{{ password1|default:'' }}" required>
             </div>
             {% if form.password1.errors %}
                 <div class="error-messages">
@@ -356,7 +502,7 @@
             {% endif %}
 
             <div class="password-field">
-                <input type="password" id="id_password2" name="password2" placeholder="Confirm your password" required>
+                <input type="password" id="id_password2" name="password2" placeholder="Confirm your password" value="{{ password2|default:'' }}" required>
             </div>
             {% if form.password2.errors %}
                 <div class="error-messages">
@@ -398,67 +544,271 @@
         <p class="login-text">Joined us before? <a href="{% url 'login' %}" class="login-link">Log In</a></p>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Инициализация поля телефона
-            const phoneInputField = document.querySelector("#id_mobile_phone");
-            const iti = window.intlTelInput(phoneInputField, {
-                initialCountry: "auto",
-                geoIpLookup: function (callback) {
-                    fetch("https://ipapi.co/json/")
-                        .then((response) => response.json())
-                        .then((data) => callback(data.country_code))
-                        .catch(() => callback("us"));
-                },
-                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
-            });
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Инициализация поля телефона
+    const phoneInputField = document.querySelector("#id_mobile_phone");
 
-            // Обработка отправки формы
-            const form = document.querySelector("form");
-            form.addEventListener("submit", function (event) {
-                let isValid = true;
+    if (typeof window.intlTelInput === 'undefined') {
+        console.error('intlTelInput library not loaded');
+        return;
+    }
 
-                // Проверяем все обязательные поля
-                const fields = form.querySelectorAll("input[required]");
-                fields.forEach(function (field) {
-                    const errorBlock = field.nextElementSibling;
+    const iti = window.intlTelInput(phoneInputField, {
+        initialCountry: "us",
+        separateDialCode: true,
+        preferredCountries: ['us', 'gb', 'de', 'fr', 'it', 'es', 'ru', 'ua', 'kz', 'by'],
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
+        formatOnDisplay: true,
+        autoFormat: true,
+        autoPlaceholder: "aggressive",
+        customContainer: "phone-input-container",
+        onCountryChange: function() {
+            const selectedCountry = iti.getSelectedCountryData();
+            console.log('Country changed to:', selectedCountry.iso2);
+        }
+    });
 
-                    if (!field.checkValidity()) {
-                        isValid = false;
-                        // Показываем сообщение об ошибке
-                        if (errorBlock && errorBlock.classList.contains("error-messages")) {
-                            errorBlock.classList.add("visible");
-                        }
-                    } else {
-                        // Скрываем сообщение об ошибке
-                        if (errorBlock && errorBlock.classList.contains("error-messages")) {
-                            errorBlock.classList.remove("visible");
-                        }
-                    }
-                });
+    window.iti = iti;
 
-                // Дополнительная проверка для телефона с intl-tel-input
-                const phoneErrorBlock = document.querySelector("#phone-error");  // Используем id блока
-                if (!iti.isValidNumber()) {
-                    isValid = false;
-                    // Выводим сообщение об ошибке
-                    phoneErrorBlock.innerHTML = "<ul><li>The phone number is not valid.</li></ul>";
-                    phoneErrorBlock.classList.add("visible");
-                } else {
-                    // Если номер валиден, скрываем ошибку
-                    phoneErrorBlock.innerHTML = "";
-                    phoneErrorBlock.classList.remove("visible");
+    // Принудительно исправляем позиционирование после инициализации
+    setTimeout(function() {
+        const countryList = document.querySelector('.iti__country-list');
+        if (countryList) {
+            // Убеждаемся, что список привязан к родительскому контейнеру
+            const parent = countryList.parentElement;
+            if (parent && !parent.classList.contains('iti')) {
+                // Если список не внутри .iti, перемещаем его
+                const itiContainer = document.querySelector('.iti');
+                if (itiContainer) {
+                    itiContainer.appendChild(countryList);
                 }
+            }
 
-                // Если форма невалидна, предотвращаем отправку
-                if (!isValid) {
-                    event.preventDefault();
+            // Принудительно устанавливаем стили
+            countryList.style.position = 'absolute';
+            countryList.style.top = '100%';
+            countryList.style.left = '0';
+            countryList.style.marginTop = '5px';
+            countryList.style.zIndex = '9999';
+        }
+
+        console.log('Phone input fixed');
+    }, 100);
+
+    // Если есть сохраненное значение, устанавливаем его
+    const savedPhone = "{{ phone_number|default:'' }}";
+    if (savedPhone && savedPhone !== '') {
+        // Устанавливаем номер через библиотеку
+        setTimeout(function() {
+            window.iti.setNumber(savedPhone);
+        }, 100);
+    }
+
+        // Функция для автоматического форматирования номера
+        function formatPhoneNumber(value, countryCode) {
+            // Удаляем все нецифровые символы, кроме +
+            let cleaned = value.replace(/[^\d+]/g, '');
+
+            // Если номер начинается с +, сохраняем его
+            if (!cleaned.startsWith('+')) {
+                cleaned = '+' + cleaned;
+            }
+
+            return cleaned;
+        }
+
+        // Обработчик ввода для форматирования
+        phoneInputField.addEventListener('input', function(e) {
+            // Получаем текущее значение
+            let value = this.value;
+
+            // Если введен +, больше ничего не делаем
+            if (value === '+') {
+                return;
+            }
+
+            // Получаем выбранную страну
+            const selectedCountry = iti.getSelectedCountryData();
+            const dialCode = selectedCountry.dialCode;
+
+            // Если номер начинается не с + и не содержит код страны
+            if (!value.startsWith('+') && dialCode) {
+                // Проверяем, не ввели ли код страны вручную
+                const hasDialCode = value.startsWith(dialCode) || value.includes(dialCode);
+                if (!hasDialCode && value.length > 0) {
+                    // Добавляем код страны автоматически
+                    const formatted = '+' + dialCode + value;
+                    // Обновляем значение через библиотеку
+                    iti.setNumber(formatted);
+                    // Перемещаем курсор в конец
+                    this.setSelectionRange(this.value.length, this.value.length);
                 }
-
-            });
-
+            }
         });
-    </script>
+
+        // Обработчик изменения страны
+        phoneInputField.addEventListener('countrychange', function() {
+            const selectedCountry = iti.getSelectedCountryData();
+            const dialCode = selectedCountry.dialCode;
+
+            // Если поле пустое, добавляем код страны
+            if (!this.value || this.value === '') {
+                // Библиотека сама добавит код благодаря separateDialCode: true
+                this.focus();
+            } else {
+                // Если номер уже введен, проверяем и форматируем
+                const currentNumber = iti.getNumber();
+                if (currentNumber && !currentNumber.startsWith('+')) {
+                    iti.setNumber('+' + currentNumber);
+                }
+            }
+
+            // Обновляем плейсхолдер с примером формата
+            const placeholder = iti.getNumber(iti.getSelectedCountryData().iso2);
+            if (placeholder) {
+                this.placeholder = placeholder;
+            }
+        });
+
+        // При фокусе на поле
+        phoneInputField.addEventListener('focus', function() {
+            // Если поле пустое, показываем код страны
+            if (!this.value) {
+                const selectedCountry = iti.getSelectedCountryData();
+                if (selectedCountry && selectedCountry.dialCode) {
+                    // Код уже отображается благодаря separateDialCode: true
+                }
+            }
+        });
+
+        // Запрещаем ввод букв и специальных символов
+        phoneInputField.addEventListener('keydown', function(e) {
+            const key = e.key;
+            const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', '+'];
+
+            // Разрешаем только цифры, + и служебные клавиши
+            if (!allowedKeys.includes(key) && !/^[0-9]$/.test(key)) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Если вводим +, проверяем что он первый
+            if (key === '+') {
+                if (this.value.includes('+')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        // Обработка вставки из буфера обмена
+        phoneInputField.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            // Очищаем от всех символов кроме цифр и +
+            const cleaned = pastedText.replace(/[^\d+]/g, '');
+            if (cleaned) {
+                // Если вставленный текст содержит +, используем его
+                if (cleaned.startsWith('+')) {
+                    iti.setNumber(cleaned);
+                } else {
+                    // Иначе добавляем код текущей страны
+                    const selectedCountry = iti.getSelectedCountryData();
+                    iti.setNumber('+' + selectedCountry.dialCode + cleaned);
+                }
+                this.setSelectionRange(this.value.length, this.value.length);
+            }
+        });
+
+        // Обработка отправки формы
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (event) {
+            let isValid = true;
+
+            // Проверяем все обязательные поля
+            const fields = form.querySelectorAll("input[required]");
+            fields.forEach(function (field) {
+                const errorBlock = field.nextElementSibling;
+
+                if (!field.checkValidity()) {
+                    isValid = false;
+                    if (errorBlock && errorBlock.classList.contains("error-messages")) {
+                        errorBlock.classList.add("visible");
+                    }
+                } else {
+                    if (errorBlock && errorBlock.classList.contains("error-messages")) {
+                        errorBlock.classList.remove("visible");
+                    }
+                }
+            });
+
+            // Проверка телефона
+            const phoneErrorBlock = document.querySelector("#phone-error");
+            const phoneValue = phoneInputField.value.trim();
+
+            if (!phoneValue) {
+                isValid = false;
+                phoneErrorBlock.innerHTML = "<ul><li>Please enter your phone number.</li></ul>";
+                phoneErrorBlock.classList.add("visible");
+            } else if (!iti.isValidNumber()) {
+                isValid = false;
+                phoneErrorBlock.innerHTML = "<ul><li>The phone number is not valid.</li></ul>";
+                phoneErrorBlock.classList.add("visible");
+            } else {
+                // Если номер валиден, скрываем ошибку
+                phoneErrorBlock.innerHTML = "";
+                phoneErrorBlock.classList.remove("visible");
+
+                // Получаем полный номер с кодом страны
+                const fullNumber = iti.getNumber();
+                console.log('Full number with country code:', fullNumber);
+
+                // Обновляем значение поля полным номером
+                phoneInputField.value = fullNumber;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        // Валидация при потере фокуса
+        phoneInputField.addEventListener('blur', function() {
+            const phoneErrorBlock = document.querySelector("#phone-error");
+
+            if (this.value && !iti.isValidNumber()) {
+                phoneErrorBlock.innerHTML = "<ul><li>The phone number is not valid.</li></ul>";
+                phoneErrorBlock.classList.add("visible");
+            } else {
+                phoneErrorBlock.innerHTML = "";
+                phoneErrorBlock.classList.remove("visible");
+            }
+        });
+
+        // Очистка ошибки при вводе
+        phoneInputField.addEventListener('input', function() {
+            const phoneErrorBlock = document.querySelector("#phone-error");
+            if (phoneErrorBlock.classList.contains("visible")) {
+                phoneErrorBlock.innerHTML = "";
+                phoneErrorBlock.classList.remove("visible");
+            }
+        });
+
+        // Принудительное обновление плейсхолдера после загрузки
+        setTimeout(function() {
+            const selectedCountry = iti.getSelectedCountryData();
+            if (selectedCountry && selectedCountry.iso2) {
+                const placeholder = iti.getNumber(selectedCountry.iso2);
+                if (placeholder) {
+                    phoneInputField.placeholder = placeholder;
+                }
+            }
+        }, 500);
+
+        console.log('Phone input initialized successfully');
+    });
+</script>
 
 </body>
 </html>

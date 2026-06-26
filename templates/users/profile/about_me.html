@@ -475,12 +475,12 @@
 
                 <div class="input_block">
                     <label>Current City*</label>
-                    <input type="text" placeholder="Current City" name="curr_city" value="{{ user.curr_city }}" required>
+                    <input type="text" placeholder="Current City" name="curr_city" value="{{ user.curr_city|default:'' }}" required>
                 </div>
 
                 <div class="input_block">
                     <label>Hometown*</label>
-                    <input type="text" placeholder="Hometown" name="hometown" value="{{ user.hometown }}" required>
+                    <input type="text" placeholder="Hometown" name="hometown" value="{{ user.hometown|default:'' }}" required>
                 </div>
 
                 <div id="schoolsContainer">

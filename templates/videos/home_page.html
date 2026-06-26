@@ -191,7 +191,7 @@
             }
 
             .container_svg {
-                height: 140px;
+                height: 130px;
             }
 
             .nav_pannel {
@@ -415,7 +415,10 @@
                 </p>
 
                 <div class="container_svg">
-                    {{ page.icon_svg|safe }}
+                    {% if page.icon_svg %}
+                        {# Отображаем SVG из файла #}
+                        <img src="{{ page.icon_svg.url }}" alt="{{ page.title }}" style="width: 100%; height: 100%; object-fit: contain;">
+                    {% endif %}
                 </div>
 
             </div>
@@ -439,40 +442,40 @@ function initializeTour() {
     // Определяем шаги тура для навигационных элементов
 const tourSteps = [
     {
-        selector: '.nav_pannel_pc a:first-child',
+        selector: '[data-tour="dashboard"]',
         title: 'Dashboard',
         description: 'Return to main dashboard with all active pages and courses.',
         position: 'right'
     },
     {
-        selector: '.nav_pannel_pc a:nth-child(2)',
+        selector: '[data-tour="favorites"]',
         title: 'Favourites',
-        description: 'Save important content you like for quick access.',
+        description: 'This is where anything you choose to save will be stored. Return to it as you like.',
         position: 'right'
     },
     {
-        selector: '.nav_pannel_pc a:nth-child(3)',
-        title: 'Hot Takes',
-        description: 'Popular and trending topics. Share opinions and join discussions.',
-        position: 'right'
-    },
-    {
-        selector: '.nav_pannel_pc a:nth-child(4)',
+        selector: '[data-tour="glossary"]',
         title: 'Glossary',
-        description: 'Dictionary of terms and definitions. Find meanings of unfamiliar words.',
+        description: 'Translating the jargon - some common financial terms, defined in plain-language.',
         position: 'right'
     },
     {
-        selector: '.nav_pannel_pc a:nth-child(5)',
+        selector: '[data-tour="profile"]',
         title: 'Profile',
         description: 'Manage profile, view achievements and account settings.',
         position: 'right'
     },
     {
-        selector: '.container',
+        selector: '.all_containers',
         title: 'Content Library',
-        description: 'All available learning materials are here. Click any card to start exploring and studying.',
+        description: 'All available learning materials are here. Click any card to start exploring.',
         position: 'right'
+    },
+    {
+        selector: '.fire',
+        title: 'Points',
+        description: 'These are your Doe Points. Go to your profile to see what they’re worth.',
+        position: 'bottom'
     }
 ];
 
@@ -720,7 +723,24 @@ const tourSteps = [
 
     // Функция для пропуска тура
     function skipTour() {
-        finishTour();
+        // Очищаем элементы тура
+        clearHighlight();
+        if (tooltip) {
+            tooltip.remove();
+            tooltip = null;
+        }
+        if (progress) {
+            progress.remove();
+            progress = null;
+        }
+
+        // Сохраняем в localStorage, что тур пропущен
+        localStorage.setItem('tour_skipped_dashboard', 'true');
+
+        // Убираем параметр ?tour=1 из URL без перезагрузки страницы
+        const url = new URL(window.location.href);
+        url.searchParams.delete('tour');
+        window.history.replaceState({}, '', url);
     }
 
     // Функция для показа уведомления

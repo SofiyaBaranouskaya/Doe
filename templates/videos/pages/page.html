@@ -722,7 +722,7 @@
                         </svg>
                     {% elif content.content_type.model == 'video' %}
                         <svg class="play_icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4.69897 0.383455C2.61707 -0.697825 0 0.636152 0 2.77862V21.2214C0 23.3638 2.61712 24.6978 4.69897 23.6165L22.4532 14.3952C24.5156 13.324 24.5156 10.676 22.4532 9.60484L4.69897 0.383455Z" fill="white"/>
+                            <path d="M4.69897 0.383455C2.61707 -0.697825 0 0.636152 0 2.77862V21.2214C0 23.3638 2.61712 24.6978 4.69897 23.6165L22.4532 14.3952C24.5156 13.324 24.5156 10.676 22.4532 9.60484L4.69897 0.383455Z" fill="white" stroke="#4a4a4a45"/>
                         </svg>
                     {% elif content.content_type.model == 'funfact' %}
                         <span>Fun Fact</span>
@@ -1707,38 +1707,8 @@ function initializeContentTour() {
     const tourSteps = [
         {
             selector: '.all_content',
-            title: 'Interactive Content',
-            description: 'Here you will find various types of learning materials: videos, quizzes, challenges, and more. Click on any card to start learning and earn points!',
-            position: 'bottom'
-        },
-        {
-            selector: '.content-element .video',
-            title: 'Video Lessons',
-            description: 'Watch educational videos. Each video has a duration and gives you points upon completion.',
-            position: 'bottom'
-        },
-        {
-            selector: '.content-element .fun-fact',
-            title: 'Fun Facts',
-            description: 'Interesting and surprising facts that expand your knowledge. Quick and engaging!',
-            position: 'bottom'
-        },
-        {
-            selector: '.content-element .challenge',
-            title: 'Challenges',
-            description: 'Test your skills with interactive challenges. Complete them to earn more points!',
-            position: 'bottom'
-        },
-        {
-            selector: '.content-element .chit-chat',
-            title: 'ChitChat',
-            description: 'Engaging "Would you rather..." questions to think about and discuss.',
-            position: 'bottom'
-        },
-        {
-            selector: '.content-element .quiz',
-            title: 'Quizzes',
-            description: 'Test your knowledge with quizzes. Answer questions correctly to earn points!',
+            title: 'Module Mix',
+            description: 'Inside each module is a mix of short videos, interactive challenges, fun facts, etc. Work through them in order - or jump around - totally up to you! You earn points (redeemable for various rewards) along the way.',
             position: 'bottom'
         }
     ];
@@ -1835,12 +1805,9 @@ function initializeContentTour() {
         element.classList.add('tour-highlight');
         currentHighlightedElement = element;
         holeElement = createHole(element);
-        const rect = element.getBoundingClientRect();
-        const isInViewport = rect.top >= 50 && rect.bottom <= window.innerHeight - 50;
-        if (!isInViewport) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => updateHolePosition(element), 300);
-        }
+        // Удаляем scrollIntoView - страница НЕ должна прокручиваться
+        // Обновляем позицию дырки
+        updateHolePosition(element);
         return element;
     }
 
@@ -1941,11 +1908,29 @@ function initializeContentTour() {
         localStorage.setItem('tour_completed_dashboard', 'true');
 
         // Переходим на страницу глоссария с параметром tour=1
-        window.location.href = '/glossary?tour=1';
+        window.location.href = '/profile_page?tour=1';
     }
 
+    // Функция для пропуска тура
     function skipTour() {
-        finishTour();
+        // Очищаем элементы тура
+        clearHighlight();
+        if (tooltip) {
+            tooltip.remove();
+            tooltip = null;
+        }
+        if (progress) {
+            progress.remove();
+            progress = null;
+        }
+
+        // Сохраняем в localStorage, что тур пропущен
+        localStorage.setItem('tour_skipped_dashboard', 'true');
+
+        // Убираем параметр ?tour=1 из URL без перезагрузки страницы
+        const url = new URL(window.location.href);
+        url.searchParams.delete('tour');
+        window.history.replaceState({}, '', url);
     }
 
     progress = createProgress();

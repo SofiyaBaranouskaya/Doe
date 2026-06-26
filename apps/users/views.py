@@ -73,7 +73,7 @@ def glossary_page(request):
 
     return render(request, "videos/glossary_page.html", {
         "items": items,
-        "show_tour": show_tour,  # 👈 ДОБАВЬ ЭТУ СТРОКУ
+        "show_tour": show_tour,
     })
 
 def saved_page(request):
@@ -258,7 +258,7 @@ def user_profile(request):
         'rewards': rewards,
         'user_profile_picture_base64': user.get_profile_picture_base64(),
         'member_since': formatted_date,
-        'show_tour': show_tour,  # 👈 ДОБАВЬ ЭТУ СТРОКУ
+        'show_tour': show_tour,
     })
 
 
@@ -435,10 +435,16 @@ def ajax_password_reset(request):
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST, request.FILES)
+        # Сохраняем данные из POST для передачи в шаблон при ошибке
+        email = request.POST.get('email', '')
+        phone_number = request.POST.get('phone_number', '')
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+
         if form.is_valid():
-            user = form.save(commit=False)  # Не сохраняем сразу
-            user.email = user.email.lower()  # Приводим email к lowercase
-            user.save()  # Теперь сохраняем
+            user = form.save(commit=False)
+            user.email = user.email.lower()
+            user.save()
 
             # Ищем приглашение (используем iexact для надёжности)
             invitation = Invitation.objects.filter(
@@ -464,10 +470,26 @@ def register(request):
             user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
             login(request, user)
             return redirect('signup_complete')
+        else:
+            # Если форма не валидна - передаем данные обратно в шаблон
+            context = {
+                'form': form,
+                'email': email,
+                'phone_number': phone_number,
+                'password1': password1,
+                'password2': password2,
+            }
+            return render(request, 'users/register.html', context)
     else:
         form = RegistrationForm()
-
-    return render(request, 'users/register.html', {'form': form})
+        context = {
+            'form': form,
+            'email': '',
+            'phone_number': '',
+            'password1': '',
+            'password2': '',
+        }
+        return render(request, 'users/register.html', context)
 
 
 def login_view(request):
@@ -497,8 +519,95 @@ def login_view(request):
     return render(request, 'users/login.html')
 
 def profile_view(request):
-    schools = Schools.objects.all()
-    return render(request, 'users/profile.html', {'schools': schools})
+    user = request.user
+
+    # Проверяем, есть ли параметр next в URL (режим редактирования)
+    edit_mode = 'next' in request.GET
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Для POST тоже проверяем
+        edit_mode = 'next' in request.POST
+        next_url = request.POST.get('next')
+
+        # --- BASIC FIELDS ---
+        first_name = request.POST.get('first_name')
+        if first_name is not None:
+            user.first_name = first_name.strip()
+
+        last_name = request.POST.get('last_name')
+        if last_name is not None:
+            user.last_name = last_name.strip()
+
+        curr_city = request.POST.get('curr_city')
+        if curr_city is not None:
+            user.curr_city = curr_city.strip()
+
+        hometown = request.POST.get('hometown')
+        if hometown is not None:
+            user.hometown = hometown.strip()
+
+        # --- DATE OF BIRTH ---
+        dob = request.POST.get('dob')
+        if dob:
+            try:
+                user.date_of_birth = datetime.strptime(dob, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
+        # --- AVATAR ---
+        if request.FILES.get('avatar'):
+            user.profile_picture = request.FILES['avatar']
+
+        user.save()
+
+        # --- SCHOOLS ---
+        UserSchool.objects.filter(user=user).delete()
+
+        index = 0
+        while f'schools[{index}][school_id]' in request.POST:
+
+            school_id = request.POST.get(f'schools[{index}][school_id]')
+            grad_year = request.POST.get(f'schools[{index}][grad_year]')
+            other_name = request.POST.get(f'schools[{index}][other_name]', '').strip()
+
+            if school_id and grad_year:
+
+                if school_id == '0' and other_name:
+                    UserSchool.objects.create(
+                        user=user,
+                        school=None,
+                        graduation_year=grad_year,
+                        other_school_name=other_name
+                    )
+
+                else:
+                    try:
+                        school = Schools.objects.get(id=school_id)
+                        UserSchool.objects.create(
+                            user=user,
+                            school=school,
+                            graduation_year=grad_year
+                        )
+                    except Schools.DoesNotExist:
+                        pass
+
+            index += 1
+
+        # ВОЗВРАЩАЕМСЯ В ЗАВИСИМОСТИ ОТ РЕЖИМА
+        if edit_mode and next_url:
+            return redirect(next_url)
+        else:
+            return redirect('profile_your_next_move')
+
+    # ---------- GET REQUEST ----------
+    return render(request, 'users/profile/about_me.html', {
+        'user': user,
+        'schools': Schools.objects.all(),
+        'user_schools': UserSchool.objects.filter(user=user),
+        'edit_mode': edit_mode,
+        'next': next_url if edit_mode else None,
+    })
 
 
 @login_required

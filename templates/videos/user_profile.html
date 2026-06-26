@@ -1058,9 +1058,9 @@
                         <div class="lists">
                             <div class="lists_content">
                                 <div class="goal">
-                                    <h4>About</h4>
+                                    <h4>City</h4>
                                     <p style="margin-left: 35px; padding: 5px;">{{ user.curr_city |default:'Not set yet' }}</p>
-                                    <p style="margin-left: 35px; padding: 5px;">{{ user.current_vibe |default:'Not set yet' }}</p>
+<!--                                    <p style="margin-left: 35px; padding: 5px;">{{ user.current_vibe |default:'Not set yet' }}</p>-->
 <!--                                    <p style="margin-left: 35px; padding: 5px;">{{ member_since }}</p>-->
                                 </div>
                                 <div class="interests_hobbies">
@@ -1540,52 +1540,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeProfileTour() {
     const tourSteps = [
         {
-            selector: '.profile_icon',
-            title: 'Your Profile Picture',
-            description: 'This is your profile picture. You can change it by clicking the edit button next to your name.',
-            position: 'bottom'
-        },
-        {
-            selector: '.edit_svg',
-            title: 'Edit Profile',
-            description: 'Click here to edit your personal information, including about me, your next move, current vibe, industry field, and more.',
-            position: 'bottom'
-        },
-        {
-            selector: '.lists_content',
-            title: 'Your Information',
-            description: 'Here you can see your location, current vibe, member since date, industry/field, and who you are today.',
-            position: 'right'
-        },
-        {
             selector: '#redeemBtn',
             title: 'Redeem Points',
-            description: 'Exchange your earned points for exciting rewards! Click here to see available rewards.',
-            position: 'top'
-        },
-        {
-            selector: '#referFriendBtn',
-            title: 'Refer a Friend',
-            description: 'Invite friends to join Doe and earn bonus points when they sign up!',
-            position: 'top'
-        },
-        {
-            selector: '.status',
-            title: 'Your Activity Stats',
-            description: 'Track your progress here: points earned, activities completed, and events attended.',
-            position: 'left',
-            preserveSize: true  // Маркер, что нужно сохранить размер
-        },
-        {
-            selector: '#retakeTourLink',
-            title: 'Retake Platform Tour',
-            description: 'Want to see the tour again? Click here to restart the platform tour anytime!',
-            position: 'top'
-        },
-        {
-            selector: 'a[href*="signout"]',
-            title: 'Sign Out',
-            description: 'Click here to securely log out of your account.',
+            description: 'Exchange your earned points for rewards. See what’s available here.',
             position: 'top'
         }
     ];
@@ -1853,10 +1810,30 @@ function initializeProfileTour() {
         const url = new URL(window.location.href);
         url.searchParams.delete('tour');
         window.history.replaceState({}, '', url);
+
+        window.location.href = '/home/';
     }
 
+    // Функция для пропуска тура
     function skipTour() {
-        finishTour();
+        // Очищаем элементы тура
+        clearHighlight();
+        if (tooltip) {
+            tooltip.remove();
+            tooltip = null;
+        }
+        if (progress) {
+            progress.remove();
+            progress = null;
+        }
+
+        // Сохраняем в localStorage, что тур пропущен
+        localStorage.setItem('tour_skipped_dashboard', 'true');
+
+        // Убираем параметр ?tour=1 из URL без перезагрузки страницы
+        const url = new URL(window.location.href);
+        url.searchParams.delete('tour');
+        window.history.replaceState({}, '', url);
     }
 
     progress = createProgress();

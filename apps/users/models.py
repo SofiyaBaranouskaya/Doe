@@ -140,7 +140,14 @@ class Page(models.Model):
         default="#FD7981"
     )
 
-    icon_svg = models.TextField(blank=True)
+    icon_svg = models.FileField(
+        upload_to='pages-icons/',
+        validators=[FileExtensionValidator(allowed_extensions=['svg'])],
+        blank=True,
+        null=True,
+        storage=SupabaseStorage(bucket_name='pages'),
+        help_text='Upload SVG only (.svg)'
+    )
 
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
