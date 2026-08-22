@@ -29,7 +29,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = env.bool("DEBUG")
 
 ALLOWED_HOSTS = ['app.doe.wuaze.com', 'doe-82da822924d4.herokuapp.com', 'localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.simulator',
     'apps.aichat',
+    'apps.invest_calculator',
 ]
 
 MIDDLEWARE = [
@@ -172,7 +173,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = []
+# STATICFILES_DIRS = []
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Для корректной работы whitenoise (если используешь)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -234,7 +238,7 @@ DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
 #     pass
 
 # WhiteNoise configuration
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+# MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Дополнительная диагностика для staticfiles

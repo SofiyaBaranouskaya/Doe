@@ -8,7 +8,6 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('', views.onboarding_view3, name='onboarding3'),
 
-
     path('', include('django_prometheus.urls')),
     # Кастомные эндпоинты для отслеживания
     path('api/track/start/<int:content_id>/', views.track_content_start, name='track_content_start'),
@@ -101,5 +100,7 @@ urlpatterns = [
 
     path('simulator/', include('apps.simulator.urls', namespace='simulator')),
     path('aichat/', include('apps.aichat.urls', namespace='aichat')),
+
+    path("calculator/", include("apps.invest_calculator.urls")),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

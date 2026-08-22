@@ -19,7 +19,7 @@
 
     .nav_pannel_pc{
         width: max-content;
-        height: 400px;
+        height: 70%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -34,10 +34,31 @@
         width: 100%;
     }
 
+.nav_pannel_pc a {
+    color: #9a9a9a;
+}
+
+.nav_pannel_pc a svg path {
+    fill: #9a9a9a;
+}
+
+.nav_pannel_pc a.active {
+    color: #000;
+}
+
+.nav_pannel_pc a.active svg path {
+    fill: #000;
+}
+
 </style>
 
 <div class="nav_pannel_pc">
-    <a href="{% url 'home' %}" data-tour="dashboard">
+
+    {% load static %}
+    <img src="{% static 'icons/icon.svg' %}" alt="icon" class="doe_icon">
+
+
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' or request.resolver_match.url_name == 'dynamic_page' %}active{% endif %}" data-tour="dashboard">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2091_642" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
             <rect width="31" height="31" fill="#D9D9D9"/>
@@ -51,7 +72,7 @@
 
     <hr class="menu-divider">
 
-    <a href="{% url 'favourites_page' %}" data-tour="favorites">
+    <a href="{% url 'favourites_page' %}" class="{% if request.resolver_match.url_name == 'favourites_page' %}active{% endif %}" data-tour="favorites">
         <svg width="29" height="29" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.3638 0L15.2825 8.98278H24.7275L17.0863 14.5344L20.005 23.5172L12.3638 17.9656L4.72256 23.5172L7.64124 14.5344L3.52859e-05 8.98278H9.44509L12.3638 0Z" fill="black"/>
         </svg>
@@ -70,7 +91,7 @@
 <!--        <span>Hot takes</span>-->
 <!--    </a>-->
 
-    <a href="{% url 'glossary_page' %}" data-tour="glossary">
+    <a href="{% url 'glossary_page' %}" class="{% if request.resolver_match.url_name == 'glossary_page' %}active{% endif %}" data-tour="glossary">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2334_498" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
             <rect width="31" height="31" fill="#D9D9D9"/>
@@ -82,7 +103,7 @@
         <span>Glossary</span>
     </a>
 
-<!--    <a href="{% url 'simulator:fund_list' %}">-->
+<!--    <a href="{% url 'simulator:fund_list' %}" class="{% if request.resolver_match.url_name == 'simulator:fund_list' %}active{% endif %}">-->
 <!--        <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">-->
 <!--            <mask id="mask0_2091_simulator" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">-->
 <!--                <rect width="31" height="31" fill="#D9D9D9"/>-->
@@ -94,7 +115,7 @@
 <!--        <span>Simulator</span>-->
 <!--    </a>-->
 
-<!--    <a href="{% url 'aichat:chat' %}">-->
+<!--    <a href="{% url 'aichat:chat' %}" class="{% if request.resolver_match.url_name == 'aichat:chat' %}active{% endif %}">-->
 <!--        <svg width="31" height="31" viewBox="0 0 31 31" xmlns="http://www.w3.org/2000/svg">-->
 <!--            <path d="M6.5 22.5V8.5C6.5 7.6 7.1 7 8 7H23C23.9 7 24.5 7.6 24.5 8.5V18C24.5 18.9 23.9 19.5 23 19.5H11.5L6.5 22.5Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round"/>-->
 <!--            <circle cx="12" cy="13.5" r="1.2" fill="black"/>-->
@@ -104,10 +125,16 @@
 <!--        <span>Ai Сhat</span>-->
 <!--    </a>-->
 
+    <a href="{% url 'invest_calculator:compound_calculator' %}" class="{% if request.resolver_match.view_name == 'invest_calculator:compound_calculator' or request.resolver_match.view_name == 'invest_calculator:angel_investor_calculator' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" height="31px" viewBox="0 -960 960 960" width="31px" fill="#e3e3e3">
+            <path d="M360-160q-134 0-227-93T40-480q0-134 93-227t227-93h240q134 0 227 93t93 227q0 134-93 227t-227 93H360Zm0-80h240q100 0 170-70t70-170q0-100-70-170t-170-70H360q-100 0-170 70t-70 170q0 100 70 170t170 70Zm120-160q33 0 56.5-23.5T560-480q0-33-23.5-56.5T480-560q-33 0-56.5 23.5T400-480q0 33 23.5 56.5T480-400Zm-40-200h80q17 0 28.5-11.5T560-640q0-17-11.5-28.5T520-680h-80q-17 0-28.5 11.5T400-640q0 17 11.5 28.5T440-600Zm0 320h80q17 0 28.5-11.5T560-320q0-17-11.5-28.5T520-360h-80q-17 0-28.5 11.5T400-320q0 17 11.5 28.5T440-280Zm200-120q17 0 28.5-11.5T680-440v-80q0-17-11.5-28.5T640-560q-17 0-28.5 11.5T600-520v80q0 17 11.5 28.5T640-400Zm-320 0q17 0 28.5-11.5T360-440v-80q0-17-11.5-28.5T320-560q-17 0-28.5 11.5T280-520v80q0 17 11.5 28.5T320-400Zm160-80Z"/>
+        </svg>
+        <span>Tools</span>
+    </a>
 
     <hr class="menu-divider">
 
-    <a href="{% url 'user_profile' %}" data-tour="profile">
+    <a href="{% url 'user_profile' %}" class="{% if request.resolver_match.url_name == 'user_profile' %}active{% endif %}" data-tour="profile">
         <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_2091_648" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="31" height="31">
             <rect width="31" height="31" fill="#D9D9D9"/>

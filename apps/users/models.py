@@ -1,6 +1,7 @@
 import os
 import re
 import mimetypes
+import uuid
 from datetime import time
 
 from django.apps import apps
@@ -78,6 +79,7 @@ class Invitation(models.Model):
     invitee_email = models.EmailField()
     invited_at = models.DateTimeField(auto_now_add=True)
     accepted = models.BooleanField(default=False)
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
         return f"{self.inviter.email} invited {self.invitee_email}"
@@ -647,11 +649,18 @@ class ChitChat(models.Model):
     title = models.CharField(
         max_length=500,
         verbose_name="Title",
-        help_text="Fill the title",
         default="Would you rather?"
     )
     points = models.PositiveIntegerField(default=100)
     duration = models.CharField(max_length=20, blank=True, null=True)
+
+    poster_url = models.ImageField(
+        upload_to="posters/",
+        storage=SupabaseStorage(bucket_name="posters"),
+        blank=True,
+        null=True,
+    )
+    poster_base64 = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Chit Chat"
@@ -659,6 +668,39 @@ class ChitChat(models.Model):
 
     def __str__(self):
         return self.title[:50]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old = ChitChat.objects.get(pk=self.pk)
+            if old.poster_url != self.poster_url or not self.poster_base64:
+                self.convert_poster_to_base64()
+        elif self.poster_url:
+            self.convert_poster_to_base64()
+
+        super().save(*args, **kwargs)
+
+    def convert_poster_to_base64(self):
+        try:
+            if not self.poster_url:
+                self.poster_base64 = None
+                return
+
+            img = Image.open(self.poster_url)
+
+            if img.mode in ("RGBA", "LA"):
+                background = Image.new("RGB", img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1])
+                img = background
+
+            buffered = BytesIO()
+            img.save(buffered, format="JPEG", quality=85)
+
+            self.poster_base64 = base64.b64encode(
+                buffered.getvalue()
+            ).decode("utf-8")
+
+        except Exception:
+            self.poster_base64 = None
 
 
 class ChitChatOption(models.Model):
@@ -746,19 +788,59 @@ class Challenge(models.Model):
     picture_base64 = models.TextField(blank=True, null=True)
     min_answers_required = models.PositiveIntegerField(default=1, verbose_name="Minimum number of answers required")
     duration = models.CharField(max_length=20, blank=True, null=True)
+    poster_url = models.ImageField(
+        upload_to="posters/",
+        storage=SupabaseStorage(bucket_name="posters"),
+        blank=True,
+        null=True,
+    )
+    poster_base64 = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
+
         if self.pk:
-            old_obj = Challenge.objects.filter(pk=self.pk).first()
-            if old_obj and old_obj.picture != self.picture:
+            old = Challenge.objects.filter(pk=self.pk).first()
+
+            if old and old.picture != self.picture:
                 self.convert_image_to_base64()
-        elif self.picture:
-            self.convert_image_to_base64()
+
+            if old and (old.poster_url != self.poster_url or not self.poster_base64):
+                self.convert_poster_to_base64()
+
+        else:
+            if self.picture:
+                self.convert_image_to_base64()
+
+            if self.poster_url:
+                self.convert_poster_to_base64()
 
         super().save(*args, **kwargs)
+
+    def convert_poster_to_base64(self):
+        try:
+            if not self.poster_url:
+                self.poster_base64 = None
+                return
+
+            img = Image.open(self.poster_url)
+
+            if img.mode in ("RGBA", "LA"):
+                background = Image.new("RGB", img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1])
+                img = background
+
+            buffered = BytesIO()
+            img.save(buffered, format="JPEG", quality=85)
+
+            self.poster_base64 = base64.b64encode(
+                buffered.getvalue()
+            ).decode("utf-8")
+
+        except Exception:
+            self.poster_base64 = None
 
     @property
     def formatted_description(self):

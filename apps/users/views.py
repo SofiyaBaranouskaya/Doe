@@ -25,13 +25,13 @@ from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from collections import defaultdict
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
 from utils.supabase_upload import upload_user_avatar
 from utils.generate_avatar import generate_initial_avatar
 import logging
 from .tasks import process_uploaded_file
-
+from email.mime.image import MIMEImage
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -298,55 +298,364 @@ def get_user_points(request):
         })
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
 @csrf_exempt
 @require_POST
 def send_invite(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-    data = json.loads(request.body)
-    email = data.get('email')
-
-    sender_email = request.user.email
-    if not sender_email:
-        return JsonResponse({'error': 'User email not found'}, status=400)
-
-    # не приглашали ли уже
-    if Invitation.objects.filter(
-        inviter=request.user,
-        invitee_email=email
-    ).exists():
-        return JsonResponse(
-            {'message': 'Invitation already sent'},
-            status=200
-        )
-
     try:
-        # СОЗДАЁМ ЗАПИСЬ В БД
+        data = json.loads(request.body)
+        email = data.get('email')
+        friend_name = data.get('name', '')
+        friend_phone = data.get('phone', '')
+
+        if not email:
+            return JsonResponse({'error': 'Email is required'}, status=400)
+
+        # ПРОВЕРКА 1: Приглашаемый уже зарегистрирован?
+        if User.objects.filter(email__iexact=email).exists():
+            return JsonResponse({
+                'error': f'{email} is already registered on the platform.',
+                'code': 'USER_EXISTS'
+            }, status=400)
+
+        # ПРОВЕРКА 2: Уже отправляли приглашение этому email?
+        if Invitation.objects.filter(
+                inviter=request.user,
+                invitee_email__iexact=email
+        ).exists():
+            return JsonResponse({
+                'error': f'An invitation to {email} has already been sent.',
+                'code': 'INVITE_EXISTS'
+            }, status=400)
+
+        # СОЗДАЕМ ПРИГЛАШЕНИЕ
         invitation = Invitation.objects.create(
             inviter=request.user,
             invitee_email=email,
         )
 
-        base_url = request.build_absolute_uri('/')
+        # ФОРМИРУЕМ ССЫЛКУ
+        base_url = settings.SITE_URL.rstrip('/') if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/').rstrip('/')
+        register_url = f"{base_url}/register?token={invitation.token}&email={email}"
 
-        # ОТПРАВЛЯЕМ ПИСЬМО
-        send_mail(
-            subject="You're invited!",
-            message=(
-                f"{request.user.first_name} invited you to join Doe!\n\n"
-                f"Join us here: {base_url}"
-            ),
-            from_email=sender_email,
-            recipient_list=[email],
-            fail_silently=False,
+        # ИМЯ ПРИГЛАШАЮЩЕГО
+        inviter_name = request.user.get_full_name() or request.user.first_name or request.user.email
+
+        subject = f"🌸 {inviter_name} invited you to join Doe!"
+        # ПУТЬ К ЛОГОТИПУ (используем PNG, а не SVG)
+        logo_filename = 'doe_logo.png'  # должно быть в static/icons/doe_logo.png
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'icons', logo_filename)
+
+        # Если PNG нет, пробуем использовать SVG, но конвертировать в PNG не умеем
+        # Проще сохранить логотип как PNG в static/icons/
+        if not os.path.exists(logo_path):
+            # Если файла нет — используем внешний URL или просто пропускаем логотип
+            logo_path = None
+            print(f"⚠️ Logo not found at {logo_path}")
+
+        # HTML версия письма
+        html_message = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{ 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                    color: #333; 
+                    line-height: 1.6;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #fdf6f8;
+                }}
+                .container {{ 
+                    max-width: 600px; 
+                    margin: 0 auto; 
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 40px rgba(253, 121, 129, 0.15);
+                }}
+                .header {{ 
+                    background: linear-gradient(135deg, #FD7981 0%, #FF9A9E 50%, #FFB3B7 100%);
+                    padding: 40px 30px 30px;
+                    text-align: center;
+                    border-radius: 20px 20px 0 0;
+                    position: relative;
+                    overflow: hidden;
+                }}
+                .header::before {{
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    right: -50%;
+                    width: 100%;
+                    height: 100%;
+                    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                    border-radius: 50%;
+                }}
+                .logo-container {{
+                    background: rgba(255,255,255,0.95);
+                    padding: 15px 30px;
+                    border-radius: 50px;
+                    display: inline-block;
+                    margin-bottom: 20px;
+                    box-shadow: 0 4px 20px rgba(253, 121, 129, 0.3);
+                    position: relative;
+                }}
+                .doe-icon {{
+                    display: block;
+                    max-width: 134px;
+                    height: auto;
+                }}
+                .header h1 {{ 
+                    margin: 0; 
+                    font-size: 32px;
+                    color: white;
+                    font-weight: 700;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    position: relative;
+                }}
+                .header p {{ 
+                    margin: 10px 0 0;
+                    color: rgba(255,255,255,0.95);
+                    font-size: 18px;
+                    position: relative;
+                }}
+                .content {{ 
+                    padding: 40px 35px;
+                    background: white;
+                    border-radius: 0 0 20px 20px;
+                }}
+                .greeting {{
+                    font-size: 18px;
+                    color: #555;
+                    margin-bottom: 20px;
+                }}
+                .inviter-name {{ 
+                    color: #FD7981; 
+                    font-weight: 700; 
+                    font-size: 20px;
+                }}
+                .message-box {{
+                    background: linear-gradient(135deg, #FFF5F6 0%, #FFE8EA 100%);
+                    padding: 25px;
+                    border-radius: 15px;
+                    margin: 25px 0;
+                    border-left: 4px solid #FD7981;
+                }}
+                .button-container {{
+                    text-align: center;
+                    margin: 35px 0 25px;
+                }}
+                .button {{
+                    display: inline-block;
+                    padding: 16px 48px;
+                    background: linear-gradient(135deg, #FD7981 0%, #FF6B7A 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 50px;
+                    font-weight: 600;
+                    font-size: 18px;
+                    box-shadow: 0 6px 25px rgba(253, 121, 129, 0.4);
+                    letter-spacing: 0.5px;
+                }}
+                .link-box {{
+                    background: #f8f9fa;
+                    padding: 12px 15px;
+                    border-radius: 10px;
+                    word-break: break-all;
+                    border: 1px solid #f0f0f0;
+                    margin: 15px 0 25px;
+                    font-size: 14px;
+                }}
+                .link-box a {{
+                    color: #FD7981;
+                    text-decoration: none;
+                    font-weight: 500;
+                }}
+                .features {{
+                    display: flex;
+                    justify-content: space-around;
+                    margin: 30px 0;
+                    padding: 20px 0;
+                    border-top: 2px solid #FFF0F2;
+                    border-bottom: 2px solid #FFF0F2;
+                }}
+                .feature {{
+                    text-align: center;
+                    flex: 1;
+                }}
+                .feature-emoji {{
+                    font-size: 28px;
+                    display: block;
+                    margin-bottom: 5px;
+                }}
+                .feature-text {{
+                    font-size: 13px;
+                    color: #666;
+                    font-weight: 500;
+                }}
+                .footer {{
+                    text-align: center;
+                    padding: 25px 0 10px;
+                    color: #999;
+                    font-size: 12px;
+                    border-top: 1px solid #f0f0f0;
+                    margin-top: 30px;
+                }}
+                .footer a {{
+                    color: #FD7981;
+                    text-decoration: none;
+                    font-weight: 500;
+                }}
+                .footer .brand {{
+                    font-weight: 600;
+                    color: #FD7981;
+                }}
+                .disclaimer {{
+                    background: #FFF9F9;
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin-top: 20px;
+                    font-size: 13px;
+                    color: #888;
+                    border: 1px solid #FFE8EA;
+                }}
+                @media only screen and (max-width: 480px) {{
+                    .container {{ padding: 10px; }}
+                    .content {{ padding: 25px 20px; }}
+                    .header {{ padding: 30px 20px; }}
+                    .header h1 {{ font-size: 26px; }}
+                    .features {{ flex-direction: column; gap: 15px; }}
+                    .button {{ padding: 14px 30px; font-size: 16px; }}
+                    .doe-icon {{
+                        max-width: 100px;
+                    }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div style="max-width: 640px; margin: 40px auto; padding: 0 20px;">
+                <div class="container">
+                    <div class="header">
+                        <div class="logo-container">
+                            <img src="cid:logo_cid" alt="Doe" class="doe-icon" width="134" height="74">
+                        </div>
+                        <h1>You're Invited! 🎉</h1>
+                        <p>Join the Doe community</p>
+                    </div>
+                    <div class="content">
+                        <div class="greeting">Hello <strong>👋</strong>,</div>
+                        <p style="font-size: 16px; color: #444;">
+                            <span class="inviter-name">{inviter_name}</span> 
+                            has invited you to join the <strong style="color: #FD7981;">Doe</strong> community!
+                        </p>
+                        <div class="message-box">
+                            <p style="margin: 0; font-size: 15px; color: #555;">
+                                <span style="font-size: 20px;">🌟</span> 
+                                You've been personally invited to check out the Doe platform and community. 
+                                Join other bright, ambitious young women in learning the power, 
+                                influence, and opportunity that comes with understanding Financial Capital.
+                            </p>
+                        </div>
+                        <div class="button-container">
+                            <a href="{register_url}" class="button">✨ Accept Invitation</a>
+                        </div>
+                        <p style="text-align: center; color: #888; font-size: 14px; margin: 10px 0;">
+                            or copy this link:
+                        </p>
+                        <div class="link-box">
+                            <a href="{register_url}">{register_url}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Plain text версия
+        plain_message = f"""
+        ✨ You're Invited to Doe! ✨
+
+        {inviter_name} has invited you to join Doe!
+
+        Accept your invitation here:
+        {register_url}
+
+        Why join?
+        🤝 Connect with like-minded people
+        💡 Share insights and experiences  
+        🚀 Grow together as a community
+
+        This invitation was sent by {inviter_name}.
+
+        ---
+        Doe
+        {base_url}
+        """
+
+        # === ОТПРАВКА ПИСЬМА (ОДИН РАЗ, через EmailMultiAlternatives) ===
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[email]
         )
+        msg.attach_alternative(html_message, "text/html")
 
-        return JsonResponse({'message': 'Invitation sent successfully!'})
+        # ВЛОЖЕНИЕ ЛОГОТИПА (если файл существует)
+        if logo_path and os.path.exists(logo_path):
+            try:
+                with open(logo_path, 'rb') as f:
+                    # Определяем MIME-тип по расширению
+                    if logo_path.lower().endswith('.svg'):
+                        content_type = 'image/svg+xml'
+                    elif logo_path.lower().endswith('.png'):
+                        content_type = 'image/png'
+                    elif logo_path.lower().endswith('.jpg') or logo_path.lower().endswith('.jpeg'):
+                        content_type = 'image/jpeg'
+                    else:
+                        content_type = 'image/png'  # по умолчанию
 
+                    from email.mime.image import MIMEImage
+                    img = MIMEImage(f.read(), _subtype=content_type.split('/')[-1])
+                    img.add_header('Content-ID', '<logo_cid>')
+                    img.add_header('Content-Disposition', 'inline', filename=os.path.basename(logo_path))
+                    msg.attach(img)
+            except Exception as e:
+                print(f"⚠️ Failed to attach logo: {e}")
+        else:
+            print(f"⚠️ Logo not found, sending without it")
+
+        # ОТПРАВЛЯЕМ
+        try:
+            msg.send(fail_silently=False)
+        except Exception as e:
+            print(f"❌ Failed to send email: {e}")
+            return JsonResponse({
+                'error': f'Failed to send email: {str(e)}'
+            }, status=500)
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Invitation sent successfully to {email}!',
+            'email': email,
+            'inviter': inviter_name
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     except Exception as e:
-        print(e)
-        return JsonResponse({'error': 'Failed to send email.'}, status=500)
+        print(f"❌ Error sending invitation: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': 'Failed to send invitation. Please try again later.'}, status=500)
 
 
 

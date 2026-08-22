@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Single Deal Calculator</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* ── Общие стили из Compound Interest Calculator ── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f8f9fc;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            overflow-y: hidden;
+        }
+
+        /* ── Типографика ── */
+        .main-title {
+            color: #f47b76;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: #f47b76;
+            font-size: 25px;
+            margin-bottom: 28px;
+            font-weight: bold;
+            justify-self: center;
+        }
+
+        .card-title {
+            color: #f47b76;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 18px;
+        }
+
+        .label-sm {
+            color: #9ca3af;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ── Карточка плана (общая) ── */
+        .plan-card {
+            border: 2px solid #1a2b4c;
+            border-radius: 18px;
+            padding: 24px 28px 28px;
+            margin-bottom: 24px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 28px;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+            border: 2px solid #1a2b4c;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a2b4c;
+            width: 100%;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #f47b76;
+        }
+
+        .input-group input[readonly] {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        /* ── Переключатель табов (тип инвестиции) ── */
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: #fce4e4;
+            border: 2px solid #fce4e4;
+            border-radius: 10px;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #1a2b4c;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab.active {
+            background: #f47b76;
+            border-color: #1a2b4c;
+            color: #ffffff;
+        }
+
+        .tab input { display: none; }
+
+        /* ── Слайдер (аналог years slider) ── */
+        .slider-wrap {
+            margin-top: 14px;
+            padding: 0 4px;
+            position: relative;
+        }
+
+        .slider-wrap label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a2b4c;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            background: #1a2b4c;
+            border-radius: 4px;
+            outline: none;
+            margin: 8px 0 4px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f47b76;
+            cursor: pointer;
+            border: 3px solid #1a2b4c;
+            box-shadow: 0 0 0 2px #f47b76;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #f47b76; cursor: pointer; border: 3px solid #1a2b4c;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .slider-tooltip {
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            color: #1a2b4c;
+            font-weight: 700;
+            font-size: 12px;
+            pointer-events: none;
+            transition: left 0.1s;
+        }
+
+        /* ── Кнопка Calculate ── */
+        .calculate-btn {
+            width: 100%;
+            margin-top: 24px;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: #f47b76;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .calculate-btn:hover { opacity: 0.9; }
+
+        /* ── Карточки владения ── */
+        .cards-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .ownership-card {
+            background: #f47b76;
+            border: 2px solid #1a2b4c;
+            border-radius: 16px;
+            padding: 18px 20px;
+        }
+
+        .ownership-card .label {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .ownership-card .value {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* ── Блок с графиком ── */
+        .chart-card {
+            border: 2px solid #1a2b4c;
+            border-radius: 18px;
+            padding: 24px 24px 16px;
+            margin-bottom: 18px;
+        }
+
+        .chart-card .chart-title {
+            color: #f47b76;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .chart-card .chart-sub {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 220px;
+        }
+
+        /* ── Таблица сценариев ── */
+        .table-container {
+            border: 2px solid #1a2b4c;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f47b76;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 12px 10px;
+            text-align: right;
+        }
+
+        th:first-child, td:first-child { text-align: left; padding-left: 16px; }
+        th:last-child, td:last-child { padding-right: 16px; }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px dotted #9ca3af;
+            color: #1a2b4c;
+            font-size: 13px;
+            text-align: right;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        /* ── Итоговая строка ── */
+        .bottom-result {
+            border: 2px dashed #1a2b4c;
+            border-radius: 12px;
+            padding: 14px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fce4e4;
+            margin-bottom: 14px;
+        }
+
+        .bottom-result .label {
+            color: #1a2b4c;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bottom-result .value {
+            color: #1a2b4c;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .note-text {
+            color: #6b7280;
+            font-size: 11px;
+            font-style: italic;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .input-note {
+            font-size: 11px;
+            color: #6b7280;
+            font-style: italic;
+            margin-top: 4px;
+            padding-left: 4px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ── Каркас страницы (как в Compound Interest Calculator) ── */
+        .main {
+            width: 100%;
+            height: 100vh;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0px;
+            overflow: hidden;
+        }
+
+        .calculator {
+            width: 100%;
+            display: block;
+            flex-wrap: wrap;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0 30px 30px 30px;
+        }
+
+        .nav_pannel {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px 30px 20px;
+            margin-top: auto;
+        }
+
+        .main_content {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            font-style: normal;
+            padding: 0px 10px;
+            margin: 25px 0px 0px;
+        }
+
+        .separator {
+            height: auto;
+            margin-left: 0;
+        }
+
+        h1.page-switcher {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: nowrap;
+            gap: 10px;
+            margin: 25px 0 0;
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 52px;
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        h1.page-switcher a {
+            color: #9a9a9a;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            cursor: pointer;
+            font-size: inherit;
+            font-weight: inherit;
+        }
+
+        h1.page-switcher a.active {
+            color: #f47b76;
+        }
+
+        h1.page-switcher a:hover {
+            color: #f47b76;
+        }
+
+        h1.page-switcher .separator {
+            color: #9a9a9a;
+            user-select: none;
+        }
+
+        /* Адаптация для мобильных */
+        @media (max-width: 480px) {
+            h1.page-switcher {
+                font-size: 24px;
+                gap: 6px;
+            }
+        }
+        @media (min-width: 790px) {
+            .doe_icon {
+                display: block;
+                margin: 40px auto;
+                width: 150px;
+            }
+
+            h1 {
+                font-size: 48px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .calculator {
+                padding: 20px 16px 28px;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .cards-row {
+                grid-template-columns: 1fr;
+            }
+            .bottom-result {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+            .chart-wrapper {
+                height: 180px;
+            }
+            .plan-card {
+                padding: 18px 16px 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main">
+    <div class="main_content">
+        <div class="nav_pc">
+            {% include 'videos/nav_pc.html' %}
+        </div>
+
+        <div style="width: -webkit-fill-available; display:flex; flex-direction: column;">
+            <div style="
+                    margin: 65px 40px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;">
+<h1 class="page-switcher">
+    <a href="{% url 'invest_calculator:compound_calculator' %}"
+       class="{% if request.resolver_match.view_name == 'invest_calculator:compound_calculator' %}active{% endif %}">
+        Compound Interest
+    </a>
+    <span class="separator">/</span>
+    <a href="{% url 'invest_calculator:angel_investor_calculator' %}"
+       class="{% if request.resolver_match.view_name == 'invest_calculator:angel_investor_calculator' %}active{% endif %}">
+        Single Deal
+    </a>
+</h1>
+            </div>
+            <div class="calculator">
+                <p class="subtitle">Ownership, dilution, and payout range for a Priced-Round investment.</p>
+
+                <!-- Форма с параметрами сделки -->
+                <form id="angel-form" class="plan-card">
+                    <div class="card-title">DEAL TERMS</div>
+
+                    <!-- Табы выбора типа -->
+                    <div class="tabs">
+                        <label class="tab" data-type="safe">
+                            <input type="radio" name="security_type" value="safe"> SAFE
+                        </label>
+                        <label class="tab" data-type="note">
+                            <input type="radio" name="security_type" value="note"> NOTE
+                        </label>
+                        <label class="tab active" data-type="priced_round">
+                            <input type="radio" name="security_type" value="priced_round" checked> PRICED
+                        </label>
+                    </div>
+
+                    <!-- Поля ввода -->
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <span class="label-sm">YOUR INVESTMENT</span>
+                            <input type="text" name="investment" id="investment" value="{{ defaults.investment|default:25000 }}">
+                        </div>
+
+                        <div class="input-group" data-field="val-cap">
+                            <span class="label-sm">VAL CAP</span>
+                            <input type="text" name="val_cap" id="val_cap" value="{{ defaults.val_cap|default:10000000 }}">
+                        </div>
+
+                        <div class="input-group" data-field="pre-money">
+                            <span class="label-sm">PRE-MONEY VALUATION</span>
+                            <input type="text" name="pre_money" id="pre_money" value="{{ defaults.pre_money|default:15000000 }}">
+                        </div>
+
+                        <div class="input-group" data-field="round-size">
+                            <span class="label-sm">TOTAL ROUND SIZE</span>
+                            <input type="text" name="round_size" id="round_size" value="{{ defaults.round_size|default:5000000 }}">
+                        </div>
+
+                        <!-- Будущие раунды -->
+                        <div class="input-group">
+                            <span class="label-sm">FUTURE DILUTIVE ROUNDS</span>
+                            <input type="number" name="future_rounds" value="{{ defaults.future_rounds|default:1 }}" step="1" min="0" max="9">
+                            <div class="input-note">* This model assumes 20% dilution at each future round.</div>
+                        </div>
+
+                        <!-- Поля для NOTE -->
+                        <div class="input-group hidden" data-field="interest">
+                            <span class="label-sm">INTEREST RATE (%)</span>
+                            <input type="text" name="interest_rate" id="interest_rate" value="{{ defaults.interest_rate|default:5 }}">
+                        </div>
+
+                        <div class="input-group hidden" data-field="note-years">
+                            <span class="label-sm">YEARS UNTIL CONVERSION</span>
+                            <input type="text" name="years_until_conversion" id="years_until_conversion" value="{{ defaults.years_until_conversion|default:5 }}">
+                        </div>
+                    </div>
+
+                    <!-- Слайдер горизонта -->
+                    <div class="slider-wrap">
+                        <label>
+                            <span>TIME HORIZON</span>
+                            <span id="horizon-display">{{ defaults.irr_time_horizon|default:7 }} years</span>
+                        </label>
+                        <div class="slider-tooltip" id="slider-tooltip">{{ defaults.irr_time_horizon|default:7 }} years</div>
+                        <input type="range" name="irr_time_horizon" min="1" max="20" step="1" value="{{ defaults.irr_time_horizon|default:7 }}" id="horizon-slider">
+                        <div class="slider-labels">
+                            <span>1 year</span>
+                            <span>10 years</span>
+                            <span>20 years max</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="calculate-btn">Calculate</button>
+                </form>
+
+                <!-- Результаты -->
+                <div class="cards-row" id="summary" style="display:none;">
+                    <div class="ownership-card">
+                        <div class="label">OWNERSHIP AT CLOSE</div>
+                        <div class="value" id="ownership-close">—</div>
+                    </div>
+                    <div class="ownership-card">
+                        <div class="label">OWNERSHIP AT EXIT</div>
+                        <div class="value" id="ownership-exit">—</div>
+                    </div>
+                </div>
+
+                <div class="chart-card" id="chart-container" style="display:none;">
+                    <div class="chart-title">OUTCOME BY SCENARIO</div>
+                    <div class="chart-sub" id="chart-sub">Payout on the $25,000 check - a range, not a single forecast</div>
+                    <div class="chart-wrapper"><canvas id="angel-chart"></canvas></div>
+                </div>
+
+                <div class="table-container" id="results" style="display:none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SCENARIO</th>
+                                <th>Probability</th>
+                                <th>Multiple</th>
+                                <th>Exit Valuation</th>
+                                <th>Payout</th>
+                                <th>MOIC</th>
+                                <th>IRR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scenario-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="bottom-result" id="summary-footer" style="display:none;">
+                    <div class="label">PROBABILITY-WEIGHTED EXPECTED VALUE</div>
+                    <div class="value" id="expected-payout">$0</div>
+                </div>
+
+                <p class="note-text">For simplification purposes, no liquidation preferences, MFN, or pro-rata modeled here.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для ошибок (как в Compound Interest Calculator) -->
+<div id="error-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center;">
+        <h3 style="margin-top: 0; color: #f47b76;">Fill all the fields</h3>
+        <p id="error-modal-message" style="font-size: 16px; color: #333; margin: 10px 0px;"></p>
+        <button id="error-modal-close" style="background: #f47b76; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-weight: 600;">ОК</button>
+    </div>
+</div>
+
+<script>
+    // ─── Cookie helper (общий) ─────────────────────────────────────
+    function getCookie(name) {
+        let value = null;
+        if (document.cookie && document.cookie !== '') {
+            document.cookie.split(';').forEach(c => {
+                const trimmed = c.trim();
+                if (trimmed.substring(0, name.length + 1) === (name + '=')) {
+                    value = decodeURIComponent(trimmed.substring(name.length + 1));
+                }
+            });
+        }
+        return value;
+    }
+
+    // ─── Форматирование чисел / денег ─────────────────────────────
+    function fmtMoney(n) {
+        return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function parseMoney(str) {
+        return parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+    }
+
+    function fmtDecimal(n) {
+        return parseFloat(n).toFixed(1);
+    }
+
+    function parseDecimal(str) {
+        return parseFloat(str.replace(',', '.')) || 0;
+    }
+
+    // ─── Модальное окно ──────────────────────────────────────────
+    const errorModal = document.getElementById('error-modal');
+    const errorModalMessage = document.getElementById('error-modal-message');
+
+    function showModal(message) {
+        errorModalMessage.textContent = message;
+        errorModal.style.display = 'flex';
+    }
+
+    function hideModal() {
+        errorModal.style.display = 'none';
+    }
+
+    document.getElementById('error-modal-close').addEventListener('click', hideModal);
+    errorModal.addEventListener('click', function(e) {
+        if (e.target === errorModal) hideModal();
+    });
+
+    // ─── Поля и элементы DOM ─────────────────────────────────────
+    const form = document.getElementById('angel-form');
+    const tabs = document.querySelectorAll('.tab');
+    const slider = document.getElementById('horizon-slider');
+    const horizonDisplay = document.getElementById('horizon-display');
+    const tooltip = document.getElementById('slider-tooltip');
+    const summary = document.getElementById('summary');
+    const footer = document.getElementById('summary-footer');
+    const chartContainer = document.getElementById('chart-container');
+    const results = document.getElementById('results');
+    const scenarioBody = document.getElementById('scenario-body');
+    const expectedPayout = document.getElementById('expected-payout');
+    const chartSub = document.getElementById('chart-sub');
+
+    const moneyFields = ['investment', 'val_cap', 'pre_money', 'round_size'];
+    const decimalFields = ['interest_rate', 'years_until_conversion'];
+
+    let currentType = 'priced_round';
+
+    // ─── Функция проверки отдельного поля на пустоту ──────────────
+    function isFieldEmpty(input) {
+        if (!input) return false;
+        const rawValue = input.value.trim();
+
+        if (moneyFields.includes(input.id)) {
+            // Денежное поле: пустое если строка пустая или после удаления всех символов, кроме цифр и точки, ничего нет
+            return rawValue === '' || (parseMoney(rawValue) === 0 && rawValue.replace(/[^0-9.]/g, '') === '');
+        } else if (decimalFields.includes(input.id)) {
+            // Десятичное поле: пустое если строка пустая или не число
+            return rawValue === '' || isNaN(parseFloat(rawValue));
+        } else if (input.type === 'number') {
+            // Обычное числовое поле (future_rounds)
+            return rawValue === '' || isNaN(parseFloat(rawValue));
+        }
+        return false;
+    }
+
+    // ─── Показать ошибку для конкретного поля ────────────────────
+    function validateField(input) {
+        if (isFieldEmpty(input)) {
+            const label = input.previousElementSibling.textContent;
+            showModal(`The field "${label}" can not be empty.`);
+            input.focus();
+            return false;
+        }
+        return true;
+    }
+
+    // ─── Проверить все видимые обязательные поля ─────────────────
+    function validateAllRequired() {
+        // Investment всегда обязателен
+        const investmentEl = document.getElementById('investment');
+        if (!validateField(investmentEl)) return false;
+
+        if (currentType === 'safe' || currentType === 'note') {
+            const valCapEl = document.getElementById('val_cap');
+            if (!validateField(valCapEl)) return false;
+        }
+        if (currentType === 'note') {
+            const interestEl = document.getElementById('interest_rate');
+            const yearsEl = document.getElementById('years_until_conversion');
+            if (!validateField(interestEl)) return false;
+            if (!validateField(yearsEl)) return false;
+        }
+        if (currentType === 'priced_round') {
+            const preMoneyEl = document.getElementById('pre_money');
+            const roundSizeEl = document.getElementById('round_size');
+            if (!validateField(preMoneyEl)) return false;
+            if (!validateField(roundSizeEl)) return false;
+        }
+        return true;
+    }
+
+    // ─── Обработчики для денежных полей (blur, focus, input) ────
+    moneyFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.addEventListener('blur', function() {
+            if (isFieldEmpty(this)) {
+                validateField(this);
+                return;
+            }
+            // Форматирование и отправка формы
+            const raw = parseMoney(this.value);
+            this.value = fmtMoney(raw);
+            if (validateAllRequired()) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        el.addEventListener('focus', function() {
+            const raw = parseMoney(this.value);
+            if (!isNaN(raw)) this.value = raw.toString();
+        });
+
+        // Запрет ввода всего, кроме цифр и точки (как в оригинале)
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+        });
+    });
+
+    // ─── Обработчики для десятичных полей ────────────────────────
+    decimalFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.addEventListener('blur', function() {
+            if (isFieldEmpty(this)) {
+                validateField(this);
+                return;
+            }
+            const raw = parseDecimal(this.value);
+            this.value = fmtDecimal(raw);
+            if (validateAllRequired()) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        el.addEventListener('focus', function() {
+            const raw = parseDecimal(this.value);
+            if (!isNaN(raw)) this.value = raw.toString();
+        });
+
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+            // Ограничение на одну точку
+            const parts = this.value.split('.');
+            if (parts.length > 2) this.value = parts[0] + '.' + parts.slice(1).join('');
+        });
+    });
+
+    // ─── Поле future_rounds (обычное число) ──────────────────────
+    const futureRoundsEl = form.querySelector('input[name="future_rounds"]');
+    if (futureRoundsEl) {
+        futureRoundsEl.addEventListener('blur', function() {
+            if (isFieldEmpty(this)) {
+                validateField(this);
+                return;
+            }
+            if (validateAllRequired()) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+    }
+
+    // ─── Обработка Enter в обязательных полях (вызов blur) ───────
+    [moneyFields, decimalFields, ['future_rounds']].flat().forEach(id => {
+        const el = document.getElementById(id) || form.querySelector(`input[name="${id}"]`);
+        if (!el) return;
+        el.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.blur();
+            }
+        });
+    });
+
+    // ─── Переключение табов ──────────────────────────────────────
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentType = this.dataset.type;
+            updateFieldsVisibility();
+        });
+    });
+
+    function updateFieldsVisibility() {
+        const valCap = document.querySelector('[data-field="val-cap"]');
+        const preMoney = document.querySelector('[data-field="pre-money"]');
+        const roundSize = document.querySelector('[data-field="round-size"]');
+        const interest = document.querySelector('[data-field="interest"]');
+        const noteYears = document.querySelector('[data-field="note-years"]');
+
+        valCap.classList.add('hidden');
+        preMoney.classList.add('hidden');
+        roundSize.classList.add('hidden');
+        interest.classList.add('hidden');
+        noteYears.classList.add('hidden');
+
+        if (currentType === 'safe') {
+            valCap.classList.remove('hidden');
+        } else if (currentType === 'note') {
+            valCap.classList.remove('hidden');
+            interest.classList.remove('hidden');
+            noteYears.classList.remove('hidden');
+            // При показе полей сразу форматируем их
+            decimalFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) formatDecimalField(el);
+            });
+        } else if (currentType === 'priced_round') {
+            preMoney.classList.remove('hidden');
+            roundSize.classList.remove('hidden');
+        }
+    }
+
+    function formatDecimalField(input) {
+        const raw = parseDecimal(input.value);
+        if (!isNaN(raw)) input.value = fmtDecimal(raw);
+        else input.value = '0.0';
+    }
+
+    // ─── Слайдер горизонта ───────────────────────────────────────
+    function updateSlider() {
+        const val = parseFloat(slider.value).toFixed(1);
+        horizonDisplay.textContent = val + ' years';
+        tooltip.textContent = val + ' years';
+        const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+        tooltip.style.left = `calc(${percent}% + (${8 - percent * 0.15}px))`;
+    }
+
+    slider.addEventListener('input', updateSlider);
+    slider.addEventListener('change', function() {
+        if (validateAllRequired()) {
+            form.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // ─── Отправка формы (fetch) ──────────────────────────────────
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Клиентская проверка всех видимых полей перед отправкой
+        if (!validateAllRequired()) {
+            return;
+        }
+
+        // Собираем FormData с сырыми значениями
+        const investmentEl = document.getElementById('investment');
+        const valCapEl = document.getElementById('val_cap');
+        const preMoneyEl = document.getElementById('pre_money');
+        const roundSizeEl = document.getElementById('round_size');
+        const interestRateEl = document.getElementById('interest_rate');
+        const yearsUntilConversionEl = document.getElementById('years_until_conversion');
+
+        const formData = new FormData(form);
+        formData.set('investment', parseMoney(investmentEl.value));
+        formData.set('val_cap', parseMoney(valCapEl.value));
+        formData.set('pre_money', parseMoney(preMoneyEl.value));
+        formData.set('round_size', parseMoney(roundSizeEl.value));
+        formData.set('interest_rate', parseDecimal(interestRateEl.value));
+        formData.set('years_until_conversion', parseDecimal(yearsUntilConversionEl.value));
+        formData.set('security_type', currentType);
+
+        const fetchUrl = "{% url 'invest_calculator:angel_investor_calculator' %}";
+
+        try {
+            const response = await fetch(fetchUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || `Server Error ${response.status}`);
+            }
+
+            // Показываем результаты
+            summary.style.display = 'grid';
+            footer.style.display = 'flex';
+            chartContainer.style.display = 'block';
+            results.style.display = 'block';
+
+            const invVal = parseMoney(investmentEl.value);
+            chartSub.textContent = `Payout on the $${invVal.toLocaleString()} check - a range, not a single forecast`;
+
+            document.getElementById('ownership-close').textContent = data.summary.ownership_at_close + '%';
+            document.getElementById('ownership-exit').textContent = data.summary.ownership_at_exit + '%';
+            expectedPayout.textContent = fmtMoney(data.summary.total_expected_payout);
+
+            scenarioBody.innerHTML = '';
+            data.scenarios.forEach(scenario => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${scenario.scenario}</strong></td>
+                    <td>${scenario.probability}%</td>
+                    <td>${scenario.multiple}x</td>
+                    <td>${fmtMoney(scenario.exit_valuation)}</td>
+                    <td>${fmtMoney(scenario.payout)}</td>
+                    <td>${scenario.moic}x</td>
+                    <td>${scenario.irr}%</td>
+                `;
+                scenarioBody.appendChild(row);
+            });
+
+            // График
+            const ctx = document.getElementById('angel-chart').getContext('2d');
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.scenarios.map(s => s.scenario),
+                    datasets: [{
+                        label: 'Payout',
+                        data: data.scenarios.map(s => s.payout),
+                        backgroundColor: '#f47b76',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => fmtMoney(ctx.parsed.y) } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => fmtMoney(v) },
+                            grid: { color: '#e5e7eb' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        } catch (error) {
+            showModal(`Error: ${error.message}. Please check that all fields are filled correctly.`);
+        }
+    });
+
+    // ─── Инициализация при загрузке ──────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        updateFieldsVisibility();
+        updateSlider();
+
+        // Форматируем денежные поля по умолчанию
+        moneyFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const raw = parseMoney(el.value);
+                el.value = (!isNaN(raw) && raw >= 0) ? fmtMoney(raw) : fmtMoney(0);
+            }
+        });
+
+        // Форматируем десятичные поля, если они видимы
+        decimalFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.closest('.hidden')) {
+                formatDecimalField(el);
+            }
+        });
+    });
+</script>
+</body>
+</html>
