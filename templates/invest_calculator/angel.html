@@ -365,11 +365,12 @@
         }
 
         .calculator {
-            width: 100%;
+            width: 70%;
             display: block;
             flex-wrap: wrap;
             overflow-y: auto;
             overflow-x: hidden;
+            margin: 0 auto;
             padding: 0 30px 30px 30px;
         }
 
@@ -435,6 +436,10 @@
             user-select: none;
         }
 
+        .nav_pc {
+            height: 102%;
+        }
+
         /* Адаптация для мобильных */
         @media (max-width: 480px) {
             h1.page-switcher {
@@ -493,17 +498,7 @@
                     display: flex;
                     flex-direction: column;
                     align-items: center;">
-<h1 class="page-switcher">
-    <a href="{% url 'invest_calculator:compound_calculator' %}"
-       class="{% if request.resolver_match.view_name == 'invest_calculator:compound_calculator' %}active{% endif %}">
-        Compound Interest
-    </a>
-    <span class="separator">/</span>
-    <a href="{% url 'invest_calculator:angel_investor_calculator' %}"
-       class="{% if request.resolver_match.view_name == 'invest_calculator:angel_investor_calculator' %}active{% endif %}">
-        Single Deal
-    </a>
-</h1>
+            <h1>Angel Invesmtent Simulator</h1>
             </div>
             <div class="calculator">
                 <p class="subtitle">Ownership, dilution, and payout range for a Priced-Round investment.</p>
@@ -545,13 +540,6 @@
                         <div class="input-group" data-field="round-size">
                             <span class="label-sm">TOTAL ROUND SIZE</span>
                             <input type="text" name="round_size" id="round_size" value="{{ defaults.round_size|default:5000000 }}">
-                        </div>
-
-                        <!-- Будущие раунды -->
-                        <div class="input-group">
-                            <span class="label-sm">FUTURE DILUTIVE ROUNDS</span>
-                            <input type="number" name="future_rounds" value="{{ defaults.future_rounds|default:1 }}" step="1" min="0" max="9">
-                            <div class="input-note">* This model assumes 20% dilution at each future round.</div>
                         </div>
 
                         <!-- Поля для NOTE -->
@@ -821,22 +809,8 @@
         });
     });
 
-    // ─── Поле future_rounds (обычное число) ──────────────────────
-    const futureRoundsEl = form.querySelector('input[name="future_rounds"]');
-    if (futureRoundsEl) {
-        futureRoundsEl.addEventListener('blur', function() {
-            if (isFieldEmpty(this)) {
-                validateField(this);
-                return;
-            }
-            if (validateAllRequired()) {
-                form.dispatchEvent(new Event('submit'));
-            }
-        });
-    }
-
     // ─── Обработка Enter в обязательных полях (вызов blur) ───────
-    [moneyFields, decimalFields, ['future_rounds']].flat().forEach(id => {
+    [moneyFields, decimalFields].flat().forEach(id => {
         const el = document.getElementById(id) || form.querySelector(`input[name="${id}"]`);
         if (!el) return;
         el.addEventListener('keydown', function(e) {

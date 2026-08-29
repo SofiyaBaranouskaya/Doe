@@ -107,6 +107,15 @@ def calculate_compound_interest(
         },
     }
 
+from decimal import Decimal
+from typing import Any, Dict, Literal
+
+# Новое: фиксированный график размывания (можно изменить под свои предположения)
+DILUTION_SCHEDULE = [
+    {"round": "Seed", "dilution": Decimal("0.20")},
+    {"round": "Series A", "dilution": Decimal("0.15")},
+    {"round": "Series B", "dilution": Decimal("0.10")},
+]
 
 def calculate_angel_investment(
     investment: Decimal,
@@ -115,8 +124,6 @@ def calculate_angel_investment(
     years_to_conversion: Decimal,
     pre_money: Decimal,
     round_size: Decimal,
-    future_dilutive_rounds: int,
-    dilution_percentage: Decimal,
     security_type: Literal["safe", "note", "priced_round"],
     average_time_horizon: Decimal,
 ) -> Dict[str, Any]:
@@ -127,20 +134,8 @@ def calculate_angel_investment(
     if val_cap < 0:
         raise ValueError("Val Cap cannot be negative.")
 
-    if future_dilutive_rounds < 0 or future_dilutive_rounds > 9:
-        raise ValueError(
-            "Future dilutive rounds must be a single digit (0-9)."
-        )
-
-    if dilution_percentage < 0 or dilution_percentage > 100:
-        raise ValueError(
-            "Dilution must be between 0% and 100%."
-        )
-
     if average_time_horizon <= 0 or average_time_horizon > 20:
-        raise ValueError(
-            "Time horizon must be between 1 and 20 years."
-        )
+        raise ValueError("Time horizon must be between 1 and 20 years.")
 
     scenarios_data = [
         {
@@ -175,34 +170,23 @@ def calculate_angel_investment(
     # ---------------------------------------------------------
 
     if security_type == "safe":
-
         if val_cap <= 0:
             raise ValueError("Val Cap must be greater than zero.")
-
         ownership_at_close = investment / val_cap
 
     elif security_type == "note":
-
         if val_cap <= 0:
             raise ValueError("Val Cap must be greater than zero.")
-
         effective_investment = (
             investment
             * ((Decimal("1") + interest_rate) ** years_to_conversion)
         )
-
         ownership_at_close = effective_investment / val_cap
 
     elif security_type == "priced_round":
-
         if pre_money <= 0 or round_size <= 0:
-            raise ValueError(
-                "Pre-money valuation and Round Size are required."
-            )
-
-        ownership_at_close = (
-            investment / (pre_money + round_size)
-        )
+            raise ValueError("Pre-money valuation and Round Size are required.")
+        ownership_at_close = investment / (pre_money + round_size)
 
     else:
         raise ValueError("Invalid security type.")
@@ -210,27 +194,20 @@ def calculate_angel_investment(
     # ---------------------------------------------------------
     # OWNERSHIP AT EXIT
     # ---------------------------------------------------------
-
-    dilution_factor = (
-        Decimal("1")
-        - (dilution_percentage / Decimal("100"))
-    )
-
-    ownership_at_exit = (
-        ownership_at_close
-        * (dilution_factor ** future_dilutive_rounds)
-    )
+    # Применяем последовательное размывание из DILUTION_SCHEDULE
+    ownership_at_exit = ownership_at_close
+    for round_info in DILUTION_SCHEDULE:
+        dilution_factor = Decimal("1") - round_info["dilution"]
+        ownership_at_exit *= dilution_factor
 
     # ---------------------------------------------------------
     # SCENARIOS
     # ---------------------------------------------------------
 
     results = []
-
     total_expected_payout = Decimal("0")
 
     for scenario in scenarios_data:
-
         multiple = scenario["multiple"]
         probability = scenario["prob"]
 
@@ -238,15 +215,10 @@ def calculate_angel_investment(
         if security_type in ["safe", "note"]:
             exit_valuation = val_cap * multiple
         else:
-            exit_valuation = (
-                pre_money + round_size
-            ) * multiple
+            exit_valuation = (pre_money + round_size) * multiple
 
         # Payout
-        payout = (
-            ownership_at_exit
-            * exit_valuation
-        )
+        payout = ownership_at_exit * exit_valuation
 
         # MOIC
         if investment > 0:
@@ -256,88 +228,44 @@ def calculate_angel_investment(
 
         # IRR
         if moic > 0:
-            irr = (
-                moic
-                ** (Decimal("1") / average_time_horizon)
-            ) - Decimal("1")
+            irr = moic ** (Decimal("1") / average_time_horizon) - Decimal("1")
         else:
             irr = Decimal("-1")
 
         results.append({
             "scenario": scenario["name"],
-            "probability": float(
-                probability * Decimal("100")
-            ),
+            "probability": float(probability * Decimal("100")),
             "multiple": float(multiple),
-            "exit_valuation": float(
-                round(exit_valuation, 2)
-            ),
-            "payout": float(
-                round(payout, 2)
-            ),
-            "moic": float(
-                round(moic, 2)
-            ),
-            "irr": float(
-                round(irr * Decimal("100"), 2)
-            ),
+            "exit_valuation": float(round(exit_valuation, 2)),
+            "payout": float(round(payout, 2)),
+            "moic": float(round(moic, 2)),
+            "irr": float(round(irr * Decimal("100"), 2)),
         })
 
-        total_expected_payout += (
-            payout * probability
-        )
+        total_expected_payout += payout * probability
 
     # ---------------------------------------------------------
     # EXPECTED VALUE
     # ---------------------------------------------------------
 
     if investment > 0:
-        avg_moic = (
-            total_expected_payout / investment
-        )
+        avg_moic = total_expected_payout / investment
     else:
         avg_moic = Decimal("0")
 
     if avg_moic > 0:
-        avg_irr = (
-            avg_moic
-            ** (Decimal("1") / average_time_horizon)
-        ) - Decimal("1")
+        avg_irr = avg_moic ** (Decimal("1") / average_time_horizon) - Decimal("1")
     else:
         avg_irr = Decimal("-1")
 
     return {
         "scenarios": results,
-
         "summary": {
-            "avg_moic": float(
-                round(avg_moic, 2)
-            ),
-
-            "avg_irr": float(
-                round(avg_irr * Decimal("100"), 2)
-            ),
-
-            "total_expected_payout": float(
-                round(total_expected_payout, 2)
-            ),
-
-            "ownership_at_close": float(
-                round(
-                    ownership_at_close * Decimal("100"),
-                    3
-                )
-            ),
-
-            "ownership_at_exit": float(
-                round(
-                    ownership_at_exit * Decimal("100"),
-                    3
-                )
-            ),
-
-            "time_horizon": float(
-                average_time_horizon
-            ),
+            "avg_moic": float(round(avg_moic, 2)),
+            "avg_irr": float(round(avg_irr * Decimal("100"), 2)),
+            "total_expected_payout": float(round(total_expected_payout, 2)),
+            "ownership_at_close": float(round(ownership_at_close * Decimal("100"), 3)),
+            "ownership_at_exit": float(round(ownership_at_exit * Decimal("100"), 3)),
+            "time_horizon": float(average_time_horizon),
         }
     }

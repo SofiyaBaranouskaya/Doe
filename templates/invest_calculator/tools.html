@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Single Deal Calculator</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* ── Общие стили из Compound Interest Calculator ── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f8f9fc;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            overflow-y: hidden;
+        }
+
+        .main {
+            width: 100%;
+            height: 100vh;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0px;
+            overflow: hidden;
+        }
+
+        .nav_pannel {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px 30px 20px;
+            margin-top: auto;
+        }
+
+        .main_content {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-family: 'Baloo Bhaijaan 2', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            font-style: normal;
+            padding: 0px 10px;
+            margin: 85px;
+        }
+
+        .content{
+            display: flex;
+            flex-direction: column;
+            width: -webkit-fill-available;
+        }
+
+        .content h1 {
+            display: flex;
+            justify-content: center;
+        }
+
+        .buttons{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10%;
+        }
+
+        .content a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            margin: auto 40px;
+            border-radius: 15px;
+            padding: 40px;
+        }
+
+        .content a:first-child {
+            background-color: #F26D6D;
+            color: #FFFFFF;
+        }
+
+        .content a:last-child {
+            background-color: #FFE5E5;
+            color: #F26D6D;
+        }
+
+        .content a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav_pc {
+            height: 102%;
+        }
+
+        @media (min-width: 790px) {
+            .doe_icon {
+                display: block;
+                margin: 40px auto;
+                width: 150px;
+            }
+
+            h1 {
+                font-size: 52px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main">
+    <div class="main_content">
+        <div class="nav_pc">
+            {% include 'videos/nav_pc.html' %}
+        </div>
+
+        <div class="content">
+            <h1>Tools</h1>
+            <div>
+                <div class="buttons">
+                    <a href="{% url 'invest_calculator:compound_calculator' %}">Compound Interest Calculator</a>
+                    <a href="{% url 'invest_calculator:angel_investor_calculator' %}">Angel Invesmtent Simulator</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -264,7 +264,7 @@
         }
 
         .calculator{
-            width: 100%;
+            width: 70%;
             display: block;
             flex-wrap: wrap;
             overflow-y: auto;
@@ -335,6 +335,10 @@
             user-select: none;
         }
 
+        .nav_pc {
+            height: 102%;
+        }
+
         /* Адаптация для мобильных */
         @media (max-width: 480px) {
             h1.page-switcher {
@@ -392,17 +396,7 @@
                     display: flex;
                     flex-direction: column;
                     align-items: center;">
-<h1 class="page-switcher">
-    <a href="{% url 'invest_calculator:compound_calculator' %}"
-       class="{% if request.resolver_match.view_name == 'invest_calculator:compound_calculator' %}active{% endif %}">
-        Compound Interest
-    </a>
-    <span class="separator">/</span>
-    <a href="{% url 'invest_calculator:angel_investor_calculator' %}"
-       class="{% if request.resolver_match.view_name == 'invest_calculator:angel_investor_calculator' %}active{% endif %}">
-        Single Deal
-    </a>
-</h1>
+                <h1>Compound Interest Calculator</h1>
             </div>
             <div class="calculator">
 

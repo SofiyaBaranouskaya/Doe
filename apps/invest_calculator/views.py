@@ -65,7 +65,6 @@ def compound_calculator(request):
             "defaults": defaults
         })
 
-
 @require_http_methods(["GET", "POST"])
 def angel_investor_calculator(request):
     defaults = {
@@ -75,8 +74,8 @@ def angel_investor_calculator(request):
         "years_until_conversion": 5.0,
         "pre_money": 15000000,
         "round_size": 5000000,
-        "future_rounds": 1,
-        "dilution": 20,
+        # "future_rounds": 1,  # больше не нужно
+        # "dilution": 20,      # больше не нужно
         "irr_time_horizon": 7,
         "security_type": "priced_round",
     }
@@ -104,12 +103,6 @@ def angel_investor_calculator(request):
         pre_money = Decimal(str(request.POST.get("pre_money", "0")))
         round_size = Decimal(str(request.POST.get("round_size", "0")))
 
-        future_rounds = int(
-            request.POST.get("future_rounds", 0)
-        )
-
-        dilution_percent = Decimal('20')
-
         security_type = request.POST.get(
             "security_type",
             "safe"
@@ -122,8 +115,6 @@ def angel_investor_calculator(request):
             years_to_conversion=years_until_conversion,
             pre_money=pre_money,
             round_size=round_size,
-            future_dilutive_rounds=future_rounds,
-            dilution_percentage=dilution_percent,
             security_type=security_type,
             average_time_horizon=irr_time_horizon,
         )
@@ -144,7 +135,6 @@ def angel_investor_calculator(request):
         )
 
     except (InvalidOperation, ValueError, TypeError) as e:
-
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse(
                 {"error": str(e)},
@@ -159,3 +149,7 @@ def angel_investor_calculator(request):
                 "defaults": defaults
             }
         )
+
+
+def tools(request):
+    return render(request, "invest_calculator/tools.html")

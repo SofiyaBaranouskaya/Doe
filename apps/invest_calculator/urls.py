@@ -6,5 +6,6 @@ app_name = "invest_calculator"
 urlpatterns = [
     path("compound/", views.compound_calculator, name="compound_calculator"),
     path('angel/', views.angel_investor_calculator, name='angel_investor_calculator'),
+    path('tools/', views.tools, name='tools'),
 
 ]
