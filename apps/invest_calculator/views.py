@@ -74,18 +74,13 @@ def angel_investor_calculator(request):
         "years_until_conversion": 5.0,
         "pre_money": 15000000,
         "round_size": 5000000,
-        # "future_rounds": 1,  # больше не нужно
-        # "dilution": 20,      # больше не нужно
+        "modest_exit_value": 25000000,  # <-- НОВОЕ ПОЛЕ
         "irr_time_horizon": 7,
-        "security_type": "priced_round",
+        "security_type": "safe",
     }
 
     if request.method == "GET":
-        return render(
-            request,
-            "invest_calculator/angel.html",
-            {"defaults": defaults}
-        )
+        return render(request, "invest_calculator/angel.html", {"defaults": defaults})
 
     try:
         investment = Decimal(str(request.POST.get("investment", "0")))
@@ -102,11 +97,9 @@ def angel_investor_calculator(request):
 
         pre_money = Decimal(str(request.POST.get("pre_money", "0")))
         round_size = Decimal(str(request.POST.get("round_size", "0")))
+        modest_exit_value = Decimal(str(request.POST.get("modest_exit_value", "0")))  # <-- НОВОЕ
 
-        security_type = request.POST.get(
-            "security_type",
-            "safe"
-        )
+        security_type = request.POST.get("security_type", "safe")
 
         result = calculate_angel_investment(
             investment=investment,
@@ -117,38 +110,25 @@ def angel_investor_calculator(request):
             round_size=round_size,
             security_type=security_type,
             average_time_horizon=irr_time_horizon,
+            modest_exit_value=modest_exit_value,  # <-- ПЕРЕДАЁМ
         )
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse(result)
 
-        return render(
-            request,
-            "invest_calculator/angel.html",
-            {
-                "result": result,
-                "defaults": {
-                    **defaults,
-                    **request.POST.dict()
-                }
-            }
-        )
+        return render(request, "invest_calculator/angel.html", {
+            "result": result,
+            "defaults": {**defaults, **request.POST.dict()}
+        })
 
     except (InvalidOperation, ValueError, TypeError) as e:
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse(
-                {"error": str(e)},
-                status=400
-            )
+            return JsonResponse({"error": str(e)}, status=400)
 
-        return render(
-            request,
-            "invest_calculator/angel.html",
-            {
-                "error": str(e),
-                "defaults": defaults
-            }
-        )
+        return render(request, "invest_calculator/angel.html", {
+            "error": str(e),
+            "defaults": defaults
+        })
 
 
 def tools(request):

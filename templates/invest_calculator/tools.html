@@ -5,9 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Single Deal Calculator</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>Tools</title>
 
     <style>
         /* ── Общие стили из Compound Interest Calculator ── */
@@ -90,9 +88,12 @@
             color: #FFFFFF;
         }
 
+        /* ОБНОВЛЕННЫЙ СТИЛЬ ДЛЯ КНОПКИ ANGEL */
         .content a:last-child {
             background-color: #FFE5E5;
             color: #F26D6D;
+            border: 2px solid #F26D6D; /* Добавили рамку */
+            box-shadow: 0 4px 8px rgba(242, 109, 109, 0.2); /* Добавили тень */
         }
 
         .content a:hover {
@@ -131,7 +132,8 @@
             <div>
                 <div class="buttons">
                     <a href="{% url 'invest_calculator:compound_calculator' %}">Compound Interest Calculator</a>
-                    <a href="{% url 'invest_calculator:angel_investor_calculator' %}">Angel Invesmtent Simulator</a>
+                    <!-- Исправлена опечатка: Investment -->
+                    <a href="{% url 'invest_calculator:angel_investor_calculator' %}">Angel Investment Simulator</a>
                 </div>
             </div>
         </div>

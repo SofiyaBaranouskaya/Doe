@@ -126,49 +126,28 @@ def calculate_angel_investment(
     round_size: Decimal,
     security_type: Literal["safe", "note", "priced_round"],
     average_time_horizon: Decimal,
+    modest_exit_value: Decimal,  # <-- НОВЫЙ ПАРАМЕТР
 ) -> Dict[str, Any]:
 
     if investment < 0:
         raise ValueError("Investment cannot be negative.")
 
-    if val_cap < 0:
-        raise ValueError("Val Cap cannot be negative.")
+    if modest_exit_value <= 0:
+        raise ValueError("Modest Exit Value must be greater than zero.")
 
     if average_time_horizon <= 0 or average_time_horizon > 20:
         raise ValueError("Time horizon must be between 1 and 20 years.")
 
+    # Сценарии согласно слайду 6
     scenarios_data = [
-        {
-            "name": "Total loss",
-            "prob": Decimal("0.55"),
-            "multiple": Decimal("0"),
-        },
-        {
-            "name": "Soft Landing",
-            "prob": Decimal("0.17"),
-            "multiple": Decimal("0.6"),
-        },
-        {
-            "name": "Modest Exit",
-            "prob": Decimal("0.20"),
-            "multiple": Decimal("2"),
-        },
-        {
-            "name": "Good Outcome",
-            "prob": Decimal("0.06"),
-            "multiple": Decimal("6"),
-        },
-        {
-            "name": "Home Run",
-            "prob": Decimal("0.02"),
-            "multiple": Decimal("25"),
-        },
+        {"name": "Total loss",   "prob": Decimal("0.55"), "multiple": Decimal("0"),    "rounds": 0},
+        {"name": "Soft Landing", "prob": Decimal("0.17"), "multiple": Decimal("0.3"),  "rounds": 2},
+        {"name": "Modest Exit",  "prob": Decimal("0.20"), "multiple": Decimal("1"),    "rounds": 3},
+        {"name": "Good Outcome", "prob": Decimal("0.06"), "multiple": Decimal("3"),    "rounds": 4},
+        {"name": "Home Run",     "prob": Decimal("0.02"), "multiple": Decimal("12.5"), "rounds": 5},
     ]
 
-    # ---------------------------------------------------------
-    # OWNERSHIP AT CLOSE
-    # ---------------------------------------------------------
-
+    # ── OWNERSHIP AT CLOSE ─────────────────────────────────────
     if security_type == "safe":
         if val_cap <= 0:
             raise ValueError("Val Cap must be greater than zero.")
@@ -191,34 +170,26 @@ def calculate_angel_investment(
     else:
         raise ValueError("Invalid security type.")
 
-    # ---------------------------------------------------------
-    # OWNERSHIP AT EXIT
-    # ---------------------------------------------------------
-    # Применяем последовательное размывание из DILUTION_SCHEDULE
-    ownership_at_exit = ownership_at_close
-    for round_info in DILUTION_SCHEDULE:
-        dilution_factor = Decimal("1") - round_info["dilution"]
-        ownership_at_exit *= dilution_factor
-
-    # ---------------------------------------------------------
-    # SCENARIOS
-    # ---------------------------------------------------------
-
+    # ── ПРОХОД ПО СЦЕНАРИЯМ ────────────────────────────────────
     results = []
     total_expected_payout = Decimal("0")
 
     for scenario in scenarios_data:
         multiple = scenario["multiple"]
         probability = scenario["prob"]
+        rounds = scenario["rounds"]
 
-        # Exit valuation
-        if security_type in ["safe", "note"]:
-            exit_valuation = val_cap * multiple
-        else:
-            exit_valuation = (pre_money + round_size) * multiple
+        # Ретеншн (остаточная доля) после `rounds` раундов размытия по 20%
+        retention = (Decimal("1") - Decimal("0.20")) ** rounds
 
-        # Payout
-        payout = ownership_at_exit * exit_valuation
+        # Доля на выходе для этого сценария
+        ownership_at_exit_scenario = ownership_at_close * retention
+
+        # Выходная стоимость = Modest Exit Value * множитель
+        exit_valuation = modest_exit_value * multiple
+
+        # Выплата инвестору
+        payout = ownership_at_exit_scenario * exit_valuation
 
         # MOIC
         if investment > 0:
@@ -237,6 +208,7 @@ def calculate_angel_investment(
             "probability": float(probability * Decimal("100")),
             "multiple": float(multiple),
             "exit_valuation": float(round(exit_valuation, 2)),
+            "ownership_at_exit": float(round(ownership_at_exit_scenario * Decimal("100"), 3)),
             "payout": float(round(payout, 2)),
             "moic": float(round(moic, 2)),
             "irr": float(round(irr * Decimal("100"), 2)),
@@ -244,10 +216,7 @@ def calculate_angel_investment(
 
         total_expected_payout += payout * probability
 
-    # ---------------------------------------------------------
-    # EXPECTED VALUE
-    # ---------------------------------------------------------
-
+    # ── ИТОГОВЫЕ ЗНАЧЕНИЯ ─────────────────────────────────────
     if investment > 0:
         avg_moic = total_expected_payout / investment
     else:
@@ -258,6 +227,10 @@ def calculate_angel_investment(
     else:
         avg_irr = Decimal("-1")
 
+    # Доля на выходе именно для сценария "Modest Exit" (3 раунда)
+    retention_modest = (Decimal("1") - Decimal("0.20")) ** 3
+    ownership_at_exit_modest = ownership_at_close * retention_modest
+
     return {
         "scenarios": results,
         "summary": {
@@ -265,7 +238,7 @@ def calculate_angel_investment(
             "avg_irr": float(round(avg_irr * Decimal("100"), 2)),
             "total_expected_payout": float(round(total_expected_payout, 2)),
             "ownership_at_close": float(round(ownership_at_close * Decimal("100"), 3)),
-            "ownership_at_exit": float(round(ownership_at_exit * Decimal("100"), 3)),
+            "ownership_at_exit_modest": float(round(ownership_at_exit_modest * Decimal("100"), 3)),
             "time_horizon": float(average_time_horizon),
         }
     }

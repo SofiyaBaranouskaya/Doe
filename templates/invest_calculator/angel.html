@@ -246,6 +246,13 @@
             margin-top: 4px;
         }
 
+        .ownership-card .subtext {
+            font-size: 11px;
+            color: rgba(255,255,255,0.85);
+            margin-top: 4px;
+            font-style: italic;
+        }
+
         /* ── Блок с графиком ── */
         .chart-card {
             border: 2px solid #1a2b4c;
@@ -498,10 +505,10 @@
                     display: flex;
                     flex-direction: column;
                     align-items: center;">
-            <h1>Angel Invesmtent Simulator</h1>
+            <h1>Angel Investment Simulator</h1> <!-- Исправлена опечатка в заголовке -->
             </div>
             <div class="calculator">
-                <p class="subtitle">Ownership, dilution, and payout range for a Priced-Round investment.</p>
+                <p class="subtitle">Ownership, dilution, and payout range for a SAFE investment.</p> <!-- Поправлен подзаголовок под дефолт -->
 
                 <!-- Форма с параметрами сделки -->
                 <form id="angel-form" class="plan-card">
@@ -509,14 +516,14 @@
 
                     <!-- Табы выбора типа -->
                     <div class="tabs">
-                        <label class="tab" data-type="safe">
-                            <input type="radio" name="security_type" value="safe"> SAFE
+                        <label class="tab active" data-type="safe"> <!-- Теперь active на SAFE -->
+                            <input type="radio" name="security_type" value="safe" checked> SAFE
                         </label>
                         <label class="tab" data-type="note">
                             <input type="radio" name="security_type" value="note"> NOTE
                         </label>
-                        <label class="tab active" data-type="priced_round">
-                            <input type="radio" name="security_type" value="priced_round" checked> PRICED
+                        <label class="tab" data-type="priced_round">
+                            <input type="radio" name="security_type" value="priced_round"> PRICED
                         </label>
                     </div>
 
@@ -540,6 +547,12 @@
                         <div class="input-group" data-field="round-size">
                             <span class="label-sm">TOTAL ROUND SIZE</span>
                             <input type="text" name="round_size" id="round_size" value="{{ defaults.round_size|default:5000000 }}">
+                        </div>
+
+                        <!-- НОВОЕ ПОЛЕ: Modest Exit Value -->
+                        <div class="input-group" data-field="modest-exit">
+                            <span class="label-sm">MODEST EXIT VALUE (your estimate)</span>
+                            <input type="text" name="modest_exit_value" id="modest_exit_value" value="{{ defaults.modest_exit_value|default:25000000 }}">
                         </div>
 
                         <!-- Поля для NOTE -->
@@ -578,9 +591,11 @@
                         <div class="label">OWNERSHIP AT CLOSE</div>
                         <div class="value" id="ownership-close">—</div>
                     </div>
+                    <!-- Обновлённая карточка с подписью -->
                     <div class="ownership-card">
-                        <div class="label">OWNERSHIP AT EXIT</div>
+                        <div class="label">OWNERSHIP AT (Modest) EXIT</div>
                         <div class="value" id="ownership-exit">—</div>
+                        <div class="subtext">Assumes 3 more rounds of funding before a Modest Exit</div>
                     </div>
                 </div>
 
@@ -598,6 +613,7 @@
                                 <th>Probability</th>
                                 <th>Multiple</th>
                                 <th>Exit Valuation</th>
+                                <th>Ownership at Exit</th> <!-- Новый столбец -->
                                 <th>Payout</th>
                                 <th>MOIC</th>
                                 <th>IRR</th>
@@ -691,10 +707,11 @@
     const expectedPayout = document.getElementById('expected-payout');
     const chartSub = document.getElementById('chart-sub');
 
-    const moneyFields = ['investment', 'val_cap', 'pre_money', 'round_size'];
+    // Добавляем modest_exit_value в список денежных полей
+    const moneyFields = ['investment', 'val_cap', 'pre_money', 'round_size', 'modest_exit_value'];
     const decimalFields = ['interest_rate', 'years_until_conversion'];
 
-    let currentType = 'priced_round';
+    let currentType = 'safe';
 
     // ─── Функция проверки отдельного поля на пустоту ──────────────
     function isFieldEmpty(input) {
@@ -730,6 +747,10 @@
         // Investment всегда обязателен
         const investmentEl = document.getElementById('investment');
         if (!validateField(investmentEl)) return false;
+
+        // Modest Exit Value всегда обязателен (новое поле)
+        const modestExitEl = document.getElementById('modest_exit_value');
+        if (!validateField(modestExitEl)) return false;
 
         if (currentType === 'safe' || currentType === 'note') {
             const valCapEl = document.getElementById('val_cap');
@@ -837,12 +858,14 @@
         const roundSize = document.querySelector('[data-field="round-size"]');
         const interest = document.querySelector('[data-field="interest"]');
         const noteYears = document.querySelector('[data-field="note-years"]');
+        const modestExit = document.querySelector('[data-field="modest-exit"]'); // Новое поле
 
         valCap.classList.add('hidden');
         preMoney.classList.add('hidden');
         roundSize.classList.add('hidden');
         interest.classList.add('hidden');
         noteYears.classList.add('hidden');
+        modestExit.classList.remove('hidden'); // Всегда видимо, т.к. это ключевой input
 
         if (currentType === 'safe') {
             valCap.classList.remove('hidden');
@@ -897,6 +920,7 @@
         const valCapEl = document.getElementById('val_cap');
         const preMoneyEl = document.getElementById('pre_money');
         const roundSizeEl = document.getElementById('round_size');
+        const modestExitEl = document.getElementById('modest_exit_value'); // Новое поле
         const interestRateEl = document.getElementById('interest_rate');
         const yearsUntilConversionEl = document.getElementById('years_until_conversion');
 
@@ -905,6 +929,7 @@
         formData.set('val_cap', parseMoney(valCapEl.value));
         formData.set('pre_money', parseMoney(preMoneyEl.value));
         formData.set('round_size', parseMoney(roundSizeEl.value));
+        formData.set('modest_exit_value', parseMoney(modestExitEl.value)); // Новое поле
         formData.set('interest_rate', parseDecimal(interestRateEl.value));
         formData.set('years_until_conversion', parseDecimal(yearsUntilConversionEl.value));
         formData.set('security_type', currentType);
@@ -937,7 +962,7 @@
             chartSub.textContent = `Payout on the $${invVal.toLocaleString()} check - a range, not a single forecast`;
 
             document.getElementById('ownership-close').textContent = data.summary.ownership_at_close + '%';
-            document.getElementById('ownership-exit').textContent = data.summary.ownership_at_exit + '%';
+            document.getElementById('ownership-exit').textContent = data.summary.ownership_at_exit_modest + '%'; // Используем новое поле из ответа
             expectedPayout.textContent = fmtMoney(data.summary.total_expected_payout);
 
             scenarioBody.innerHTML = '';
@@ -948,6 +973,7 @@
                     <td>${scenario.probability}%</td>
                     <td>${scenario.multiple}x</td>
                     <td>${fmtMoney(scenario.exit_valuation)}</td>
+                    <td>${scenario.ownership_at_exit}%</td> <!-- Новый столбец -->
                     <td>${fmtMoney(scenario.payout)}</td>
                     <td>${scenario.moic}x</td>
                     <td>${scenario.irr}%</td>
@@ -993,6 +1019,15 @@
 
     // ─── Инициализация при загрузке ──────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
+        // ВАЖНО: Синхронизируем активный класс с выбранной радиокнопкой при загрузке страницы
+        const checkedTab = document.querySelector('.tab input:checked');
+        if (checkedTab) {
+            const parentTab = checkedTab.closest('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            parentTab.classList.add('active');
+            currentType = parentTab.dataset.type;
+        }
+
         updateFieldsVisibility();
         updateSlider();
 
