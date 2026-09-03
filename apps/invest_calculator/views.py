@@ -71,7 +71,7 @@ def angel_investor_calculator(request):
         "investment": 25000,
         "val_cap": 10000000,
         "interest_rate": 5.0,
-        "years_until_conversion": 5.0,
+        "years_until_conversion": 3.0,
         "pre_money": 15000000,
         "round_size": 5000000,
         "modest_exit_value": 25000000,  # <-- НОВОЕ ПОЛЕ

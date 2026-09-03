@@ -563,7 +563,7 @@
 
                         <div class="input-group hidden" data-field="note-years">
                             <span class="label-sm">YEARS UNTIL CONVERSION</span>
-                            <input type="text" name="years_until_conversion" id="years_until_conversion" value="{{ defaults.years_until_conversion|default:5 }}">
+                            <input type="text" name="years_until_conversion" id="years_until_conversion" value="{{ defaults.years_until_conversion|default:3 }}">
                         </div>
                     </div>
 
@@ -963,7 +963,9 @@
 
             document.getElementById('ownership-close').textContent = data.summary.ownership_at_close + '%';
             document.getElementById('ownership-exit').textContent = data.summary.ownership_at_exit_modest + '%'; // Используем новое поле из ответа
-            expectedPayout.textContent = fmtMoney(data.summary.total_expected_payout);
+
+            const expectedMultiple = parseFloat(data.summary.avg_moic).toFixed(2);
+            expectedPayout.innerHTML = `${fmtMoney(data.summary.total_expected_payout)} (${expectedMultiple}x)`;
 
             scenarioBody.innerHTML = '';
             data.scenarios.forEach(scenario => {
