@@ -79,8 +79,8 @@
             height: fit-content;
             display: flex;
             flex-wrap: wrap;
-            padding:auto;
             overflow-y: auto;
+            margin-top: -20px;
         }
 
         .content-element{
@@ -625,7 +625,7 @@
                     justify-content: space-between;
                     padding: 65px 40px;
                 ">
-                <h1 style="margin-left: 20%;">{{ page.title }}</h1>
+                <h1 style="margin: 20px auto; text-align: center;">{{ page.title }}</h1>
                 <div class="profile_part">
                     <div class="fire">
                         <svg width="24" height="24" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -656,8 +656,8 @@
                         {% elif content.content_type.model == 'chitchat' %}chit-chat
                         {% elif content.content_type.model == 'quiz' %}quiz
                         {% elif content.content_type.model == 'staticimages' %}static-image{% endif %}"
-                        {% if content.content_type.model == 'video' and content.poster_base64 %}
-                            style="background-image: url('data:image/jpeg;base64,{{ content.poster_base64 }}')"
+                        {% if content.content_type.model == 'video' and content.value.poster_base64 %}
+                            style="background-image: url('data:image/jpeg;base64,{{ content.value.poster_base64 }}')"
                         {% elif content.content_type.model == 'challenge' and content.value.poster_base64 %}
                             style="background-image:url('data:image/jpeg;base64,{{ content.value.poster_base64 }}')"
                         {% elif content.content_type.model == 'chitchat' and content.value.poster_base64 %}
