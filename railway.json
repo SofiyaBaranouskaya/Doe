@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "python manage.py collectstatic --noinput"
+  },
+  "deploy": {
+    "startCommand": "python manage.py migrate --noinput && gunicorn config.wsgi --timeout 120",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}

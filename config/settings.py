@@ -31,14 +31,8 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG")
 
-ALLOWED_HOSTS = ['app.doe.wuaze.com', 'doe-82da822924d4.herokuapp.com', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = [
-    'https://doe-82da822924d4.herokuapp.com',
-    'https://app.doe.wuaze.com',
-]
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-# SECURE_SSL_REDIRECT = True
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
 # Application definition
 
@@ -239,7 +233,6 @@ DEFAULT_FILE_STORAGE = 'utils.supabase_storage.SupabaseStorage'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Дополнительная диагностика для staticfiles
-STATICFILES_STORAGE_DEBUG = True
 AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False  # отключаем подписи в ссылках
 AWS_S3_ADDRESSING_STYLE = "path"  # важно для Supabase!
@@ -249,7 +242,7 @@ AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
 STORJ_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-STORJ_ACCESS_GRANT = os.getenv('STORJ_ACCESS_GRANT ')
+STORJ_ACCESS_GRANT = os.getenv('STORJ_ACCESS_GRANT')
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL")
 CELERY_RESULT_BACKEND = "rpc://"
@@ -263,17 +256,19 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+        'console': {
+            'class': 'logging.StreamHandler',
         },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }
